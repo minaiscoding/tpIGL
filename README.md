@@ -6,7 +6,7 @@
 
 ### - branches will follow the naming convention `<member name>/<feature or section name> `
 
-        example: wissal/authentication
+        example: mina/authentication
 
 ### - try to provide meaningfull commit messages
 
@@ -36,7 +36,7 @@ This project is a web application designed to search scientific articles using a
 
 ### Backend:
 
-1. Flask python library
+1. Django python library
 2. SQLite relational database management system (RDBMS)
 3. SQLAlchemy python library
 

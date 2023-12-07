@@ -103,7 +103,7 @@ SQLite is a self-contained, serverless, and zero-configuration relational databa
 
 - If you don't have Python installed, navigate to (https://www.python.org/downloads/) and download the last release then install it.
 - Navigate to the backend folder
-  `cd backend`
+  `cd server`
 - Install Django by typing the command
   `pip install Django`
 - Start the django server by running

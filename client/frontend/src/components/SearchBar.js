@@ -27,9 +27,13 @@ const SearchBar = () => {
       <div>
         <h2>Search Results</h2>
         <ul>
-          {searchResults.map((result) => (
-            <li key={result.id}>{result.Titre}</li>
-            // Include other fields as needed
+          {searchResults.map((result, index) => (
+            <li key={index}>
+              <strong>Title:</strong> {result.Titre},{' '}
+              <strong>Summary:</strong> {result.Resume},{' '}
+              <strong>Authors:</strong> {result.auteurs},{' '}
+              <strong>Institution:</strong> {result.Institution}
+            </li>
           ))}
         </ul>
       </div>

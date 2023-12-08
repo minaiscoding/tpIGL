@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch_dsl.connections import connections
-from .search_indexes import ArticleDocument
+from .documents import ArticleDocument
 
 connections.create_connection(hosts=['https://localhost:9200'], timeout=20)
 
@@ -46,8 +46,10 @@ class Favoris(models.Model):
 
 @receiver(post_save, sender=Articles)
 def index_article(sender, instance, **kwargs):
-    ArticleDocument().update(instance)
+    article_document = ArticleDocument(meta={'id': instance.id})
+    article_document.save()
 
 @receiver(post_delete, sender=Articles)
 def delete_article(sender, instance, **kwargs):
-    ArticleDocument().update(instance)
+    article_document = ArticleDocument(meta={'id': instance.id})
+    article_document.delete()

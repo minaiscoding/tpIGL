@@ -1,16 +1,14 @@
-// src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';  // Update the import statement
-import SearchPage from './pages/SearchPage';
+import DataDisplay from './components/DataDisplay';
 
-const App = () => {
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/search" element={<SearchPage />} />
-      </Routes>
-    </Router>
+    <div>
+      <DataDisplay endpoint="utilisateurs" />
+      <DataDisplay endpoint="articles" />
+      <DataDisplay endpoint="favoris" />
+    </div>
   );
-};
+}
 
 export default App;

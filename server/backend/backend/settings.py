@@ -39,7 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'backendapp',
     'corsheaders',
+    'django_elasticsearch_dsl',
 ]
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200',
+    }
+}
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app's origin

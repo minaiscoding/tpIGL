@@ -6,7 +6,8 @@ const SearchBar = () => {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`/api/search/?q=${query}`);
+      const response = await fetch(`http://localhost:8000/api/search/?q=${query}`);
+      console.log(response);
       const data = await response.json();
       setSearchResults(data);
     } catch (error) {

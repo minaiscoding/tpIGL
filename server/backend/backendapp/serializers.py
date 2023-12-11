@@ -7,9 +7,10 @@ class UtilisateursSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ArticlesSerializer(serializers.ModelSerializer):
+    PDF_File = serializers.FileField()
     class Meta:
         model = Articles
-        fields = '__all__'
+        fields = '__all___'
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

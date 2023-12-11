@@ -2,7 +2,7 @@ import React from 'react';
 
 const SearchPage = () => {
   return (
-    <div className="h-screen w-screen flex-col flex font-Futura">
+    <div className="h-full w-screen flex-col  items-center flex font-Futura">
       {/* Background Image */}
       <div
         className="relative w-full justify-center flex flex-col items-center h-[57vh] bg-cover bg-center relative"
@@ -33,13 +33,35 @@ const SearchPage = () => {
 
       </div>
 
-      {/* Images Section */}
-      <div className="w-1/2 flex items-center justify-around">
-        {/* Replace these image URLs with your actual image paths */}
-        <img className="w-1/3" src="/images/image1.jpg" alt="Product 1" />
-        <img className="w-1/3" src="/images/image2.jpg" alt="Product 2" />
-        <img className="w-1/3" src="/images/image3.jpg" alt="Product 3" />
-      </div>
+{/* Bottom Section */}
+<div className="flex flex-col items-center justify-center gap-2 h-full py-[2%] w-full">
+ {/* Lines next to the text */}
+<div className="flex items-center gap-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="411" height="6" viewBox="0 0 411 6" fill="none">
+  <path opacity="0.5" d="M0.333333 3C0.333333 4.47276 1.52724 5.66667 3 5.66667C4.47276 5.66667 5.66667 4.47276 5.66667 3C5.66667 1.52724 4.47276 0.333333 3 0.333333C1.52724 0.333333 0.333333 1.52724 0.333333 3ZM405.347 3C405.347 4.47276 406.541 5.66667 408.013 5.66667C409.486 5.66667 410.68 4.47276 410.68 3C410.68 1.52724 409.486 0.333333 408.013 0.333333C406.541 0.333333 405.347 1.52724 405.347 3ZM3 3.5H408.013V2.5H3V3.5Z" fill="#1E1E1E"/>
+</svg>
+  <p className="text-center text-2xl font-bold mb-4">
+    Que pouvez-vous faire avec <span className="font-Futura-bold text-[#3635CE]">articlo</span>
+  </p>
+  <svg xmlns="http://www.w3.org/2000/svg" width="411" height="6" viewBox="0 0 411 6" fill="none">
+  <path opacity="0.5" d="M0.333333 3C0.333333 4.47276 1.52724 5.66667 3 5.66667C4.47276 5.66667 5.66667 4.47276 5.66667 3C5.66667 1.52724 4.47276 0.333333 3 0.333333C1.52724 0.333333 0.333333 1.52724 0.333333 3ZM405.347 3C405.347 4.47276 406.541 5.66667 408.013 5.66667C409.486 5.66667 410.68 4.47276 410.68 3C410.68 1.52724 409.486 0.333333 408.013 0.333333C406.541 0.333333 405.347 1.52724 405.347 3ZM3 3.5H408.013V2.5H3V3.5Z" fill="#1E1E1E"/>
+</svg>
+</div>
+
+
+  {/* Images Section */}
+<div className="grid grid-cols-3 gap-20 items-center justify-center h-full">
+  {/* Replace these image URLs with your actual image paths */}
+  <img className="w-[80%] h-[80%] object-cover items-center mx-auto" src="../../../images/offer2.svg" alt="Product 1" />
+  <img className="w-full h-full object-cover items-center" src="../../../images/offer1.svg" alt="Product 2" />
+  <img className="w-[80%] h-[80%] object-cover items-center mx-auto" src="../../../images/offer3.svg" alt="Product 3" />
+</div>
+
+</div>
+
+
+
+
     </div>
   );
 };

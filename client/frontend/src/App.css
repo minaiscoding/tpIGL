@@ -5,9 +5,16 @@
 
 @font-face {
   font-family: 'Futura Book BT';
-  src: url('../public/fonts/FuturaBookBT.ttf');
+  src: url('../public/fonts/FutuBk.ttf');
+  font-weight: lighter;
+}
+@font-face {
+  font-family: 'Futura Bold';
+  src: url('../public/fonts/Futura\ Bk\ Bold.ttf');
+  font-weight: bolder;
 }
 .App {
+  font-family: 'Futura Book BT';
   text-align: center;
 }
 

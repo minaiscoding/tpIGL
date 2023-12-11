@@ -2,7 +2,7 @@ import React from 'react';
 
 const SearchPage = () => {
   return (
-    <div className="h-screen w-screen flex-col flex">
+    <div className="h-screen w-screen flex-col flex font-Futura">
       {/* Background Image */}
       <div
         className="relative w-full justify-center flex flex-col items-center h-[57vh] bg-cover bg-center relative"
@@ -14,21 +14,23 @@ const SearchPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-yellow-400 opacity-80 z-10"></div>
 
         {/* Content for the top half */}
-        <div className="text-white font-bold text-5xl z-20 ">
-          <p>Découvrez l'excellence</p>
-          <p>scientifique en un clic</p>
-        </div>
+        <div className="text-white text-5xl z-20 font-Futura-bold">
+  <p>Découvrez l'excellence</p>
+  <p>scientifique en un clic</p>
+</div>
 
-        <div className="absolute translate-y-[18vh] h-[200px] flex items-center justify-center z-20 w-[50vw]">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border border-r-0 border-gray-300 rounded-l-lg px-4 py-3 bg-white w-full"  
-          />
-          <button className="bg-gray-800 text-white px-[6%] py-3 rounded-r-lg">
-            Search
-          </button>
-        </div>
+
+<div className="absolute translate-y-[18vh] h-[200px] flex items-center justify-center z-20 w-[50vw]">
+  <input
+    type="text"
+    placeholder="Rechercher un article"
+    className="border border-r-0 border-gray-300 rounded-l-md px-4 py-3 bg-white w-full"  
+  />
+  <button className="bg-gray-800 text-white px-[6%] py-3 rounded-r-md">
+    Search
+  </button>
+</div>
+
       </div>
 
       {/* Images Section */}

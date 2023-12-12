@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage'; // Import the component for the new route
-
+import './App.css'
 const App = () => {
   return (
     <Router>

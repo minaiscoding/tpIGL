@@ -11,10 +11,10 @@ const SearchPage = () => {
         }}
       >
         {/* Overlay Pseudo-element */}
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-yellow-400 opacity-80 z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#3635CE] to-[#F6B237] opacity-80 z-10"></div>
 
         {/* Content for the top half */}
-        <div className="text-white text-5xl z-20 font-Futura-bold">
+        <div className="text-white text-[3vw] z-20 font-Futura-bold mb-[7vh]">
   <p>Découvrez l'excellence</p>
   <p>scientifique en un clic</p>
 </div>

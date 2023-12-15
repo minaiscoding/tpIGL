@@ -204,7 +204,7 @@ def is_valid_scientific_pdf(file_path):
       )    
     '''
     # NER and language
-    #doc = nlp(first_three_pages_text)
+    doc = nlp(first_three_pages_text)
     entities = [(ent.text, ent.label_) for ent in doc.ents]
     ##has_scientific_entities = any(label in ("ORG", "LOC", "PERSON") for text, label in entities)
     #language_detected = doc.lang_

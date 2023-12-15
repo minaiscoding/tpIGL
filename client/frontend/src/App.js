@@ -1,14 +1,23 @@
+// src/App.js
 import React from 'react';
-import DataDisplay from './components/DataDisplay';
-
-function App() {
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SearchPage from './pages/SearchPage';
+import DataPage from './pages/DataPage'; // Import the component for the new route
+import './App.css'
+const App = () => {
   return (
-    <div>
-      <DataDisplay endpoint="utilisateurs" />
-      <DataDisplay endpoint="articles" />
-      <DataDisplay endpoint="favoris" />
-    </div>
+    <Router>
+      <Routes>
+        {/* Route for the SearchPage */}
+        <Route path="/search" element={<SearchPage />} />
+
+        {/* Route for the Home page */}
+        <Route path="/" element={<DataPage />} />
+        
+        {/* Add more routes as needed */}
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

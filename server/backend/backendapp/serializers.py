@@ -10,7 +10,17 @@ class ArticlesSerializer(serializers.ModelSerializer):
     PDF_File = serializers.FileField()
     class Meta:
         model = Articles
+<<<<<<< HEAD
         fields = '__all___'
+=======
+        fields = [
+            'Titre',
+            'Resume',
+            'auteurs',
+            'Institution',
+           
+        ]
+>>>>>>> origin/main
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

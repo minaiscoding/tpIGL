@@ -1,8 +1,22 @@
+import os
 import requests
 #--------------------------------------------------------------------------------------------------------------
-import PyPDF2
-from PyPDF2 import PdfReader
-import fitz  # PyMuPDF
+from .utils import (
+    extract_pdf_metadata,
+    generate_metadata_dict,
+    extract_text_from_pdf,
+    extract_information,
+    analyze_texte,
+    is_valid_scientific_pdf,
+    is_valid_external_url,
+    is_valid_localfilepath,
+    download_pdf_from_url,
+    validate_articleSci_pdf,
+)
+#--------------------------------------------------------------------------------------------------------------
+from django.core.files.base import ContentFile
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.response import Response
 #--------------------------------------------------------------------------------------------------------------
 from rest_framework.decorators import api_view
 from rest_framework import generics,status
@@ -10,15 +24,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 #--------------------------------------------------------------------------------------------------------------
-from backendapp.models import Utilisateurs, Articles, Favoris
-from backendapp.serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer
+from backendapp.models import Articles
+from backendapp.serializers import  ArticlesSerializer
 #--------------------------------------------------------------------------------------------------------------
 from django.shortcuts import render
 #--------------------------------------------------------------------------------------------------------------
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+
+
+
 #--------------------------------------------------------------------------------------------------------------
-import spacy
+
 #--------------------------------------------------------------------------------------------------------------
 
                                    #**************************#
@@ -38,145 +53,61 @@ l article scientifique. Les informations extraites sont envoyées dans un index 
 '''
 #///////////////////////////////////////////////////////////////////
 
-
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#to be tested 
-def download_pdfs_from_one_url(url):
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        pdf_links = soup.find_all('a', href=lambda href: (href and href.endswith('.pdf')))
-
-        articles = []
-        for link in pdf_links:
-            pdf_url = urljoin(url, link['href'])
-            pdf_content = requests.get(pdf_url).content
-            
-            # Actuellement, cela renvoie simplement l'URL et le contenu du PDF pour illustration
-            articles.append({'url': pdf_url, 'content': pdf_content})
-
-        return articles
-
-    return None
-
-
-
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# to be tested 
-
-def analyze_text(text):
-    nlp = spacy.load("en_core_web_sm")
-    doc = nlp(text)
-
-    # Exemple : Extraire les entités nommées (auteurs, lieux, organisations, etc.)
-    authors = [entity.text for entity in doc.ents if entity.label_ == "PERSON"]
-
-    # Autres traitements spécifiques en fonction de ce que vous souhaitez extraire
-    # Par exemple, extraire la première phrase pour le résumé
-    sentences = list(doc.sents)
-    summary = str(sentences[0]) if sentences else ''
-
-    # Vous devez adapter ces extraits à la structure spécifique de votre modèle Articles
-    return {
-        'Titre': doc._.meta['title'],  # Supposons que le titre est stocké dans les métadonnées
-        'Resume': summary,
-        'auteurs': ', '.join(authors),
-        'Institution': '...',  
-        'date': '...',  
-        'MotsCles': '...',  
-        'text': text,
-        'URL_Pdf': '...',  
-        'RefBib': '...',  
-    }
-
-''' tested successfully '''
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#////////////////////////////////////////////////////////////////////
-# column_boxes Function 
-#////////////////////////////////////////////////////////////////////
-def column_boxes(page: fitz.Page, footer_margin: int = 0, no_image_text: bool = True) -> list:
-    """Return list of column bounding boxes for the given page."""
-    # Function to identify column bounding boxes on a page.
-#     Uses the multi_column.column_boxes method from the 'multi_column' module.
-#     Parameters:
-#       - page: A fitz.Page object representing the PDF page.
-#       - footer_margin: An integer specifying the margin from the bottom of the page (default: 0).
-#       - no_image_text: A boolean indicating whether to include text in image regions (default: True).
-#     Returns:
-#     A list of column bounding boxes for the given page.
-
-#////////////////////////////////////////////////////////////////////
-# extract_text_from_pdf Function
-#////////////////////////////////////////////////////////////////////
-def extract_text_from_pdf(file_path):
-    """Extract text from a PDF file considering multi-column layout.
-
-    Parameters:
-        file_path (str): The path to the PDF file.
-
-    Returns:
-        str: Extracted text.
-    """
-    # Implementation details:
-    # - Opens the PDF file using PyMuPDF's fitz module.
-    # - Iterates through each page in the PDF file.
-    # - Uses the column_boxes function to detect column bounding boxes.
-    # - Extracts text, considering one or two columns.
-    # - Closes the PDF file and returns the extracted text.
-#///////////////////////////////////////////////////////////////////
-
-    # Open the PDF file using PyMuPDF's fitz module.
-    pdf_file = fitz.open(file_path)
-    text = ''  # Initialize an empty string to store the extracted text.
-
-     # Iterate through each page in the PDF file.
-    for page_num in range(pdf_file.page_count):
-        page = pdf_file[page_num] # Get the current page.
-        
-        # Use the column_boxes function to detect column bounding boxes.
-        bboxes = column_boxes(page, footer_margin=50, no_image_text=True)
-
-        if bboxes:
-            # If two columns are detected, extract text from each column separately.
-            column_text = []
-            for rect in bboxes:
-                column_text.append(page.get_text(clip=rect, sort=True))
-            text += '\n'.join(column_text) # Combine text from both columns with newline separation.
-        else:
-            # If only one column is present, extract text from the entire page.
-            text += page.get_text()
-
-    pdf_file.close() # Close the PDF file.
-    return text # Return the extracted text.
-
-#///////////////////////////////////////////////////////////////////
+#----------------------------------------------------------------------------------------------------
 #  for testing
-'''  
+#*****************************************************************************  
+
 def pdf_text_view(request):
-    file_path = "C:\\Users\\dell\\Downloads\\New_Fac_101.pdf"
+    file_path = "C:\\Users\\dell\\Downloads\\Artificial_Intelligence_Enabled_Radio_Propagation_for_CommunicationsPart_I_Channel_Characterization_and_Antenna-Channel_Optimization.pdf"
     text = extract_text_from_pdf(file_path)
     return render(request, 'pdf_text.html', {'text': text})
-'''
-#///////////////////////////////////////////////////////////////////
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#*****************************************************************************
+def analize_text_view(request):
+    
+    file_path = "C:\\Users\\dell\\Downloads\\Artificial_Intelligence_Enabled_Radio_Propagation_for_CommunicationsPart_I_Channel_Characterization_and_Antenna-Channel_Optimization.pdf"
+
+    # Extract text from the PDF file
+    pdf_text = extract_text_from_pdf(file_path)
+
+    # Analyze the extracted text
+    #result = extract_information(pdf_text)
+    metadata = extract_pdf_metadata(file_path)
+    result = analyze_texte(pdf_text,metadata)
+
+    # Render the template with the extracted information
+    return render(request, 'ana_text.html', {'result': result})
+#*****************************************************************************
+def pdf_metadata_view(request):
+    # Extract metadata from the PDF file
+    pdf_path = "C:\\Users\\dell\\Downloads\\Artificial_Intelligence_Enabled_Radio_Propagation_for_CommunicationsPart_I_Channel_Characterization_and_Antenna-Channel_Optimization.pdf"
+    metadata = extract_pdf_metadata(pdf_path)
+
+    # Generate metadata dictionary
+    metadata_dict = generate_metadata_dict(metadata)
+
+    # Pass the metadata dictionary to the template
+    return render(request, 'pdf_metadata_template.html', {'result': metadata_dict})
+
+
+#*****************************************************************************
 # to be tested by the end 
 class UploadArticleView(APIView):
-    #parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (FileUploadParser, MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
-        # Télécharger les PDFs à partir de l'URL
+        # Retrieve the URL from the request data
         url = request.data.get('url')
-        articles_data = download_pdfs_from_one_url(url)
+        # If the URL points to a directory, download PDFs from the directory
+        articles_data = download_pdf_from_url(url)
 
         if articles_data:
-            # Créer des instances Articles avec les informations téléchargées
             for article_data in articles_data:
+                # Save only the URL in the 'url' field
+                url_field_data = {'url': url}
+                article_data.update(url_field_data)
+
+                # Serialize the data and create an Article instance
                 serializer = ArticlesSerializer(data=article_data)
 
                 if serializer.is_valid():
@@ -184,11 +115,9 @@ class UploadArticleView(APIView):
 
                     # Extraire le texte du PDF et analyser les informations
                     pdf_text = extract_text_from_pdf(article.pdf_file.path)
-                    analysis_result = analyze_text(pdf_text)
+                    analysis_result = analyze_texte(pdf_text)
 
-                    # Mettre à jour l'instance de l'article avec les informations analysées
-                    for key, value in analysis_result.items():
-                        setattr(article, key, value)
+        
 
                     article.save()
 
@@ -298,4 +227,32 @@ class UploadArticleView(APIView):
                 pdf_document.close()
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 '''
+
+
+
+
+
+
+
+
+
+#///////////////////////
+
+#///////////////////////
+
+def scientific_pdf_view(request):
+    # Call the test_scientific_pdf function to get the validation result
+    url='C:\\Users\\dell\\Downloads\\ScienceDirect_articles_14Dec2023_23-22-46.478\\An-Introduction-to-Machine-Learning--a-per_2023_Physica-A--Statistical-Mecha.pdf'
+    url2='C:\\Users\\dell\\Downloads\\Artificial_Intelligence_Enabled_Radio_Propagation_for_CommunicationsPart_I_Channel_Characterization_and_Antenna-Channel_Optimization.pdf'
+    is_valid = validate_articleSci_pdf(url2)
+
+    # Prepare the context data to pass to the template
+    context = {'is_valid': is_valid}
+
+    # Render the template with the context data
+    return render(request, 'test_scientific_pdf.html', context)
+

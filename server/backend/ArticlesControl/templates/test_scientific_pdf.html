@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Scientific PDF</title>
+</head>
+<body>
+    <h2>Test Scientific PDF</h2>
+
+  <!--  <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="pdf_file">Upload PDF:</label>
+        <input type="file" name="pdf_file" accept=".pdf">
+        <button type="submit">Test</button>
+    </form>
+-->
+    {% if is_valid is not None %}
+        {% if is_valid %}
+            <p style="color: green;">The PDF is valid according to the scientific criteria.</p>
+        {% else %}
+            <p style="color: red;">The PDF does not meet the scientific criteria.</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

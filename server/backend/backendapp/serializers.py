@@ -7,20 +7,10 @@ class UtilisateursSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ArticlesSerializer(serializers.ModelSerializer):
-    PDF_File = serializers.FileField()
     class Meta:
         model = Articles
-<<<<<<< HEAD
-        fields = '__all___'
-=======
-        fields = [
-            'Titre',
-            'Resume',
-            'auteurs',
-            'Institution',
-           
-        ]
->>>>>>> origin/main
+        fields = ('URL_Pdf', 'pdf_File')
+        
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

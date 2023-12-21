@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage'; // Import the component for the new route
+import UploadPage from './pages/UploadPage';
 import './App.css'
 const App = () => {
   return (
@@ -13,7 +14,10 @@ const App = () => {
 
         {/* Route for the Home page */}
         <Route path="/" element={<DataPage />} />
-        
+  
+        {/* Route for the Upload page */}
+        <Route path="/upload" element={<UploadPage />} />
+
         {/* Add more routes as needed */}
       </Routes>
     </Router>

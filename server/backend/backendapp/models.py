@@ -28,32 +28,20 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model): 
-    Titre = models.CharField(max_length=255)#null=False,blank=False
+    Titre = models.CharField(max_length=255)
     Resume = models.TextField(null=True,blank=True)
-    auteurs = models.CharField(max_length=255)#null=False,blank=False
+    auteurs = models.CharField(max_length=255)
     Institution = models.CharField(max_length=255)
-<<<<<<< HEAD
-    date = models.DateField()#null=False,blank=False
+    date = models.DateField()
     MotsCles = models.CharField(max_length=255,null=True,blank=True)
     text = models.TextField(null=True,blank=True)
     URL_Pdf = models.URLField(max_length=255,null=True,blank=True)
     RefBib = models.CharField(max_length=255,null=True,blank=True)
-    pdf_File = models.FileField(upload_to='article_pdfs/',null=True)#null=False,blank=False
+    pdf_File = models.FileField(upload_to='article_pdfs/',null=True)
 
     def __str__(self):
         return self.Titre 
 
-=======
-    date = models.DateField()
-    MotsCles = models.CharField(max_length=255)
-    text = models.TextField()
-    URL_Pdf = models.CharField(max_length=255)
-    RefBib = models.CharField(max_length=255)
-    date = models.DateField()
-
-    def __str__(self):
-        return self.Titre
->>>>>>> origin/main
 class Favoris(models.Model):
     UtilisateurID = models.ForeignKey(Utilisateurs, on_delete=models.CASCADE)
     ArticleID = models.ForeignKey(Articles, on_delete=models.CASCADE)

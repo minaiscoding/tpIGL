@@ -7,9 +7,20 @@ module.exports = {
       fontFamily: {
         'Futura' : 'Futura Book BT', 
         'Futura-bold' : 'Futura bold',
-      }
-    },
-  },
-  plugins: [],
+      },
+      borderRadius: {
+        '14': '14px',
+      },
+      colors: {
+        'purple-600': '#8A88E2',
+        'purple-300':'#bdbdec',
+      },
+      
+  plugins: [
+   
+  ],
+ },
+},
 }
+  
 

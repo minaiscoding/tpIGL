@@ -19,7 +19,7 @@ from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 #--------------------------------------------------------------------------------------------------------------
 from rest_framework.decorators import api_view
-from rest_framework import generics,status
+from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -126,6 +126,64 @@ class UploadArticleView(APIView):
         return Response({'error': 'Échec du téléchargement des PDFs depuis l\'URL'}, status=status.HTTP_400_BAD_REQUEST)
 
 #///////////////////////////////////////////////////////////////////
+from django.core.exceptions import ValidationError
+class ArticleUploadViewSet(viewsets.ModelViewSet):
+    queryset = Articles.objects.all()
+    serializer_class = ArticlesSerializer
+    #parser_classes = (FileUploadParser, MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        url = request.data.get('url')
+        pdf_file = request.data.get('pdf_File')
+
+        if not url and not pdf_file:
+            return Response({'error': 'A URL or a PDF file is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if url:
+            # Handle URL upload
+            articles_data = download_pdf_from_url(url)
+
+            if articles_data:
+                for article_data in articles_data:
+                    url_field_data = {'URL_Pdf': url}
+                    article_data.update(url_field_data)
+
+                    serializer = self.get_serializer(data=article_data)
+                    serializer.is_valid(raise_exception=True)
+                    article = serializer.save()
+
+                    pdf_text = extract_text_from_pdf(article.pdf_file)
+                    analysis_result = analyze_texte(pdf_text)
+
+                    article.save()
+
+                headers = self.get_success_headers(serializer.data)
+                return Response({'message': 'Upload réussi'}, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                return Response({'error': 'Échec du téléchargement des PDFs depuis l\'URL'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif pdf_file:
+            # Handle local file upload
+            if not pdf_file.content_type == 'application/pdf':
+                return Response({'error': 'Only PDF files are allowed'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Save the file temporarily in the pdf_File field
+            serializer = self.get_serializer(data={'pdf_File': pdf_file})
+            try:
+                serializer.is_valid(raise_exception=True)
+            except ValidationError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            article = serializer.save()
+
+            pdf_text = extract_text_from_pdf(article.pdf_file.path)
+            analysis_result = analyze_texte(pdf_text)
+
+            article.save()
+
+            headers = self.get_success_headers(serializer.data)
+            return Response({'message': 'Upload réussi'}, status=status.HTTP_201_CREATED, headers=headers)
+
 # other version to review 
 '''
 class UploadArticleView(APIView):
@@ -231,6 +289,104 @@ class UploadArticleView(APIView):
 
 
 '''
+
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from backendapp.models import Articles
+from backendapp.serializers import ArticlesSerializer
+from .utils import download_pdf_from_url, extract_text_from_pdf, analyze_texte
+
+#//////////////////////////////////
+import PyPDF2
+from io import BytesIO
+#/////////////////////////////////
+class LocalFileUploadView(APIView):
+
+    def is_pdf(self, file_content):
+        try:
+            pdf_reader = PyPDF2.PdfFileReader(BytesIO(file_content))
+            # Check if the file has at least one page to ensure it's a valid PDF
+            return pdf_reader.numPages > 0
+        except PyPDF2.utils.PdfReadError:
+            return False
+        
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        local_file_path = request.data.get('local_file_path')
+
+        if not local_file_path:
+            return Response({'error': 'A file path is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if default_storage.exists(local_file_path):
+            with default_storage.open(local_file_path, 'rb') as file:
+
+                # Read the file content
+                file_content = file.read()
+
+                # Check if the file is a PDF
+                if not self.is_pdf(file_content):
+                    return Response({'error': 'Invalid file format. Only PDF files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                #temp_file = NamedTemporaryFile(delete=True)
+                #for chunk in file.chunks():
+                #   temp_file.write(chunk)
+                #temp_file.seek(0)
+
+                #article_data = {'pdf_File': File(temp_file), 'URL_Pdf': local_file_path}
+                #serializer = ArticlesSerializer(data=article_data)
+
+                #try:
+                #    serializer.is_valid(raise_exception=True)
+                #except ValidationError as e:
+                #    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+                #article = serializer.save()
+                # traitement
+                #pdf_text = extract_text_from_pdf(article.URL_Pdf)
+                #analysis_result = analyze_texte(pdf_text)
+
+                return Response({'message': 'Upload pdf file successful'}, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response({'error': 'Invalid file path'}, status=status.HTTP_400_BAD_REQUEST)
+#/////////////////////////////////
+        
+#/////////////////////////////////
+class ExternalURLUploadView(APIView):
+    def post(self, request, *args, **kwargs):
+        url = request.data.get('url')
+
+        if not url:
+            return Response({'error': 'A URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if url.startswith(('http://', 'https://')):
+            articles_data = download_pdf_from_url(url)
+
+            if articles_data:
+                for article_data in articles_data:
+                    url_field_data = {'URL_Pdf': url}
+                    article_data.update(url_field_data)
+
+                    serializer = ArticlesSerializer(data=article_data)
+
+                    if serializer.is_valid():
+                        article = serializer.save()
+                        #traitement
+                        #pdf_text = extract_text_from_pdf(article.URL_Pdf)
+                        #analysis_result = analyze_texte(pdf_text)
+                        article.save()
+
+                return Response({'message': 'Upload successful'}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'Failed to download PDFs from the URL'}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response({'error': 'Invalid URL format'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

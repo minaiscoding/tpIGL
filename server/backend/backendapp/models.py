@@ -28,16 +28,16 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model): 
-    Titre = models.CharField(max_length=255)
+    Titre = models.CharField(max_length=255,null=True,blank=True)
     Resume = models.TextField(null=True,blank=True)
-    auteurs = models.CharField(max_length=255)
-    Institution = models.CharField(max_length=255)
-    date = models.DateField()
+    auteurs = models.CharField(max_length=255,null=True,blank=True)
+    Institution = models.CharField(max_length=255,null=True,blank=True)
+    date = models.DateField(null=True,blank=True)
     MotsCles = models.CharField(max_length=255,null=True,blank=True)
     text = models.TextField(null=True,blank=True)
     URL_Pdf = models.URLField(max_length=255,null=True,blank=True)
     RefBib = models.CharField(max_length=255,null=True,blank=True)
-    pdf_File = models.FileField(upload_to='article_pdfs/',null=True)
+    pdf_File = models.FileField(upload_to='article_pdfs/',null=True,blank=True)
 
     def __str__(self):
         return self.Titre 

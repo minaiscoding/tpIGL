@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage'; // Import the component for the new route
 import './App.css'
+import SearchResultPage from './pages/SearchResultPage';
 const App = () => {
   return (
     <Router>
@@ -14,7 +15,8 @@ const App = () => {
         {/* Route for the Home page */}
         <Route path="/" element={<DataPage />} />
         
-        {/* Add more routes as needed */}
+        {/* Route for the SearchResultPage */}
+        <Route path="/result" element={<SearchResultPage />} />
       </Routes>
     </Router>
   );

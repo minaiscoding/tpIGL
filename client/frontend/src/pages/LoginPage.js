@@ -91,7 +91,7 @@ const LoginPage = () => {
           </div>
 
           <button
-            className="px-4 h-[55px] bg-rgba-54-53-206-1 w-full rounded-md text-white font-Futura text-center text-2xl"
+            className="px-4 h-[55px] bg-rgba-54-53-206-1 w-full rounded-md text-[#fff] font-Futura text-center text-2xl"
             onClick={handleLogin}
           >
             Connecter

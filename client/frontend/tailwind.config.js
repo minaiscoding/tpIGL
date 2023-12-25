@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+   
   theme: {
     extend: {
       gradientColorStops: (theme) => ({
@@ -16,27 +17,26 @@ module.exports = {
       screens: {
         's': '500px',
       },
-      fontFamily: {
-        'Futura' : 'Futura Book BT', 
-        'Futura-bold' : 'Futura bold',
-        'ITC Avant Garde Std Bold' : 'ITC',
-      }
-        'Futura': 'Futura Book BT',
-        'Futura-bold': 'Futura bold',
-        'avantgarde': ['ITC Avant Garde Gothic', 'sans-serif'],
-      },
-      colors: {
-        'navBg': '#1E1E1E',
-        'yellow': ' #F6B237',
-        'yellow1': 'rgba(54, 53, 206, 0.72)',
-        'purple': 'rgba(107, 48, 228, 0.72)',
-        'blue': 'rgba(246, 178, 55, 0.72)',
-        'rgba-54-53-206-1': 'rgba(54, 53, 206, 1)',
-        'yellow2': 'rgba(54, 53, 206, 0.9)',
-        'purple2': 'rgba(107, 48, 228, 0.86)',
-        'blue2': 'rgba(246, 178, 55, 0.9)',
-        'purple-3OO':'#bdbdec',
-      },
+    },
+    fontFamily: {
+      'Futura' : 'Futura Book BT', 
+      'Futura-bold' : 'Futura bold',
+      'ITC Avant Garde Std Bold' : 'ITC',
+    },
+    'Futura': 'Futura Book BT',
+    'Futura-bold': 'Futura bold',
+    'avantgarde': ['ITC Avant Garde Gothic', 'sans-serif'],
+    colors: {
+      'navBg': '#1E1E1E',
+      'yellow': ' #F6B237',
+      'yellow1': 'rgba(54, 53, 206, 0.72)',
+      'purple': 'rgba(107, 48, 228, 0.72)',
+      'blue': 'rgba(246, 178, 55, 0.72)',
+      'rgba-54-53-206-1': 'rgba(54, 53, 206, 1)',
+      'yellow2': 'rgba(54, 53, 206, 0.9)',
+      'purple2': 'rgba(107, 48, 228, 0.86)',
+      'blue2': 'rgba(246, 178, 55, 0.9)',
+      'purple-3OO':'#bdbdec',
     },
   },
   plugins: [],

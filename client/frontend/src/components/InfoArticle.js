@@ -24,7 +24,7 @@ const style3 ='font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid
 function InfoArticle(props) {
 
   return (
-    <div className={`bg-white mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg  mt-20 sm:mt-8  mb-4 w-[85%]`}>
+    <div className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg  mt-20 sm:mt-8  mb-4 w-[85%]`}>
       {!props.edit ? (
         <div className='flex flex-col items-start justify-center text-left'>
           <h2 className={style1}> Titre de l'article :</h2>

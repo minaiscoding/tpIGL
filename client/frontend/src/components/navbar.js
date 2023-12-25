@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { LuFileText } from 'react-icons/lu';
-import { SiWindows11 } from "react-icons/si";
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../logo.svg';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa6';
 import { IoIosLogOut } from 'react-icons/io';
 import { SlMenu } from 'react-icons/sl';
-import { IoCloseOutline } from "react-icons/io5";
-import line from "../assets/Line_nav.svg";
+import line from "../assets/Line_nav.svg"
 
 export default function Navbar() {
     const [role, setRole] = useState('user');
@@ -21,7 +19,6 @@ export default function Navbar() {
         // Update active class when the location changes
         const pathname = location.pathname;
         setActiveClassName(pathname);
-        setShownav(false);
     }, [location]);
 
     function changeActiveClassName(name) {
@@ -37,23 +34,22 @@ export default function Navbar() {
                 <div className="flex flex-row text-center gap-6">
                     {role === 'user' ? (
                         <>
-
                             <FiSearch
-                                className={`relative  -right-5 top-1 ${activeClassName === '/search' ? 'text-yellow' : 'text-white'}`}
+                                className={`relative  -right-5 top-1 ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
                             <Link to="/search" onClick={() => changeActiveClassName('/search')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/search' ? 'text-yellow' : 'text-white'}`}
+                                    className={` font-Futura ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Rechercher
                                 </p>
                             </Link>
                             <LuFileText
-                                className={`relative  -right-5 top-1 ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-white'}`}
+                                className={`relative  -right-5 top-1 ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
                             <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-white'}`}
+                                    className={` font-Futura ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Mes Favoris
                                 </p>
@@ -61,22 +57,22 @@ export default function Navbar() {
                         </>
                     ) : role === 'admin' ? (
                         <>
-                            <LuFileText
-                                className={`relative  -right-5 top-1 ${activeClassName === '/search' ? 'text-yellow' : 'text-white'}`}
+                            <FiSearch
+                                className={`relative  -right-5 top-1 ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
                             <Link to="/search" onClick={() => changeActiveClassName('/search')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/search' ? 'text-yellow' : 'text-white'}`}
+                                    className={` font-Futura ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Uplaod Article
                                 </p>
                             </Link>
-                            <SiWindows11
-                                className={`relative  -right-5 top-1 ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-white'}`}
+                            <LuFileText
+                                className={`relative  -right-5 top-1 ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
                             <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-white'}`}
+                                    className={` font-Futura ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Modérateurs
                                 </p>
@@ -86,15 +82,15 @@ export default function Navbar() {
                 </div>
                 <div className="flex flex-row text-center gap-[10px] items-center">
                     <div className="w-[36px] h-[36px] rounded-full overflow-hidden">
-                        <img className="w-full h-full object-cover bg-white" alt="" />
+                        <img className="w-full h-full object-cover bg-[#fff]" alt="" />
                     </div>
                     <div className="flex flex-row items-center justify-center gap-1 mr-4">
-                        <p className="text-white font-Futura">Mon Profile</p>
+                        <p className="text-[#fff] font-Futura">Mon Profile</p>
                         <div className="flex flex-col">
                             {deconect ? (
-                                <FaAngleUp className="text-white cursor-pointer top-1 relative" onClick={() => setDeconect(false)} />
+                                <FaAngleUp className="text-[#fff] cursor-pointer top-1 relative" onClick={() => setDeconect(false)} />
                             ) : (
-                                <FaAngleDown className="text-white cursor-pointer  top-1 relative" onClick={() => setDeconect(true)} />
+                                <FaAngleDown className="text-[#fff] cursor-pointer  top-1 relative" onClick={() => setDeconect(true)} />
                             )}
                         </div>
                     </div>
@@ -102,7 +98,7 @@ export default function Navbar() {
             </div>
             <div className="sm:hidden">
                 <SlMenu
-                    className="absolute top-4 right-8 text-2xl text-white z-50 font-bold"
+                    className="absolute top-4 right-8 text-2xl text-[#fff] z-50 font-bold"
                     onClick={() => setShownav(!shownav)} // Toggle the state on click
                 />
                 {shownav && (
@@ -111,20 +107,18 @@ export default function Navbar() {
                             className="fixed inset-0 bg-black opacity-20 z-50 text-Futura h-screen w-screen"
                             onClick={() => setShownav(false)}
                         ></div>
-                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-white items-center  align-middle ">
-
-                            <div className=' relative flex flex-row gap-4  items-center py-6 w-full  justify-center bg-yellow'>
-                                <IoCloseOutline className='text-white absolute top-2 right-4 cursor-pointer mb-4' size="24" onClick={() => setShownav(false)} />
-                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-white">
+                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-[#fff] items-center  py-8 align-middle ">
+                            <div className='flex flex-row gap-2 items-center mb-4'>
+                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden">
                                     <img className="w-full h-full object-cover" alt="" />
                                 </div>
                                 <p>Mon profile</p>
                             </div>
-                            <img scr={line} />
+                            <img scr={line}/>
 
                             {role === 'user' ? (
                                 <>
-                                    <div className={`flex flex-row gap-2  py-6 w-full justify-center items-center `} >
+                                    <div className={`flex flex-row gap-2  py-6 w-full justify-center items-center ${activeClassName === '/search' ? 'bg-yellow' : ''}`} >
 
                                         <FiSearch
                                             className={` text-navBg `}
@@ -137,10 +131,10 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img src={line} />
-                                    <div className={`flex flex-row gap-2 py-6 w-full justify-center  items-center`} >
+                                    <img scr={line}/>
+                                    <div className={`flex flex-row gap-2 py-6 w-full justify-center  items-center ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`} >
                                         <LuFileText
-                                            className={`text-navBg `}
+                                            className={`text-navBg ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`}
                                         />
                                         <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
                                             <p
@@ -150,17 +144,17 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img src={line} />
+                                    <img scr={line}/>
 
                                 </>
                             ) : role === 'admin' ? (
                                 <>
-                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center`} >
+                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  ${activeClassName === '/search' ? 'bg-yellow' : ''}`} >
 
                                         <FiSearch
                                             className={` text-navBg `}
                                         />
-                                        <Link to="/UploadArticle" onClick={() => changeActiveClassName('/UploadArticle')}>
+                                        <Link to="/search" onClick={() => changeActiveClassName('/search')}>
                                             <p
                                                 className={` font-Futura text-navBg`}
                                             >
@@ -168,14 +162,14 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img src={line} />
+                                    <img scr={line}/>
 
-                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  `} >
+                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`} >
 
                                         <LuFileText
                                             className={` text-navBg `}
                                         />
-                                        <Link to="/ListeModerateurs" onClick={() => changeActiveClassName('/Moderateurs')}>
+                                        <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
                                             <p
                                                 className={` font-Futura text-navBg `}
                                             >
@@ -183,7 +177,7 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img src={line} />
+                                    <img scr={line}/>
 
                                 </>
                             ) : null}

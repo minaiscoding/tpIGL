@@ -28,13 +28,13 @@ const DetailsArticle = () => {
                     {!edit ? (
                         <>
                             <button
-                                className='bg-white text-lg font-Futura text-navBg text-center rounded-sm px-6 md:px-12 py-2'
+                                className='bg-[#ffff] text-lg font-Futura text-navBg text-center rounded-sm px-6 md:px-12 py-2'
                                 onClick={() => setEdit(true)}
                             >
                                 Modifier
                             </button>
                             <button
-                                className='bg-[#6B30E4] text-lg font-Futura text-white text-center rounded-sm px-6 md:px-12 py-2'
+                                className='bg-[#6B30E4] text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2'
                             >
                                 Supprimer
                             </button>
@@ -42,13 +42,13 @@ const DetailsArticle = () => {
                     ) : (
                         <>
                             <button
-                                className='bg-[#6B30E4] text-lg font-Futura text-white text-center rounded-sm px-6 md:px-12 py-2'
+                                className='bg-[#6B30E4] text-lg font-Futura text-[#fff]text-center rounded-sm px-6 md:px-12 py-2'
                                 onClick={() => setEdit(false)}
                             >
                                 Enrigistrer
                             </button>
                             <button
-                                className='bg-yellow text-lg font-Futura text-white text-center rounded-sm px-6 md:px-12 py-2'
+                                className='bg-yellow text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2'
                                 onClick={() => setEdit(false)}
                             >
                                 Annuler

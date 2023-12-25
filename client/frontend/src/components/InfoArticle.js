@@ -22,7 +22,6 @@ const style2 = 'font-Futura text-navBg text-base text-wrap ml-2 mb-2';
 const style3 ='font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ';
 
 function InfoArticle(props) {
-const isNarrowScreen = window.innerWidth < 500;
 
   return (
     <div className={`bg-white mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg  mt-20 sm:mt-8  mb-4 w-[85%]`}>

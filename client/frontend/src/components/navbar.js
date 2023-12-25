@@ -8,8 +8,7 @@ import { FaAngleDown, FaAngleUp } from 'react-icons/fa6';
 import { IoIosLogOut } from 'react-icons/io';
 import { SlMenu } from 'react-icons/sl';
 import { IoCloseOutline } from "react-icons/io5";
-import line from "../assets/Line_nav.svg"
-import FavorisIcon from './FavorisIcon';
+import line from "../assets/Line_nav.svg";
 
 export default function Navbar() {
     const [role, setRole] = useState('user');

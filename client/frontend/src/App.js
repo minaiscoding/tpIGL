@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage';
-import Navbar from './components/NavBar';
+import Navbar from "./components/NavBar";
 import LoginPage from './pages/LoginPage';
 import AccueilPage from './pages/AccueilPage'
 import UploadArticle from "./pages/UploadArticle";
 import ListModerateurs from "./pages/ListModerateurs";
 import DetailsArticle from "./pages/DetailsArticle";
 import './App.css';
-import Favoris from "./pages/Favoris";
 import FavoriePage from './pages/FavoriePage';
 import SearchResultPage from './pages/SearchResultPage';
 
@@ -46,8 +45,7 @@ const App = () => {
                       {/* Route for the Home page */}
                       <Route path="/Data" element={<DataPage />} />
 
-                      {/* Route for the favoris page */}
-                      <Route path="/mesFavoris" element={<Favoris />} />
+                      
 
                       {/* Route for the ModérateurPage */}
                       <Route path="/Moderateurs" element={<ListModerateurs />} />
@@ -58,7 +56,7 @@ const App = () => {
                       {/* Route for the SearchResultPage */}
                       <Route path="/result" element={<SearchResultPage />} />
                       {/* Route for the favorie page */}
-                      <Route path="/f" element={<FavoriePage />} />
+                      <Route path="/mesFavoris" element={<FavoriePage />} />
 
                     </Routes>
                   </>

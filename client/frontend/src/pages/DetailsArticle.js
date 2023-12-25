@@ -5,6 +5,7 @@ import InfoArticle from '../components/InfoArticle';
 
 // ADD HANDLE SUBLIT FOR THE BUTTON SAVE (INTEGRAION FCTN)
 // ADD INTEGRATION FOR SUPPRIMER BUTTON 
+// PiCK THE ROLE
 
 
 
@@ -16,11 +17,12 @@ const DetailsArticle = () => {
     return (
         <div
             style={{ backgroundImage }}
-            className='w-screen h-screen bg-purple-3OO bg-center flex flex-col items-center justify-center px-2 gap-4 overflow-y-scroll'
+            className='w-screen h-full min-h-screen  bg-purple-3OO bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8 overflow-y-scroll'
         >
-          
-                <InfoArticle edit={edit} />
-           
+
+
+            <InfoArticle edit={edit} />
+
             {role === 'modérateur' ? (
                 <div className='flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 xl:gap-24'>
                     {!edit ? (
@@ -56,6 +58,7 @@ const DetailsArticle = () => {
                 </div>
             ) : ''}
         </div>
+
     );
 };
 

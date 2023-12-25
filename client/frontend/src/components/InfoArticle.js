@@ -19,11 +19,13 @@ const info = {
 
 const style1 = 'font-Futura text-left text-xl text-purple2 font-semibold';
 const style2 = 'font-Futura text-navBg text-base text-wrap ml-2 mb-2';
-const style3 ='font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2 rounded-md w-[90%] w-full ';
+const style3 ='font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ';
 
 function InfoArticle(props) {
+const isNarrowScreen = window.innerWidth < 500;
+
   return (
-    <div className='bg-white mx-4 border-solid border-[1px] rounded-sm pl-4 py-2 max-h-[75%] border-navBg overflow-y-scroll w-[85%] '>
+    <div className={`bg-white mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg  mt-20 sm:mt-8  mb-4 w-[85%]`}>
       {!props.edit ? (
         <div className='flex flex-col items-start justify-center text-left'>
           <h2 className={style1}> Titre de l'article :</h2>
@@ -51,13 +53,13 @@ function InfoArticle(props) {
         <div className='flex flex-col items-start text-left gap-2  '>
          
             <label htmlFor='titre' className={style1}> Titre de l'article :</label>
-            <input type='text' id='titre' name='titre' defaultValue={info.titre} className={style3} />
+            <input type='text' id='titre' name='titre'  rows={5} defaultValue={info.titre} className={style3} />
 
             <label htmlFor='auteurs' className={style1}>Les auteurs :</label>
-            <textarea type='text' id='auteurs' name='auteurs' defaultValue={info.auteurs} className={style3} />
+            <textarea type='text' id='auteurs' name='auteurs'  rows={5} defaultValue={info.auteurs} className={style3} />
 
             <label htmlFor='institutions' className={style1}> Institusions :</label>
-            <textarea type='text' id='institutions' name='institutions' defaultValue={info.institutions} className={style3} />
+            <textarea type='text' id='institutions' name='institutions'  rows={5} defaultValue={info.institutions} className={style3} />
 
             <label htmlFor='resume' className={style1}> Résumé :</label>
             <textarea type='text' id='resume' name='resume' defaultValue={info.resume} className={style3} />
@@ -66,10 +68,10 @@ function InfoArticle(props) {
             <textarea type='text' id='motsCles' name='motsCles' defaultValue={info.motsCles} className={style3} />
 
             <label htmlFor='texte' className={style1}> Texte :</label>
-            <textarea type='text' id='texte' name='texte' defaultValue={info.texte} className={style3} />
+            <textarea type='text' id='texte' name='texte'  rows={5} defaultValue={info.texte} className={style3} />
 
             <label htmlFor='biblio' className={style1}> Bibiliographie : </label>
-            <textarea type='text' id='biblio' name='biblio' defaultValue={info.biblio} className={style3} />
+            <textarea type='text' id='biblio' name='biblio'   rows={5} defaultValue={info.biblio} className={style3} />
           
         </div>
       )}

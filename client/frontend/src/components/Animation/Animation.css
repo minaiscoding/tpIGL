@@ -1,41 +1,50 @@
 /* Animation.css */
-
 .animation-container {
-    display: flex;
+  position: relative;
+  margin-top: -32px; /* Adjust the margin-top as needed */
+}
+
+.animation-container::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  border-left: 8px solid #f6b237;
+  left: 0;
+  top: 0;
+  animation: typing 10.5s steps(1, end) infinite;
+  background:  linear-gradient(to left, rgba(107, 48, 228, 0.96) 0%, rgba(54, 53, 206, 1) 50%);
+}
+
+@keyframes typing {
+  8% {
+    left: 0; /* Display 'a' */
   }
-  
-  .letter {
+  16% {
+    left: 24.29%; /* Display 'r' */
+  }
+  24% {
+    left: 32.445%; /* Display 't' */
+  }
+  32% {
+    left:  41.9%; /* Display T' */}
+   
+    40% {
+      left: 53.035%; /* Display 'o' */
+    }
+    48% {
+      left: 69.18%; /* Display 'o' */
+    }
+    54% {
+      left: 82.325%; /* Display 'o' */
+    }
+    62% {
+      left: 99%;
+    }
  
-        margin-right: 20px; /* Adjust as needed */
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-       
   }
   
-  .visible {
-    opacity: 1;
-  }
   
-  /* Add a delay to each letter based on its index */
-  .letter-0 { animation: type 0.5s forwards 0.5s; }
-  .letter-1 { animation: type 0.5s forwards 1s; }
-  .letter-2 { animation: type 0.5s forwards 1.5s; }
-  .letter-3 { animation: type 0.5s forwards 2s; }
-  .letter-4 { animation: type 0.5s forwards 2.5s; }
-  .letter-5 { animation: type 0.5s forwards 3s; }
-  .letter-6 { animation: type 0.5s forwards 3.5s; }
-  
-  .cursor {
-    background-color: #000; /* Adjust color as needed */
-    width: 2px; /* Adjust width as needed */
-    height: 20px; /* Adjust height as needed */
-    display: inline-block;
-    opacity: 1;
-    animation: blink 1s infinite;
-  }
-  
-  @keyframes type {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
+ 
+
+
+

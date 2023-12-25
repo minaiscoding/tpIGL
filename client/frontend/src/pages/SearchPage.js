@@ -27,7 +27,7 @@ const SearchPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#3635CE] to-[#F6B237] opacity-80 z-10"></div>
 
         {/* Content for the top half */}
-        <div className="text-white md:text-[3.2vw] text-4xl z-20 font-ITC ">
+        <div className="text-white md:text-[3.2vw] text-4xl z-20 font-ITC font-black ">
           <p className="mb-0">Découvrez l'excellence</p>
           <p className="mt-0">scientifique en un clic</p>
         </div>

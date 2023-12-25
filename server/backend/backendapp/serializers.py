@@ -9,13 +9,7 @@ class UtilisateursSerializer(serializers.ModelSerializer):
 class ArticlesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Articles
-        fields = [
-            'Titre',
-            'Resume',
-            'auteurs',
-            'Institution',
-           
-        ]
+        fields = '__all__'
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

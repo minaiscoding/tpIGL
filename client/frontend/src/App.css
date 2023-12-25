@@ -8,6 +8,12 @@
   src: url('../public/fonts/FutuBk.ttf');
   font-weight: lighter;
 }
+
+@font-face {
+  font-family: 'ITC Avant Garde Std Bold';
+  src: url('../public/fonts/ITCAvantGardeStd-Bold.ttf');
+  font-weight: lighter;
+}
 @font-face {
   font-family: 'Futura Bold';
   src: url('../public/fonts/Futura\ Bk\ Bold.ttf');
@@ -22,6 +28,8 @@
   height: 40vmin;
   pointer-events: none;
 }
+
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {

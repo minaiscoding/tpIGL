@@ -5,7 +5,6 @@ import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage'; // Import the component for the new route
 import FavoriePage from './pages/FavoriePage';
 import './App.css'
-import SearchResultPage from './pages/SearchResultPage';
 const App = () => {
   return (
     <Router>
@@ -19,8 +18,7 @@ const App = () => {
         {/* Route for the favorie page */}
         <Route path="/f" element={<FavoriePage />} />
         
-        {/* Route for the SearchResultPage */}
-        <Route path="/result" element={<SearchResultPage />} />
+        {/* Add more routes as needed */}
       </Routes>
     </Router>
   );

@@ -3,11 +3,25 @@ import Navbar from "../components/NavBar"; // Import your Navbar component
 import Displayer from "../components/Displayer";
 
 const SearchResultPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const getParameterByName = (name, url) => {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return "";
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+  };
+
+  // Get the value of the 'q' parameter from the URL
+  const qValue = getParameterByName("q");
+
+  const [searchQuery, setSearchQuery] = useState(qValue);
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
-    console.log("useEffect triggered", searchQuery);
+    console.log("useEffect triggered");
+
     // Fetch search results when the component mounts or when searchQuery changes
     if (searchQuery.trim() !== "") {
       // Fetch search results from your Django API

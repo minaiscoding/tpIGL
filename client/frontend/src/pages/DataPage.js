@@ -1,17 +1,18 @@
-// src/pages/DataPage.js
-import React from 'react';
-import DataDisplay from '../components/DataDisplay';
+// Displayer.js
+import React from "react";
 
-const DataPage = () => {
+const Displayer = ({ results }) => {
   return (
-    <div>
-      <h1>Data Page</h1>
-      {/* Use the DataDisplay component with a specific endpoint */}
-      <DataDisplay endpoint="utilisateurs" />
-      <DataDisplay endpoint="articles" />
-      <DataDisplay endpoint="favoris" />
+    <div className="bg-white border border-black rounded-md p-4">
+      {/* Map through searchResults and display each result */}
+      {results.map((result) => (
+        <div key={result.id}>
+          <h2>{result.title}</h2>
+          <p>{result.content}</p>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default DataPage;
+export default Displayer;

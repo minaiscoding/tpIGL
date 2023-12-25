@@ -1,8 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/NavBar"; // Import your Navbar component
 import Displayer from "../components/Displayer";
 
 const SearchResultPage = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(() => {
+    console.log("useEffect triggered", searchQuery);
+    // Fetch search results when the component mounts or when searchQuery changes
+    if (searchQuery.trim() !== "") {
+      // Fetch search results from your Django API
+      console.log("Searching for:", searchQuery);
+      fetch(
+        `http://localhost:8000/api/search/?q=${encodeURIComponent(searchQuery)}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("API Response:", data);
+          // Convert the object into an array
+          const resultsArray = Object.keys(data).map((key) => data[key]);
+          setSearchResults(resultsArray);
+        })
+        .catch((error) => {
+          console.error("Error fetching search results:", error);
+        });
+    } else {
+      setSearchResults([]); // Clear search results if the query is empty
+    }
+  }, [searchQuery]);
+
+  const handleSearch = () => {
+    // Perform the search logic here
+    setSearchResults([]); // Clear previous search results
+
+    // For demonstration purposes, let's assume you're ready to navigate to the search results page
+    // Replace this with your actual search logic and data fetching
+    setSearchResults([
+      { id: 1, title: "Result 1", content: "Lorem ipsum 1" },
+      { id: 2, title: "Result 2", content: "Lorem ipsum 2" },
+      // Add more results as needed
+    ]);
+  };
+
   return (
     <div
       className="h-full w-screen min-h-screen font-Futura bg-cover bg-center flex flex-col"
@@ -17,9 +57,14 @@ const SearchResultPage = () => {
             <input
               type="text"
               placeholder="Rechercher un article"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="rounded-l-md px-4 py-2 bg-white w-[100%] md:w-[30vw] focus:outline-none"
             />
-            <button className="bg-gray-800 text-white px-4 py-2 rounded-r-md hover:opacity-100">
+            <button
+              onClick={handleSearch}
+              className="bg-gray-800 text-white px-4 py-2 rounded-r-md hover:opacity-100"
+            >
               Search
             </button>
           </div>
@@ -78,7 +123,7 @@ const SearchResultPage = () => {
 
         {/* Display Search Results Here */}
         <div className="mt-8">
-          <Displayer />
+          <Displayer results={searchResults} />
         </div>
       </div>
     </div>

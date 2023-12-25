@@ -1,5 +1,5 @@
-from django.urls import path, include
-from .views import UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet
+from django.urls import path,include
+from .views import UtilisateursListView, ArticlesListView, FavorisListView,SearchView,LocalUploadViewSet,ExternalUploadViewSet
 from .views import upload_articles,pdf_text_view,analize_text_view
 
 #-----------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ urlpatterns = [
     path('articles/', ArticlesListView.as_view(), name='articles-list'),
     path('favoris/', FavorisListView.as_view(), name='favoris-list'),
     path('search/', SearchView.as_view(), name='article_search'),
-
+    
     #------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #-------------------------#
     #------------------------------------------------------------------------#
@@ -22,20 +22,4 @@ urlpatterns = [
     path('articles_ctrl/ana-text/', analize_text_view, name='ana_text'), #for testing
     path('upload_files/',include(router.urls)),
     
-
-
-
-
-    
-    
-
 ]
-
-
-
-
-
-
-
-
-

@@ -51,6 +51,7 @@ from rest_framework.decorators import action
 from .utils import (  extract_text_from_pdf,
                       download_pdf_from_url,
                       pdf_to_images,
+                      extract_pdf_metadata,
                       extract_text_with_ocr,
                       extract_article_info,  
                    )
@@ -89,6 +90,16 @@ class SearchView(APIView):
 
         # Return the serialized results as JSON
         return Response(serializer.data)
+    
+#///////////////////////////////////////////////////////////////////
+'''
+Lancer une opération d Upload des articles scientifiques à partir d une adresse URL contenant un ensemble 
+d articles en format PDF, ces articles peuvent être en une colonne ou deux colonnes maximum. Le système 
+récupère les fichiers PDF, il extrait le texte, il analyse ces textes pour extraire les informations caractérisant 
+l article scientifique. Les informations extraites sont envoyées dans un index de recherche dans ElasticSearch.
+'''
+#///////////////////////////////////////////////////////////////////
+
 #--------------------------------------------------------------------------------------------------------------   
     #------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #-------------------------#
@@ -98,16 +109,17 @@ class SearchView(APIView):
 #    pdf_text_view : to view the text extracted
 #/////////////////////////////////////////////////
 def pdf_text_view(request):
-    file_path = "C:\\Users\\dell\\Downloads\\105245.pdf"
+    file_path = "C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf"
+
 # way 1
     # extract full text from the pdf
-    extracted_text = extract_text_from_pdf(file_path)
+    extracted_text,f_txt,l_txt = extract_text_from_pdf(file_path)
 # way 2
     # convert pdf pages into images 
     #pdf_images = pdf_to_images(file_path)
     # Extract text using OCR from the pdf's images --> process takes a lot of time it's not recommended
     #extracted_text = extract_text_with_ocr(pdf_images)
-    return render(request, 'pdf_text.html', {'text': extracted_text})
+    return render(request, 'pdf_text.html', {'full_text': extracted_text,'first_pages':f_txt,'last_pages':l_txt})
 #--------------------------------------------------------------------------------------------------------------
 #///////////////////////
 #     
@@ -175,13 +187,14 @@ def upload_articles(request):
 #//////////////////////////////////////////////////////////////
 def analize_text_view(request):
     
-    file_path = "C:\\Users\\dell\\Downloads\\105245.pdf"
+    file_path = "C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf"
 # way 1
+    meta = extract_pdf_metadata(file_path)
     # Extract text from the PDF file
-    pdf_text = extract_text_from_pdf(file_path)
+    pdf_text,f_txt,l_txt = extract_text_from_pdf(file_path)
 
     # Analyze the extracted text
-    result = extract_article_info(pdf_text)
+    result = extract_article_info(pdf_text,f_txt,l_txt,meta)
 # way 2
     # convert pdf pages into images 
     #pdf_images = pdf_to_images(file_path)

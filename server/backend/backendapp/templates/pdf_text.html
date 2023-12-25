@@ -1,21 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Text Extraction</title>
+    <style>
+        .text-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
+    <div class="text-section">
+        <h2>Full Text</h2>
+        <pre>{{ full_text }}</pre>
+    </div>
 
+    <div class="text-section">
+        <h2>Text of the First 5 Pages</h2>
+        <pre>{{ first_pages }}</pre>
+    </div>
 
-
-
-
-
-
-
-
-
-
+    <div class="text-section">
+        <h2>Text of the Last 5 Pages</h2>
+        <pre>{{ last_pages }}</pre>
+    </div>
 </body>
 </html>

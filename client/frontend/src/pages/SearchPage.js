@@ -1,11 +1,12 @@
 import React from 'react';
 
+
 const SearchPage = () => {
   return (
     <div className="h-full w-screen flex-col  items-center flex font-Futura">
       {/* Background Image */}
       <div
-        className="relative w-full justify-center flex flex-col items-center h-[57vh] bg-cover bg-center relative"
+        className=" w-full justify-center flex flex-col items-center h-[57vh] bg-cover bg-center relative"
         style={{
           backgroundImage: 'url(../../../images/bgimg1.svg)',
         }}

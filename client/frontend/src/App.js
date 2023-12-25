@@ -5,6 +5,7 @@ import SearchPage from './pages/SearchPage';
 import DataPage from './pages/DataPage'; // Import the component for the new route
 import UploadPage from './pages/UploadPage';
 import './App.css'
+import SearchResultPage from './pages/SearchResultPage';
 const App = () => {
   return (
     <Router>
@@ -14,11 +15,13 @@ const App = () => {
 
         {/* Route for the Home page */}
         <Route path="/" element={<DataPage />} />
-  
+        
+        {/* Route for the SearchResultPage */}
+        <Route path="/result" element={<SearchResultPage />} />
+
         {/* Route for the Upload page */}
         <Route path="/upload" element={<UploadPage />} />
-
-        {/* Add more routes as needed */}
+        
       </Routes>
     </Router>
   );

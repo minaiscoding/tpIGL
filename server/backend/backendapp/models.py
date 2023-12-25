@@ -22,6 +22,7 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
     Titre = models.CharField(max_length=255)
     Resume = models.TextField()
     auteurs = models.CharField(max_length=255)

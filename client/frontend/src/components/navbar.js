@@ -82,11 +82,11 @@ export default function Navbar() {
                         </>
                     ) : null}
                 </div>
-                <div className="flex flex-row text-center gap-[10px] items-center">
+                <div className="flex relative flex-row text-center gap-[10px] items-center">
                     <div className="w-[36px] h-[36px] rounded-full overflow-hidden">
                         <img className="w-full h-full object-cover bg-[#fff]" alt="" />
                     </div>
-                    <div className="flex flex-row items-center justify-center gap-1 mr-4">
+                    <div className=" flex flex-row items-center justify-center gap-1 mr-4">
                         <p className="text-[#fff] font-Futura">Mon Profile</p>
                         <div className="flex flex-col">
                             {deconect ? (
@@ -94,8 +94,17 @@ export default function Navbar() {
                             ) : (
                                 <FaAngleDown className="text-[#fff] cursor-pointer  top-1 relative" onClick={() => setDeconect(true)} />
                             )}
+                            {deconect && (
+                                <div className=" absolute top-10 right-4 z-50">
+                                    <button className=' text-navBg flex gap-2 justify-center text-lg font-Futura text-center bg-[#fff] rounded-sm mt-1 px-4 py-2 shadow-navBg'>
+                                        <IoIosLogOut className='relative   top-1 ' />
+                                        Déconnecter
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
+
                 </div>
             </div>
             <div className="sm:hidden">
@@ -110,16 +119,16 @@ export default function Navbar() {
                             className="fixed inset-0 bg-[#000] opacity-20 z-50 text-Futura h-screen w-screen"
                             onClick={() => setShownav(false)}
                         ></div>
-                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-[#fff] items-center   align-middle ">
+                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-[#fff] items-center text-lg  align-middle ">
 
-                            <CgClose className=' absolute top-1 right-2 text-[#ffff] z-50 cursor-pointer' onClick={() => setShownav(false)} />
-                            <div className='flex flex-row gap-4 items-center justify-center  py-3 bg-yellow w-full '>
+                            <CgClose className=' absolute top-1 right-6 text-[#ffff] z-50 cursor-pointer' onClick={() => setShownav(false)} />
+                            <div className='flex flex-row gap-4 items-center justify-center  pb-3  pt-6 bg-yellow w-full '>
                                 <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-[#ffff]">
                                     <img className="w-full h-full object-cover" alt="" />
                                 </div>
                                 <p>Amina </p>
                             </div>
-                            <img src={line}  />
+                            <img src={line} />
 
                             {role === 'user' ? (
                                 <>

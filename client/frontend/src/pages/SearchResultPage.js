@@ -62,8 +62,7 @@ const SearchResultPage = () => {
       className="h-full w-screen min-h-screen font-Futura bg-cover bg-center flex flex-col"
       style={{ backgroundImage: "url(../../../images/bgimg2.svg)" }}
     >
-      {/* Navbar Component */}
-      <Navbar />
+     
       <div className="container mx-auto mt-[8vh]  bg-opacity-80 rounded-lg md:px-[10vw] px-[5vw] md:w-80% w-100%">
         <div className="flex flex-col md:flex-row items-start  space-x-4">
           {/* Search Bar */}

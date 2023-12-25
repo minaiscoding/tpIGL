@@ -10,6 +10,8 @@ import ListModerateurs from "./pages/ListModerateurs";
 import DetailsArticle from "./pages/DetailsArticle";
 import './App.css';
 import Favoris from "./pages/Favoris";
+import DataPage from './pages/DataPage'; // Import the component for the new route
+import SearchResultPage from './pages/SearchResultPage';
 
 
 
@@ -33,7 +35,7 @@ const App = () => {
                   <>
                     <Navbar />
                     <Routes>
-                      
+
 
                       {/* Route for the SearchPage */}
                       <Route path="/search" element={<SearchPage />} />
@@ -52,6 +54,9 @@ const App = () => {
 
                       {/* Route for the UplaodArticlePage */}
                       <Route path="/UploadArticle" element={<UploadArticle />} />
+
+                      {/* Route for the SearchResultPage */}
+                      <Route path="/result" element={<SearchResultPage />} />
 
                     </Routes>
                   </>

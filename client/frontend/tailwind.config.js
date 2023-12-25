@@ -17,6 +17,10 @@ module.exports = {
         's': '500px',
       },
       fontFamily: {
+        'Futura' : 'Futura Book BT', 
+        'Futura-bold' : 'Futura bold',
+        'ITC Avant Garde Std Bold' : 'ITC',
+      }
         'Futura': 'Futura Book BT',
         'Futura-bold': 'Futura bold',
         'avantgarde': ['ITC Avant Garde Gothic', 'sans-serif'],

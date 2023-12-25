@@ -4,9 +4,11 @@ import { LuFileText } from 'react-icons/lu';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../logo.svg';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa6';
+import { TfiWidgetized } from "react-icons/tfi";
 import { IoIosLogOut } from 'react-icons/io';
 import { SlMenu } from 'react-icons/sl';
-import line from "../assets/Line_nav.svg"
+import { CgClose } from "react-icons/cg";
+import line from "../assets/Line.png";
 
 export default function Navbar() {
     const [role, setRole] = useState('user');
@@ -57,22 +59,22 @@ export default function Navbar() {
                         </>
                     ) : role === 'admin' ? (
                         <>
-                            <FiSearch
-                                className={`relative  -right-5 top-1 ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
+                            <LuFileText
+                                className={`relative  -right-5 top-1 ${activeClassName === '/UploadArticle' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
-                            <Link to="/search" onClick={() => changeActiveClassName('/search')}>
+                            <Link to="/UploadArticle" onClick={() => changeActiveClassName('/UploadArticle')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/search' ? 'text-yellow' : 'text-[#fff]'}`}
+                                    className={` font-Futura ${activeClassName === '/UploadArticle' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Uplaod Article
                                 </p>
                             </Link>
-                            <LuFileText
-                                className={`relative  -right-5 top-1 ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
+                            <TfiWidgetized
+                                className={`relative  -right-5 top-1 ${activeClassName === '/Moderateurs' ? 'text-yellow' : 'text-[#fff]'}`}
                             />
-                            <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
+                            <Link to="/Moderateurs" onClick={() => changeActiveClassName('/Moderateurs')}>
                                 <p
-                                    className={` font-Futura ${activeClassName === '/mesFavoris' ? 'text-yellow' : 'text-[#fff]'}`}
+                                    className={` font-Futura ${activeClassName === '/Moderateurs' ? 'text-yellow' : 'text-[#fff]'}`}
                                 >
                                     Modérateurs
                                 </p>
@@ -98,27 +100,30 @@ export default function Navbar() {
             </div>
             <div className="sm:hidden">
                 <SlMenu
-                    className="absolute top-4 right-8 text-2xl text-[#fff] z-50 font-bold"
+                    className="absolute top-4 right-8 text-2xl text-[#fff] z-50 font-bold cursor-pointer"
                     onClick={() => setShownav(!shownav)} // Toggle the state on click
                 />
                 {shownav && (
-                    <div>
+                    <div className='relative'>
+
                         <div
-                            className="fixed inset-0 bg-black opacity-20 z-50 text-Futura h-screen w-screen"
+                            className="fixed inset-0 bg-[#000] opacity-20 z-50 text-Futura h-screen w-screen"
                             onClick={() => setShownav(false)}
                         ></div>
-                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-[#fff] items-center  py-8 align-middle ">
-                            <div className='flex flex-row gap-2 items-center mb-4'>
-                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden">
+                        <div className="absolute w-1/2 flex flex-col right-0 top-0 h-screen z-50 bg-[#fff] items-center   align-middle ">
+
+                            <CgClose className=' absolute top-1 right-2 text-[#ffff] z-50 cursor-pointer' onClick={() => setShownav(false)} />
+                            <div className='flex flex-row gap-4 items-center justify-center  py-3 bg-yellow w-full '>
+                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-[#ffff]">
                                     <img className="w-full h-full object-cover" alt="" />
                                 </div>
-                                <p>Mon profile</p>
+                                <p>Amina </p>
                             </div>
-                            <img scr={line}/>
+                            <img src={line}  />
 
                             {role === 'user' ? (
                                 <>
-                                    <div className={`flex flex-row gap-2  py-6 w-full justify-center items-center ${activeClassName === '/search' ? 'bg-yellow' : ''}`} >
+                                    <div className={`flex flex-row gap-2  py-6 w-full justify-center items-center`} >
 
                                         <FiSearch
                                             className={` text-navBg `}
@@ -131,10 +136,10 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img scr={line}/>
-                                    <div className={`flex flex-row gap-2 py-6 w-full justify-center  items-center ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`} >
+                                    <img src={line} />
+                                    <div className={`flex flex-row gap-2 py-6 w-full justify-center  items-center`} >
                                         <LuFileText
-                                            className={`text-navBg ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`}
+                                            className={`text-navBg `}
                                         />
                                         <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
                                             <p
@@ -144,14 +149,14 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img scr={line}/>
+                                    <img src={line} />
 
                                 </>
                             ) : role === 'admin' ? (
                                 <>
-                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  ${activeClassName === '/search' ? 'bg-yellow' : ''}`} >
+                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  `} >
 
-                                        <FiSearch
+                                        <LuFileText
                                             className={` text-navBg `}
                                         />
                                         <Link to="/search" onClick={() => changeActiveClassName('/search')}>
@@ -162,11 +167,11 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img scr={line}/>
+                                    <img src={line} />
 
-                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  ${activeClassName === '/mesFavoris' ? 'bg-yellow' : ''}`} >
+                                    <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center `} >
 
-                                        <LuFileText
+                                        <TfiWidgetized
                                             className={` text-navBg `}
                                         />
                                         <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
@@ -177,11 +182,11 @@ export default function Navbar() {
                                             </p>
                                         </Link>
                                     </div>
-                                    <img scr={line}/>
+                                    <img src={line} />
 
                                 </>
                             ) : null}
-                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center `} >
+                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  cursor-pointer`} >
 
                                 <IoIosLogOut
                                     className={` text-navBg `}

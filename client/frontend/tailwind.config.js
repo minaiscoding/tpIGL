@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
 
   theme: {
@@ -37,6 +38,7 @@ module.exports = {
       "purple-3OO": "#bdbdec",
       white: "#FFFFFF",
       "gray-800": "#1E1E1E",
+
     },
   },
   plugins: [],

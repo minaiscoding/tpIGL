@@ -16,7 +16,7 @@ const App = () => {
         <Route path="/" element={<DataPage />} />
 
         {/* Route for the favorie page */}
-        <Route path="/f" element={<FavoriePage />} />
+        <Route path="/favorie" element={<Fa />} />
         
         {/* Add more routes as needed */}
       </Routes>

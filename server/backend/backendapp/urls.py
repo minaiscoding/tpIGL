@@ -1,6 +1,6 @@
 from django.urls import path,include
 from .views import UtilisateursListView, ArticlesListView, FavorisListView,SearchView,LocalUploadViewSet,ExternalUploadViewSet
-from .views import upload_articles,pdf_text_view,analize_text_view
+from .views import pdf_text_view,analize_text_view,scientific_pdf_view
 
 #-----------------------------------------------------------------------------------------------
 from rest_framework.routers import DefaultRouter
@@ -17,9 +17,9 @@ urlpatterns = [
     #------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #-------------------------#
     #------------------------------------------------------------------------#
-    path('upload_articles/', upload_articles, name='upload_articles'),
     path('articles_ctrl/pdf-text/', pdf_text_view, name='pdf_text'), #tested with ocr and with fitz
     path('articles_ctrl/ana-text/', analize_text_view, name='ana_text'), #for testing
+    path('articles_ctrl/sci_art/', scientific_pdf_view, name='sci_art'), #for testing
     path('upload_files/',include(router.urls)),
     
 ]

@@ -7,8 +7,7 @@ class UtilisateursSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ArticlesSerializer(serializers.ModelSerializer):
-    pdf_File = serializers.FileField()
-    URL_Pdf = serializers.URLField()
+    
     class Meta:
         model = Articles
         fields = ('pdf_File','URL_Pdf','Titre','Resume','date','Institution','RefBib')

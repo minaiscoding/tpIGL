@@ -1,3 +1,4 @@
+import json
 from rest_framework import generics
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer
@@ -53,7 +54,9 @@ from .utils import (  extract_text_from_pdf,
                       pdf_to_images,
                       extract_pdf_metadata,
                       extract_text_with_ocr,
-                      extract_article_info,  
+                      is_valid_scientific_pdf,
+                      extract_article_info, 
+                      extract_text_from_pdf_url, 
                    )
 #--------------------------------------------------------------------------------------------------------------
 
@@ -105,96 +108,67 @@ l article scientifique. Les informations extraites sont envoyées dans un index 
     #----------------------# ArticlesControl Views #-------------------------#
     #------------------------------------------------------------------------#   
 #--------------------------------------------------------------------------------------------------------------
+#///////////////////////
+# scientific_pdf_view
+#///////////////////////
+
+def scientific_pdf_view(request):
+    # Call the test_scientific_pdf function to get the validation result
+    #url='C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf'
+    url='C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf'
+    is_valid = is_valid_scientific_pdf(url)
+
+    # Render the template with the context data
+    return render(request, 'test_scientific_pdf.html', {'is_valid': is_valid})
 #/////////////////////////////////////////////////
 #    pdf_text_view : to view the text extracted
 #/////////////////////////////////////////////////
 def pdf_text_view(request):
-    file_path = "C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf"
+    file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf"
+
+    #url ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9721302"
+    
+    #if url:
 
 # way 1
     # extract full text from the pdf
+    #extracted_text,f_txt,l_txt = extract_text_from_pdf_url(url)
     extracted_text,f_txt,l_txt = extract_text_from_pdf(file_path)
+    #else:
+    #print("Failed to download PDF from the provided URL.")
+    #   extracted_text="null"
+    #   f_txt="null"
+    #   l_txt ="null"
+
 # way 2
     # convert pdf pages into images 
     #pdf_images = pdf_to_images(file_path)
     # Extract text using OCR from the pdf's images --> process takes a lot of time it's not recommended
     #extracted_text = extract_text_with_ocr(pdf_images)
     return render(request, 'pdf_text.html', {'full_text': extracted_text,'first_pages':f_txt,'last_pages':l_txt})
-#--------------------------------------------------------------------------------------------------------------
-#///////////////////////
-#     
-#///////////////////////
-@api_view(['POST'])
-def upload_articles(request):
-    """
-    Endpoint API pour recevoir l’adresse URL des articles PDF ou des fichiers PDF locaux.
-
-    Args:
-        request: La requête HTTP entrante.
-
-    Returns:
-        Une réponse HTTP avec le statut 200 OK si l’opération d’Upload a réussi, ou le statut 400 Bad Request si l’opération a échoué.
-    """
-
-    # Récupération de la liste des fichiers PDF.
-    files = request.FILES.getlist("files")
-
-    # Vérification de la validité de la liste des fichiers PDF.
-    if not files:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    # Récupération des fichiers PDF à partir de la liste des fichiers PDF.
-    articles = []
-    for file in files:
-        with open(file, "rb") as f:
-            articles.append(PyPDF2.PdfFileReader(f).getPage(0).extractText())
-
-    # Analyser les textes des articles pour extraire les informations caractérisant l’article scientifique.
-    information_articles = []
-    for article in articles:
-        # Extraction du titre de l’article.
-        title = nltk.sent_tokenize(article)[0]
-
-        # Extraction des auteurs de l’article.
-        authors = nltk.word_tokenize(article)[1:]
-
-        # Extraction du journal dans lequel l’article a été publié.
-        journal = nltk.sent_tokenize(article)[2]
-
-        # Extraction de la date de publication de l’article.
-        date = nltk.sent_tokenize(article)[3]
-
-        # Extraction du résumé de l’article.
-        abstract = article[len(title) + len(authors) + len(journal) + len(date) :]
-
-        information_articles.append({
-            "title": title,
-            "authors": authors,
-            "journal": journal,
-            "date": date,
-            "abstract": abstract,
-        })
-
-    # Envoyer les informations extraites dans un index de recherche dans ElasticSearch.
-    #es = Elasticsearch()
-    #for information_article in information_articles:
-        #es.index(index="articles", doc_type="article", body=information_article)
-
-    return Response(status=status.HTTP_200_OK)
+#-------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 #//////////////////////////////////////////////////////////////
 #   analize_text_view to view the extracted info of the article  
 #//////////////////////////////////////////////////////////////
+
 def analize_text_view(request):
-    
-    file_path = "C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf"
+
+    file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf"
+    #url ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9721302"
+
 # way 1
-    meta = extract_pdf_metadata(file_path)
+    #if url:
+
+    #meta = extract_pdf_metadata(url)
     # Extract text from the PDF file
+    #pdf_text,f_txt,l_txt = extract_text_from_pdf_url(url)
     pdf_text,f_txt,l_txt = extract_text_from_pdf(file_path)
 
     # Analyze the extracted text
-    result = extract_article_info(pdf_text,f_txt,l_txt,meta)
+    result = extract_article_info(pdf_text,f_txt,l_txt)
+    #else:
+    #print("Failed to download PDF from the provided URL.")
 # way 2
     # convert pdf pages into images 
     #pdf_images = pdf_to_images(file_path)
@@ -207,102 +181,131 @@ def analize_text_view(request):
 
 
 #--------------------------------------------------------
-
+from django.core.files.storage import default_storage
 class LocalUploadViewSet(viewsets.ModelViewSet):
     queryset = Articles.objects.all()
     serializer_class = ArticlesSerializer
 
     @action(detail=False, methods=['POST'])
     def upload_files(self, request):
-        uploaded_files = request.FILES.getlist('file')
+        uploaded_files = request.FILES.getlist('pdf_file')
 
-        results = []
         if not uploaded_files:
-            return Response({'error': 'files are required'}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'error': 'Files are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        response_data = []
         for uploaded_file in uploaded_files:
-            if not uploaded_file.path.endswith('.pdf'):
+            if not uploaded_file.name.lower().endswith('.pdf'):
                 return Response({'error': 'Only PDF files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Construct the file path using the uploaded file name
+            path = default_storage.save(f'/article_pdfs/{uploaded_file.name}', uploaded_file)
+            
+            # Check if the uploaded PDF is a valid scientific article
+            is_valid = is_valid_scientific_pdf(path)
+            
+            if not is_valid:
+                # Handle the case where the PDF is not valid
+                return Response({'error': 'Invalid scientific PDF.'}, status=status.HTTP_400_BAD_REQUEST)
+            
             # Extract text from the uploaded PDF
-            pdf_text = extract_text_from_pdf(uploaded_file)
-            print(pdf_text)
+            pdf_text,f_txt,l_txt = extract_text_from_pdf(path)
+            
 
             # Perform analysis on pdf_text
-            analysis_result = extract_article_info(pdf_text)
-            print(analysis_result)
-
-            # Generate a tuple for each article (title, date, analysis result)
+            analysis_result = extract_article_info(pdf_text,f_txt,l_txt)
+            
+ 
             article_data = {
-                'title': request.data.get('title', ''),
-                'date': request.data.get('date', ''),
-                'analysis_result': analysis_result,
+                'Titre': analysis_result.get('title', ''),
+                'date': analysis_result.get('date', ''),
+                'auteurs':analysis_result.get('authors', ''),
+                'resume':analysis_result.get('abstract', ''),
+                'Institution':analysis_result.get('institutions', ''),
+                'MotsCles':analysis_result.get('keywords', ''),
+                'RefBib':analysis_result.get('references', ''),
+                'Text_integral': pdf_text,
+                #'analyse': json.dumps(analysis_result),            
             }
-
-            print(article_data)
-
-            results.append(article_data)
-
-            print(results)
-
-        # Create Article instances for local files
-        for result in results:
+            print(article_data) 
+            # Create Article instances 
             article = Articles.objects.create(
-                title=result['title'],
-                date=result['date'],
+                Titre=article_data['Titre'],
+                date=article_data['date'],
+                #auteurs=article_data['auteurs'],
+                Resume=article_data['resume'],
+                Institution=article_data['Institution'],
+                #MotsCles=article_data['MotsCles'],
+                RefBib=article_data['RefBib'],      
             )
-
-            # Convert local file into an external URL (placeholder for now)
-            article.URL_Pdf = f'/media/{uploaded_file.name}'
-            print(article.URL_Pdf)
             article.save()
+
+        # Get the actual filesystem path where the file is stored
+        actual_path = default_storage.path(path)
+
+        # Add file information to the response data
+        response_data.append({
+                'file_name': uploaded_file.name,
+                'file_path': actual_path,
+                'pdf_text': pdf_text,
+                # Add other information you want to include
+            })
 
         # Elasticsearch Indexing (placeholder for now)
         # (Send article data to Elasticsearch for indexing)
-        # Envoyer les informations extraites dans un index de recherche dans ElasticSearch.
-        #es = Elasticsearch()
-        #for information_article in information_articles:
-        #es.index(index="articles", doc_type="article", body=information_article)
+        # es = Elasticsearch()
+        # for information_article in information_articles:
+        #     es.index(index="articles", doc_type="article", body=information_article)
 
-        return Response(results, status=status.HTTP_201_CREATED)
+        return Response({'files': response_data, 'message': 'Files uploaded and processed successfully.'}, status=status.HTTP_200_OK)
+    
+
     
 #-----------------------------------------------------------------------------------
     
 class ExternalUploadViewSet(viewsets.ModelViewSet):
     queryset = Articles.objects.all()
     serializer_class = ArticlesSerializer
+
     @action(detail=False, methods=['POST'])
     def upload_url(self, request):
         url = request.data.get('URL Pdf')
-
         if not url:
             return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
-
         # Download the file from the URL
-        articles_data = download_pdf_from_url(url)
+        article = download_pdf_from_url(url)
 
-        if articles_data:
-            results = []
 
-            for article_data in articles_data:
+        if article:  
                 # Extract text from the downloaded PDF
-                pdf_text = extract_text_from_pdf(article_data['pdf_File'])
+                pdf_text,f_txt,l_txt = extract_text_from_pdf(article)
 
                 # Perform analysis on pdf_text
-                analysis_result = extract_article_info(pdf_text)
+                analysis_result = extract_article_info(pdf_text,f_txt,l_txt)
 
-                # Create an instance of Article (without saving it)
-                article_instance = Articles(
-                    title=article_data['title'],
-                    date=article_data['date'],
-                    external_url=url,
-                )
+                # Generate a tuple for each article
+                article_data = {
+                'Titre': analysis_result.get('title', ''),
+                'date': analysis_result.get('date', ''),
+                'auteurs':analysis_result.get('authors', ''),
+                'resume':analysis_result.get('abstract', ''),
+                'Institution':analysis_result.get('institutions', ''),
+                'MotsCles':analysis_result.get('keywords', ''),
+                'RefBib':analysis_result.get('references', ''),
+                'Text_integral': pdf_text,
+                #'analyse': json.dumps(analysis_result),            
+            }
+                print(article_data)
 
-                results.append({
-                    'title': article_data['title'],
-                    'date': article_data['date'],
-                    'analysis_result': analysis_result,
-                })
+                # Create Article instances
+                article = Articles.objects.create(
+                       Titre=article_data['Titre'],
+                       date=article_data['date'],
+                       #auteurs=article_data['auteurs'],
+                       Resume=article_data['resume'],
+                       Institution=article_data['Institution'],
+                       #MotsCles=article_data['MotsCles'],
+                       RefBib=article_data['RefBib'],           
+            )
 
             # Elasticsearch Indexing (placeholder for now)
             # (Send article data to Elasticsearch for indexing)
@@ -310,7 +313,7 @@ class ExternalUploadViewSet(viewsets.ModelViewSet):
             #es = Elasticsearch()
             #for information_article in information_articles:
             #es.index(index="articles", doc_type="article", body=information_article)
-
-            return Response(results, status=status.HTTP_201_CREATED)
+                print(analysis_result)
+                return Response(analysis_result,status=status.HTTP_201_CREATED)
         else:
             return Response({'error': 'Failed to download PDF from the URL'}, status=status.HTTP_400_BAD_REQUEST)

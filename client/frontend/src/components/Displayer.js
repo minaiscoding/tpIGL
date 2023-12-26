@@ -1,6 +1,13 @@
 // Displayer.js
 import React from "react";
 
+/**
+ * Functional component to display results.
+ *
+ * @param {Object} props - React component props.
+ * @param {Array} props.results - Array of result objects to be displayed.
+ * @returns {JSX.Element} - Rendered component.
+ */
 const Displayer = ({ results }) => {
   return (
     <div>
@@ -11,7 +18,10 @@ const Displayer = ({ results }) => {
         >
           <h2>{result.Titre}</h2>
           <p>{result.Resume}</p>
-          {/* Add more content as needed */}
+          {/* 
+            Additional content can be added here.
+            For example, you can include more information from the 'result' object.
+          */}
         </div>
       ))}
     </div>

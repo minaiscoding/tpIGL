@@ -1,21 +1,26 @@
+// SearchPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Functional component for the search page.
+ *
+ * @returns {JSX.Element} - Rendered component.
+ */
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  /**
+   * navigate to the search result and preform the search there
+   */
   const handleSearch = () => {
-    // Perform the search logic here
-
-    // For demonstration purposes, let's assume you're ready to navigate to the search results page
-    // Replace this with your actual search logic and data fetching
-
     // Navigate to the search results page with the search query as a parameter
     navigate(`/result?q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
-    <div className="h-full w-screen flex-col  items-center flex font-Futura">
+    <div className="h-full w-screen flex-col items-center flex font-Futura">
       {/* Background Image */}
       <div
         className="relative w-full justify-center flex flex-col items-center lg:h-[57vh] h-[40vh] bg-cover bg-center relative"
@@ -27,12 +32,13 @@ const SearchPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#3635CE] to-[#F6B237] opacity-80 z-10"></div>
 
         {/* Content for the top half */}
-        <div className="text-white md:text-[3.2vw] text-4xl z-20 font-ITC ">
+        <div className="text-white md:text-[3.2vw] text-4xl z-20 font-ITC font-black ">
           <p className="mb-0">Découvrez l'excellence</p>
           <p className="mt-0">scientifique en un clic</p>
         </div>
 
         <div className="absolute lg:translate-y-[17vh] translate-y-[12vh]  flex items-center justify-center z-20 lg:w-[50vw] w-[80vw]">
+          {/* Search Input and Button */}
           <input
             type="text"
             placeholder="Rechercher un article"
@@ -53,6 +59,7 @@ const SearchPage = () => {
       <div className="flex flex-col items-center justify-center gap-2 h-full py-[2%] w-full">
         {/* Lines next to the text */}
         <div className="flex items-center gap-4">
+          {/* Line SVG */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="37%"
@@ -60,16 +67,19 @@ const SearchPage = () => {
             viewBox="0 0 411 6"
             fill="none"
           >
+            {/* Line Path */}
             <path
               opacity="0.5"
               d="M0.333333 3C0.333333 4.47276 1.52724 5.66667 3 5.66667C4.47276 5.66667 5.66667 4.47276 5.66667 3C5.66667 1.52724 4.47276 0.333333 3 0.333333C1.52724 0.333333 0.333333 1.52724 0.333333 3ZM405.347 3C405.347 4.47276 406.541 5.66667 408.013 5.66667C409.486 5.66667 410.68 4.47276 410.68 3C410.68 1.52724 409.486 0.333333 408.013 0.333333C406.541 0.333333 405.347 1.52724 405.347 3ZM3 3.5H408.013V2.5H3V3.5Z"
               fill="#1E1E1E"
             />
           </svg>
+          {/* Text */}
           <p className="text-center lg:text-xl text-xl font-bold mb-4">
             Que pouvez-vous faire avec{" "}
             <span className="font-Futura-bold text-[#3635CE]">articlo</span>
           </p>
+          {/* Line SVG */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="37%"
@@ -77,6 +87,7 @@ const SearchPage = () => {
             viewBox="0 0 411 6"
             fill="none"
           >
+            {/* Line Path */}
             <path
               opacity="0.5"
               d="M0.333333 3C0.333333 4.47276 1.52724 5.66667 3 5.66667C4.47276 5.66667 5.66667 4.47276 5.66667 3C5.66667 1.52724 4.47276 0.333333 3 0.333333C1.52724 0.333333 0.333333 1.52724 0.333333 3ZM405.347 3C405.347 4.47276 406.541 5.66667 408.013 5.66667C409.486 5.66667 410.68 4.47276 410.68 3C410.68 1.52724 409.486 0.333333 408.013 0.333333C406.541 0.333333 405.347 1.52724 405.347 3ZM3 3.5H408.013V2.5H3V3.5Z"
@@ -87,16 +98,19 @@ const SearchPage = () => {
 
         {/* Images Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-20 items-center justify-center h-full">
+          {/* Product Image 1 */}
           <img
             className="w-full h-full object-cover items-center mx-auto md:w-[80%] md:h-[80%]"
             src="../../../images/offer2.svg"
             alt="Product 1"
           />
+          {/* Product Image 2 */}
           <img
             className="w-full h-full object-cover items-center"
             src="../../../images/offer1.svg"
             alt="Product 2"
           />
+          {/* Product Image 3 */}
           <img
             className="w-full h-full object-cover items-center mx-auto md:w-[80%] md:h-[80%]"
             src="../../../images/offer3.svg"

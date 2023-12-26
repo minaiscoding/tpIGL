@@ -24,8 +24,8 @@ class ArticlesListView(APIView):
         response = search.execute()
 
         # Extract relevant information from search hits
-        hits = [ hit for hit in response.hits]
-        print( response.hits[0].id)
+        hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
+        
 
         # Serialize the search results using your existing serializer
         serializer = ArticlesSerializer(data=hits, many=True)
@@ -40,6 +40,8 @@ class FavorisListView(generics.ListAPIView):
     serializer_class = FavorisSerializer
 
 
+from django.http import JsonResponse
+
 class SearchView(APIView):
     renderer_classes = [JSONRenderer]
 
@@ -47,22 +49,40 @@ class SearchView(APIView):
         # Get the search query from the request parameters
         query = request.GET.get('q', '')
 
-        # Perform the Elasticsearch search
-        search = Search(index='articles').query('match', Titre=query)
-        response = search.execute()
+        # Get start and end dates from the request parameters
+        start_date = request.GET.get('start_date', '')
+        end_date = request.GET.get('end_date', '')
 
-        # Extract relevant information from search hits
-        hits = [{"id": "tested", **hit.to_dict()} for hit in response.hits]
+        # Get the selected filter type from the request parameters
+        filter_type = request.GET.get('filter_type', 'Titre')
 
-        # Serialize the search results using your existing serializer
-        serializer = ArticlesSerializer(data=hits, many=True)
-        serializer.is_valid()
+        # Initialize the date range filter as an empty list
+        date_range_filter = []
 
-        # Return the serialized results as JSON
-        return Response(serializer.data)
+        # Check if start_date and end_date are not empty before including them in the filter
+        if start_date and end_date:
+            date_range_filter = [{'range': {'date': {'gte': start_date, 'lte': end_date}}}]
 
+        # Perform the Elasticsearch search with dynamic query and date range filter
+        search = Search(index='articles').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
 
-    
+        try:
+            response = search.execute()
+
+            # Extract relevant information from search hits
+            hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
+
+            # Serialize the search results using your existing serializer
+            serializer = ArticlesSerializer(data=hits, many=True)
+            serializer.is_valid()
+
+            # Return the serialized results as JSON
+            return Response(serializer.data)
+
+        except Exception as e:
+            # Handle exceptions, log them, or return an appropriate error response
+            return JsonResponse({'error': str(e)}, status=500)
+
     
 
 

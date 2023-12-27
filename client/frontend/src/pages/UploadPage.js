@@ -25,7 +25,7 @@ const UploadPage = () => {
 
         // Upload file
         await axios.post(
-          "http://127.0.0.1:8000/api/upload_files/local-upload/",
+          "http://127.0.0.1:8000/api/articles_ctrl/local-upload/",
           formData
         );
 
@@ -35,7 +35,7 @@ const UploadPage = () => {
       // if the URL field is not empty
       if (url) {
         await axios.post(
-          "http://127.0.0.1:8000/api/upload_files/external-upload/",
+          "http://127.0.0.1:8000/api/articles_ctrl/external-upload/",
           { url }
         );
 
@@ -59,14 +59,14 @@ const UploadPage = () => {
   });
 
   const handleDropZoneKeyPress = (event) => {
-    // Check if the key pressed is Enter (key code 13)
+    // Check if the key pressed is Enter
     if (event.key === "Enter") {
       handleUpload();
     }
   };
 
   const handleUrlKeyPress = (event) => {
-    // Check if the key pressed is Enter (key code 13)
+    // Check if the key pressed is Enter
     if (event.key === "Enter") {
       handleUpload();
     }
@@ -79,37 +79,47 @@ const UploadPage = () => {
     >
       {/* Navbar Component */}
       <Navbar />
+
       <div className="h-full w-screen flex flex-col items-center justify-center font-Futura">
+
         <p className="text-3xl flex flex-col items-center justify-center font-Futura-bold pb-8 mt-20">
           Upload article
         </p>
+
       </div>
+
       <div className="items-center justify-center flex flex-col">
+
         {/* Dropzone for file upload */}
         <div
           {...getRootProps()}
           onKeyDown={handleDropZoneKeyPress}
           tabIndex={0}
-          className="w-[80%] px-4 py-2 flex flex-col items-center border-2  border-dashed  border-gray-900  rounded-lg cursor-pointer text-center  ml-2 mr-2 pt-6 pl-6 pb-6 pr-6 bg-gradient-to-b from-purple-600 to-purple-600 relative"
-        >
+          className="w-[80%] px-4 py-2 flex flex-col items-center border-2 border-dashed border-gray-900 rounded-lg cursor-pointer text-center ml-2 mr-2 pt-6 pl-6 pb-6 pr-6 bg-gradient-to-b from-purple-600 to-purple-600 relative transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300"
+          >
           <input {...getInputProps()} />
           <img className="w-20 mb-5 mt-5" src={add} alt="upload_file_icon" />
 
           {isDragActive ? (
+
             <div>
               <p className="pb-8 text-2xl font-Futura">Dropez vos fichiers ici...</p>
             </div>
+
           ) : (
+
             <div>
               <p className="pb-8 text-2xl font-Futura">
                 Déposez votre fichier ici ou<br />parcourez pour le sélectionner
               </p>
             </div>
+
           )}
+
         </div>
 
         <div
-          className="w-[80%]  text-black  px-4 py-2 mt-10 flex flex-col border  border-black rounded-md  relative bg-gradient-to-b from-purple-600 to-purple-600 mb-32 sm:mb-40 md:mb-48 lg:mb-56 xl:mb-64"
+          className="w-[80%]  text-black  px-4 py-2 mt-10 flex flex-col border  border-black rounded-md  relative bg-gradient-to-b from-purple-600 to-purple-600 mb-32 sm:mb-40 md:mb-48 lg:mb-56 xl:mb-64  transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300"
         >
           <input
             type="url"
@@ -124,8 +134,11 @@ const UploadPage = () => {
             alt="Link Icon"
             className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6"
           />
+
         </div>
+
       </div>
+
     </div>
   );
 };

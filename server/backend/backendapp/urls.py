@@ -1,12 +1,9 @@
 from django.urls import path,include
 from .views import UtilisateursListView, ArticlesListView, FavorisListView,SearchView,LocalUploadViewSet,ExternalUploadViewSet
-from .views import pdf_text_view,analize_text_view,scientific_pdf_view
-
 #-----------------------------------------------------------------------------------------------
-from rest_framework.routers import DefaultRouter
-router = DefaultRouter()
-router.register(r'local-upload', LocalUploadViewSet, basename='local-upload')
-router.register(r'external-upload', ExternalUploadViewSet, basename='external-upload')
+from .views import pdf_text_view,analize_text_view,scientific_pdf_view,pdf_metadata_view
+#-----------------------------------------------------------------------------------------------
+
 
 urlpatterns = [
     path('utilisateurs/', UtilisateursListView.as_view(), name='utilisateurs-list'),
@@ -20,6 +17,10 @@ urlpatterns = [
     path('articles_ctrl/pdf-text/', pdf_text_view, name='pdf_text'), #tested with ocr and with fitz
     path('articles_ctrl/ana-text/', analize_text_view, name='ana_text'), #for testing
     path('articles_ctrl/sci_art/', scientific_pdf_view, name='sci_art'), #for testing
-    path('upload_files/',include(router.urls)),
+    path('articles_ctrl/meta_data/', pdf_metadata_view, name='meta_data'), #for testing
+
+    path('articles_ctrl/local-upload/', LocalUploadViewSet.as_view(), name='local-upload'), 
+    path('articles_ctrl/external-upload/', ExternalUploadViewSet.as_view(), name='external-upload'),
+    
     
 ]

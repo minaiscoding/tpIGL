@@ -5,14 +5,6 @@
 </head>
 <body>
     <h2>Test Scientific PDF</h2>
-
-  <!--  <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="pdf_file">Upload PDF:</label>
-        <input type="file" name="pdf_file" accept=".pdf">
-        <button type="submit">Test</button>
-    </form>
--->
     {% if is_valid is not None %}
         {% if is_valid %}
             <p style="color: green;">The PDF is valid according to the scientific criteria.</p>

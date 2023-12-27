@@ -17,6 +17,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -44,10 +46,7 @@ INSTALLED_APPS = [
     'django_elasticsearch_dsl',
     'django_elasticsearch_dsl_drf',
     'PyPDF2',
-    
-    
-    
-    
+      
 ]
 
 
@@ -140,9 +139,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+#---------------------------------------------------
+# Media files (uploads) will be stored in this directory
 MEDIA_ROOT = BASE_DIR / 'uploaded_media'
 MEDIA_URL = '/uploaded_media/'
 
+
+#---------------------------------------------------
 
 
 

@@ -1,65 +1,50 @@
-import json
-from rest_framework import generics
+import uuid
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from django.core.files.base import ContentFile
+from django.shortcuts import render
+from django.core.files.storage import default_storage
+#--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer
-from rest_framework import status
+#--------------------------------------------------------------------------------
+from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import action,api_view
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+#--------------------------------------------------------------------------------
 import fitz  # PyMuPDF
 from PyPDF2 import PdfReader
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from elasticsearch_dsl import Search
-from rest_framework.renderers import JSONRenderer
-
-#------------------------------------------------------------
-from django.views.decorators.http import require_POST
-from django.http import HttpResponse
+import json
 import requests
 import PyPDF2
 import nltk
-
+import os
+#--------------------------------------------------------------------------------
+from elasticsearch_dsl import Search
 from elasticsearch import Elasticsearch
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view
-
-
-import os
-import requests
-
-from django.core.files.base import ContentFile
-from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
-from rest_framework.response import Response
-#--------------------------------------------------------------------------------------------------------------
-from rest_framework.decorators import api_view
-from rest_framework import generics,status,viewsets
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-#--------------------------------------------------------------------------------------------------------------
-from .models import Articles
-from .serializers import  ArticlesSerializer
-#--------------------------------------------------------------------------------------------------------------
-from django.shortcuts import render
-#---------------------------------------------------------------------------------
-import os
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
 #------------------------------------------------------------------
 
 from .utils import (  extract_text_from_pdf,
                       download_pdf_from_url,
                       pdf_to_images,
+                      parse_metadata_date,
                       extract_pdf_metadata,
                       extract_text_with_ocr,
+                      parse_and_validate_date,
                       is_valid_scientific_pdf,
                       extract_article_info, 
-                      extract_text_from_pdf_url, 
+                      download_pdf_from_url, 
+                      send_to_elasticsearch,            
                    )
 #--------------------------------------------------------------------------------------------------------------
 
+#                               views.py --> api endpoints
+
+#--------------------------------------------------------------------------------------------------------------
 class UtilisateursListView(generics.ListAPIView):
     queryset = Utilisateurs.objects.all()
     serializer_class = UtilisateursSerializer
@@ -71,7 +56,6 @@ class ArticlesListView(generics.ListAPIView):
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
     serializer_class = FavorisSerializer
-
 
 class SearchView(APIView):
     renderer_classes = [JSONRenderer]
@@ -103,217 +87,325 @@ l article scientifique. Les informations extraites sont envoyées dans un index 
 '''
 #///////////////////////////////////////////////////////////////////
 
-#--------------------------------------------------------------------------------------------------------------   
+#--------------------------------------------------------------------------------------------------------------#  
+ 
     #------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #-------------------------#
-    #------------------------------------------------------------------------#   
-#--------------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------#
+article_test = "06"
+#--------------------------------------------------------------------------------------------------------------#
+#///////////////////////
+# pdf_metadata_view
+#///////////////////////
+def pdf_metadata_view(request):
+    # Assuming you have the article_test variable defined
+
+    # Extract metadata from the PDF file
+    pdf_file_path = f"C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_"+article_test+".pdf"
+    with open(pdf_file_path, 'rb') as file:
+        metadata = extract_pdf_metadata(file)
+        
+        date_str = metadata.get("CreationDate", "")
+
+        date_meta = parse_metadata_date(date_str)
+        # Generate metadata dictionary
+        metadata_dict = {
+        # Extracted PDF metadata keys
+        "Title": metadata.get("Title", ""),
+        "Authors": metadata.get("Author", ""),  # Check the actual key used in metadata
+        "Keywords": metadata.get("Subject", ""),
+        "Date": date_meta
+        }
+
+    # Pass the metadata dictionary to the template
+    return render(request, 'pdf_metadata_template.html', {'result': metadata_dict})
+#--------------------------------------------------------------------------------------------------------------#
 #///////////////////////
 # scientific_pdf_view
 #///////////////////////
 
 def scientific_pdf_view(request):
-    # Call the test_scientific_pdf function to get the validation result
-    #url='C:\\Users\\dell\\Downloads\\articles_sci\\ARTICLE7.pdf'
-    url='C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf'
-    is_valid = is_valid_scientific_pdf(url)
+    """
+    View function to check if a given PDF file meets the criteria for a scientific article.
+
+    :param HttpRequest request: The request object.
+
+    :return: Rendered template with the validation result.
+    """
+    # Provide the path to the PDF file to be checked
+    # In a real-world scenario, this could be obtained from the user input or other sources
+    pdf_file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_"+article_test+".pdf"
+    with open(pdf_file_path, 'rb') as file:
+       # Call the is_valid_scientific_pdf function to get the validation result
+       is_valid = is_valid_scientific_pdf(file)
 
     # Render the template with the context data
     return render(request, 'test_scientific_pdf.html', {'is_valid': is_valid})
+#--------------------------------------------------------------------------------------------------------------#
 #/////////////////////////////////////////////////
-#    pdf_text_view : to view the text extracted
+#    pdf_text_view 
 #/////////////////////////////////////////////////
 def pdf_text_view(request):
-    file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf"
+    """
+    View function to display the extracted text from a PDF file.
 
+    :param HttpRequest request: The request object.
+
+    :return: Rendered template with the extracted text.
+    """
+    # Provide the path to the PDF file to be processed
     #url ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9721302"
-    
     #if url:
+    pdf_file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_"+article_test+".pdf"
 
-# way 1
-    # extract full text from the pdf
-    #extracted_text,f_txt,l_txt = extract_text_from_pdf_url(url)
-    extracted_text,f_txt,l_txt = extract_text_from_pdf(file_path)
-    #else:
-    #print("Failed to download PDF from the provided URL.")
-    #   extracted_text="null"
-    #   f_txt="null"
-    #   l_txt ="null"
-
-# way 2
+# ******************* way 1 ***********************
+    # Extract text from the PDF file
+    with open(pdf_file_path, 'rb') as file:
+        full_text, first_pages_text, last_pages_text = extract_text_from_pdf(file) 
+# ******************* way 2 **********************
     # convert pdf pages into images 
-    #pdf_images = pdf_to_images(file_path)
+    # pdf_images = pdf_to_images(file_path)
     # Extract text using OCR from the pdf's images --> process takes a lot of time it's not recommended
     #extracted_text = extract_text_with_ocr(pdf_images)
-    return render(request, 'pdf_text.html', {'full_text': extracted_text,'first_pages':f_txt,'last_pages':l_txt})
-#-------------------------------------------------------------------------------------------------------------
+
+    # Render the template with the context data
+
+    return render(request, 'pdf_text.html', {'full_text': full_text, 'first_pages': first_pages_text, 'last_pages': last_pages_text})
+
 #--------------------------------------------------------------------------------
 #//////////////////////////////////////////////////////////////
 #   analize_text_view to view the extracted info of the article  
 #//////////////////////////////////////////////////////////////
-
 def analize_text_view(request):
+    """
+    View function to analyze the text extracted from a PDF file.
 
-    file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_05.pdf"
+    :param HttpRequest request: The request object.
+
+    :return: Rendered template with the analysis result.
+    """
+    
+
     #url ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9721302"
-
-# way 1
     #if url:
 
-    #meta = extract_pdf_metadata(url)
+    # Provide the path to the PDF file to be processed
+    pdf_file_path = "C:\\Users\\dell\\Downloads\\Articles\\EchantillonsArticles\\Article_"+article_test+".pdf"
+    
+# ***************** way 1 ********************
     # Extract text from the PDF file
-    #pdf_text,f_txt,l_txt = extract_text_from_pdf_url(url)
-    pdf_text,f_txt,l_txt = extract_text_from_pdf(file_path)
+    with open(pdf_file_path, 'rb') as file:
+        # Extract text from the PDF file
+        pdf_text, first_pages_text, last_pages_text = extract_text_from_pdf(file)
 
-    # Analyze the extracted text
-    result = extract_article_info(pdf_text,f_txt,l_txt)
-    #else:
-    #print("Failed to download PDF from the provided URL.")
-# way 2
+        # Analyze the extracted text
+        result = extract_article_info(pdf_text, first_pages_text, last_pages_text)
+
+#  *************** way 2 ********************
     # convert pdf pages into images 
     #pdf_images = pdf_to_images(file_path)
     # Extract text using OCR from the pdf's images --> process takes a lot of time it's not recommended
     #pdf_text = extract_text_with_ocr(pdf_images)
     # Analyze the extracted text
     #result = extract_article_info(pdf_text)
-    # Render the template with the extracted information
-    return render(request, 'ana_text.html', {'result': result,})
+    
 
+    # Render the template with the context data
+    return render(request, 'ana_text.html', {'result': result})
+#--------------------------------------------------------------------------------
+#//////////////////////////////////////////////////////////////
+#     LocalUploadViewSet
+#//////////////////////////////////////////////////////////////   
+class LocalUploadViewSet(APIView):
+    """
+    API endpoint for handling local file uploads and processing.
 
-#--------------------------------------------------------
-from django.core.files.storage import default_storage
-class LocalUploadViewSet(viewsets.ModelViewSet):
-    queryset = Articles.objects.all()
+    This ViewSet provides an endpoint for uploading PDF files, validating them,
+    extracting text, performing analysis, and creating Article instances.
+
+    The endpoint is accessible via a POST request to '/upload_files/'.
+    """
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = ArticlesSerializer
 
-    @action(detail=False, methods=['POST'])
-    def upload_files(self, request):
-        uploaded_files = request.FILES.getlist('pdf_file')
+    def post(self, request, *args, **kwargs):
+        """
+        Endpoint for uploading PDF files, validating them, extracting text,
+        performing analysis, and creating Article instances.
 
-        if not uploaded_files:
-            return Response({'error': 'Files are required.'}, status=status.HTTP_400_BAD_REQUEST)
-        response_data = []
-        for uploaded_file in uploaded_files:
-            if not uploaded_file.name.lower().endswith('.pdf'):
-                return Response({'error': 'Only PDF files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+        :param HttpRequest request: The request object.
 
-            # Construct the file path using the uploaded file name
-            path = default_storage.save(f'/article_pdfs/{uploaded_file.name}', uploaded_file)
-            
+        :return: Response with information about uploaded files and processing result.
+        """
+        # Create a serializer instance with the request data
+        serializer = self.serializer_class(data=request.data)
+
+        # Check if the serializer is valid
+        if serializer.is_valid():
+            # Get the file from the serializer
+            uploaded_file = serializer.validated_data["pdf_File"]
+
+            # URL for the file
+            file_url = f'http://127.0.0.1:8000/uploaded_media/article_pdfs/{uploaded_file.name}'
+
+            # Ensure the file cursor is at the beginning
+            uploaded_file.seek(0)
+
             # Check if the uploaded PDF is a valid scientific article
-            is_valid = is_valid_scientific_pdf(path)
-            
+            is_valid = is_valid_scientific_pdf(uploaded_file)
+
+            # Handle the case where the PDF is not valid
             if not is_valid:
-                # Handle the case where the PDF is not valid
-                return Response({'error': 'Invalid scientific PDF.'}, status=status.HTTP_400_BAD_REQUEST)
-            
+                return Response({'error': 'Invalid scientific PDF.The provided URL does not lead to a valid scientific article.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Ensure the file cursor is at the beginning
+            uploaded_file.seek(0)
+
             # Extract text from the uploaded PDF
-            pdf_text,f_txt,l_txt = extract_text_from_pdf(path)
-            
+            pdf_text, f_txt, l_txt = extract_text_from_pdf(uploaded_file)
 
             # Perform analysis on pdf_text
-            analysis_result = extract_article_info(pdf_text,f_txt,l_txt)
-            
+            analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
  
-            article_data = {
-                'Titre': analysis_result.get('title', ''),
-                'date': analysis_result.get('date', ''),
-                'auteurs':analysis_result.get('authors', ''),
-                'resume':analysis_result.get('abstract', ''),
-                'Institution':analysis_result.get('institutions', ''),
-                'MotsCles':analysis_result.get('keywords', ''),
-                'RefBib':analysis_result.get('references', ''),
-                'Text_integral': pdf_text,
-                #'analyse': json.dumps(analysis_result),            
-            }
-            print(article_data) 
-            # Create Article instances 
+            date_str = analysis_result.get('date', '')
+            date_obj = parse_and_validate_date(date_str)
+            # Create Article instances
             article = Articles.objects.create(
-                Titre=article_data['Titre'],
-                date=article_data['date'],
-                #auteurs=article_data['auteurs'],
-                Resume=article_data['resume'],
-                Institution=article_data['Institution'],
-                #MotsCles=article_data['MotsCles'],
-                RefBib=article_data['RefBib'],      
+                Titre=analysis_result.get('title', ''),
+                date=date_obj,
+                auteurs=analysis_result.get('authors', ''),
+                Resume=analysis_result.get('abstract', ''),
+                Institution=analysis_result.get('institutions', ''),
+                RefBib=analysis_result.get('references', ''),
+                URL_Pdf=file_url,
             )
+
+            # Save the uploaded file along with the article
+            article.pdf_File.save(uploaded_file.name, uploaded_file)
+
             article.save()
 
-        # Get the actual filesystem path where the file is stored
-        actual_path = default_storage.path(path)
+            # Elasticsearch Indexing
+            # (Send article data to Elasticsearch - Uncomment if needed)
+            # send_to_elasticsearch('articles', '_doc', {
+            #     'title': analysis_result.get('title', ''),
+            #     'date': analysis_result.get('date', ''),
+            #     'abstract': analysis_result.get('abstract', ''),
+            #     'institutions': analysis_result.get('institutions', ''),
+            #     'references': analysis_result.get('references', ''),
+            #     'authors': analysis_result.get('authors', ''),
+            #     'pdf_text': pdf_text,
+            # })
 
-        # Add file information to the response data
-        response_data.append({
-                'file_name': uploaded_file.name,
-                'file_path': actual_path,
-                'pdf_text': pdf_text,
-                # Add other information you want to include
-            })
+            return Response({'result': analysis_result, 'message': 'Files uploaded and processed successfully.'}, status=status.HTTP_200_OK)
 
-        # Elasticsearch Indexing (placeholder for now)
-        # (Send article data to Elasticsearch for indexing)
-        # es = Elasticsearch()
-        # for information_article in information_articles:
-        #     es.index(index="articles", doc_type="article", body=information_article)
-
-        return Response({'files': response_data, 'message': 'Files uploaded and processed successfully.'}, status=status.HTTP_200_OK)
+        # Return serializer errors if the serializer is not valid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
+#--------------------------------------------------------------------------------
+#//////////////////////////////////////////////////////////////
+#     ExternalUploadViewSet
+#//////////////////////////////////////////////////////////////
     
+class ExternalUploadViewSet(APIView):
+    """
+    API endpoint for handling external file uploads via URL and processing.
 
-    
-#-----------------------------------------------------------------------------------
-    
-class ExternalUploadViewSet(viewsets.ModelViewSet):
-    queryset = Articles.objects.all()
+    This ViewSet provides an endpoint for uploading PDF files from a URL,
+    downloading them, validating, extracting text, performing analysis,
+    and creating Article instances.
+
+    The endpoint is accessible via a POST request to '/upload_url/'.
+    """
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = ArticlesSerializer
 
-    @action(detail=False, methods=['POST'])
-    def upload_url(self, request):
-        url = request.data.get('URL Pdf')
-        if not url:
-            return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
-        # Download the file from the URL
-        article = download_pdf_from_url(url)
+    def post(self, request, *args, **kwargs):
+        """
+        Endpoint for uploading PDF files from a URL, downloading them,
+        validating, extracting text, performing analysis, and creating Article instances.
 
+        :param HttpRequest request: The request object.
 
-        if article:  
-                # Extract text from the downloaded PDF
-                pdf_text,f_txt,l_txt = extract_text_from_pdf(article)
+        :return: Response with information about the uploaded file and processing result.
+        """
+        # Create a serializer instance with the request data
+        serializer = self.serializer_class(data=request.data)
 
-                # Perform analysis on pdf_text
-                analysis_result = extract_article_info(pdf_text,f_txt,l_txt)
+        # Check if the serializer is valid
+        if serializer.is_valid():
+            # Get the file URL from the serializer
+            url_file = serializer.validated_data["URL_Pdf"]
 
-                # Generate a tuple for each article
-                article_data = {
-                'Titre': analysis_result.get('title', ''),
-                'date': analysis_result.get('date', ''),
-                'auteurs':analysis_result.get('authors', ''),
-                'resume':analysis_result.get('abstract', ''),
-                'Institution':analysis_result.get('institutions', ''),
-                'MotsCles':analysis_result.get('keywords', ''),
-                'RefBib':analysis_result.get('references', ''),
-                'Text_integral': pdf_text,
-                #'analyse': json.dumps(analysis_result),            
-            }
-                print(article_data)
+            # Check if the URL is provided
+            if not url_file:
+                return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Create Article instances
-                article = Articles.objects.create(
-                       Titre=article_data['Titre'],
-                       date=article_data['date'],
-                       #auteurs=article_data['auteurs'],
-                       Resume=article_data['resume'],
-                       Institution=article_data['Institution'],
-                       #MotsCles=article_data['MotsCles'],
-                       RefBib=article_data['RefBib'],           
-            )
+            # Download the file from the URL
+            article_file = download_pdf_from_url(url_file)
 
-            # Elasticsearch Indexing (placeholder for now)
-            # (Send article data to Elasticsearch for indexing)
-            # Envoyer les informations extraites dans un index de recherche dans ElasticSearch.
-            #es = Elasticsearch()
-            #for information_article in information_articles:
-            #es.index(index="articles", doc_type="article", body=information_article)
-                print(analysis_result)
-                return Response(analysis_result,status=status.HTTP_201_CREATED)
+            if not article_file:
+               return Response({'error': 'Failed to download PDF from the URL'}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+            # Ensure the file cursor is at the beginning
+            article_file.seek(0)
+
+            # Check if the uploaded PDF is a valid scientific article
+            is_valid = is_valid_scientific_pdf(article_file)
+
+            if not is_valid:
+                # Handle the case where the PDF is not valid
+                return Response({'error': 'Invalid scientific PDF.The provided URL does not lead to a valid scientific article.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get the URL to the uploaded file in the media root
+            file_url = url_file
+
+            # Ensure the file cursor is at the beginning
+            article_file.seek(0)
+
+            # Extract text from the downloaded PDF
+            pdf_text, f_txt, l_txt = extract_text_from_pdf(article_file)
+
+            # Perform analysis on pdf_text
+            analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
+
+            date_str = analysis_result.get('date', '')
+            date_obj = parse_and_validate_date(date_str)
+
+            # Create Article instance
+            article = Articles.objects.create(
+                    Titre=analysis_result.get('title', ''),
+                    date=date_obj,
+                    auteurs=analysis_result.get('authors', ''),
+                    Resume=analysis_result.get('abstract', ''),
+                    Institution=analysis_result.get('institutions', ''),
+                    RefBib=analysis_result.get('references', ''),
+                    URL_Pdf=file_url,
+                )
+
+            # Save the uploaded file along with the article
+            article.pdf_File.save(article_file.name, article_file)
+
+            article.save()
+
+                # Elasticsearch Indexing (Uncomment if needed)
+                # send_to_elasticsearch('articles', '_doc', {
+                #     'title': analysis_result.get('title', ''),
+                #     'date': analysis_result.get('date', ''),
+                #     'abstract': analysis_result.get('abstract', ''),
+                #     'institutions': analysis_result.get('institutions', ''),
+                #     'references': analysis_result.get('references', ''),
+                #     'authors': analysis_result.get('authors', ''),
+                #     'pdf_text': pdf_text,
+                # })
+
+            return Response({'result': analysis_result, 'message': 'Files uploaded and processed successfully and sent to elastic search .'},
+                                status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Failed to download PDF from the URL'}, status=status.HTTP_400_BAD_REQUEST)
+
+        #--------------------------------------------------------------------------------
+#//////////////////////////////////////////////////////////////
+#     
+#//////////////////////////////////////////////////////////////

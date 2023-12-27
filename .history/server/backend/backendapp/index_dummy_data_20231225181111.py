@@ -1,7 +1,7 @@
 from elasticsearch.helpers import bulk
 from elasticsearch import Elasticsearch
 
-es = Elasticsearch(['http://localhost:9200/'],  verify_certs=False)
+es = Elasticsearch()
 index_name = 'articles'
 
 dummy_data = [

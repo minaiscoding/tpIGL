@@ -4,8 +4,10 @@ import Moderateurs from "../components/Moderateurs";
 
 
 
-export default function ListModerateurs() {
+const ListModerateurs=()=> {
   const [moderateurs, setModerateurs] = useState([]);
+  const [ajouté,setAjouté]=useState(false)
+
   useEffect(() => {
     console.log("fetching les modérateurs");
     fetch(`http://localhost:8000/api/moderateurs`)
@@ -18,7 +20,7 @@ export default function ListModerateurs() {
       .catch((error) => {
         console.error("Error fetching les modérateurs:", error);
       });
-  });
+  },[]);
   return (
     <div
       className="relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative"
@@ -32,6 +34,10 @@ export default function ListModerateurs() {
       <div>
        <Moderateurs moderateurs={moderateurs}/>
       </div>
+      <div>
+        <button  onClick={()=>setAjouté(true)}>Ajouter</button>
+      </div>
     </div>
   );
 }
+export default ListModerateurs;

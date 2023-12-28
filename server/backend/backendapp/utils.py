@@ -390,6 +390,7 @@ def extract_article_info(text, first_pages, last_pages):
         #________________________________________________________________________________________________
         institutions_pattern = re.compile(
              r'\bDepartment\s+of\s+(.*?)\b\.',
+             #r'(.+?)(?=\b(?:[A-Za-z\s]*\b\s*,\s*)?[A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)$'
              re.IGNORECASE
             )
         #________________________________________________________________________________________________
@@ -399,17 +400,13 @@ def extract_article_info(text, first_pages, last_pages):
             )
         #________________________________________________________________________________________________
         keywords_pattern = re.compile(
-             #r'Keywords\s*([\w\s,]+)\n|Keywords:(.*?)\n\n|Keywords\s*\n(.*?)\s*\n(?:ACM Reference Format|Introduction|1\. Introduction\n)',
-            #r'/bKeywords\s/b*([\w\s,]+)\n',
-            # re.IGNORECASE | re.DOTALL
-            r'\bKeywords\b\s*([\w\s,]+)\n|Keywords:(.*?)\n\n', re.IGNORECASE | re.DOTALL
+             r'\bKeywords\b\s*([\w\s,]+)\n|Keywords:(.*?)\n\n|\bINDEX TERMS\b\s*([\w\s,]+)\n|INDEX TERMS(.*?)\n\n',
+             re.IGNORECASE | re.DOTALL
             )
         #________________________________________________________________________________________________
         references_pattern = re.compile(
              r'(?i)(?:References|\d\.References|Bibliography)(.*?)(?=$|\Z)',
-              re.DOTALL | re.IGNORECASE 
-             #r'\b(?:References|Bibliography)\b.*?([\s\S]+?)(?=\b[A-Z]|$)',
-             #re.IGNORECASE | re.DOTALL
+             re.DOTALL | re.IGNORECASE 
             )
         #________________________________________________________________________________________________
         date_pattern = re.compile(
@@ -564,7 +561,7 @@ def send_to_elasticsearch(index_name, data):
     # Index the data in Elasticsearch
     for document in data:
         es.index(index=index_name, body=document)
-    print("Successfully indexed dummy data.")
+    print("Successfully indexed article data.")
 #------------------------------------------------------------------------------
 #//////////////////////////
 # parse_and_validate_date

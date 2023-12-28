@@ -51,6 +51,7 @@ const App = () => {
                       <Route path="/Moderateurs" element={<ListModerateurs />} />
 
                       {/* Route for the UplaodArticlePage */}
+                      {/*<Route path="/UploadArticle" element={<UploadArticle />} />*/}
                       <Route path="/UploadArticle" element={<UploadArticle />} />
 
                       {/* Route for the SearchResultPage */}

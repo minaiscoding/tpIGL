@@ -5,27 +5,6 @@ module.exports = {
 
   theme: {
     extend: {
-<<<<<<< HEAD
-      
-      fontFamily: {
-        'Futura' : 'Futura Book BT', 
-        'Futura-bold' : 'Futura bold',
-        'ITC Avant Garde Std Bold' : 'ITC',
-      },
-      borderRadius: {
-      '14': '14px',
-      },
-      colors: {
-      'purple-600': '#8A88E2',
-      'purple-300':'#bdbdec',
-      },
-    },
-  },
-  plugins: [],
-}
-
-
-=======
       gradientColorStops: (theme) => ({
         f6b237: theme("colors.yellow1"),
         "6b30e4": theme("colors.purple"),
@@ -37,6 +16,9 @@ module.exports = {
       screens: {
         s: "500px",
       },
+    },
+    borderRadius: {
+      'rd': '6px',
     },
     fontFamily: {
       Futura: "Futura Book BT",
@@ -56,7 +38,8 @@ module.exports = {
       yellow2: "rgba(54, 53, 206, 0.9)",
       purple2: "rgba(107, 48, 228, 0.86)",
       blue2: "rgba(246, 178, 55, 0.9)",
-      "purple-3OO": "#bdbdec",
+      'purple-600': '#8A88E2',
+      'purple-300':'#bdbdec',
       white: "#FFFFFF",
       "gray-800": "#1E1E1E",
 
@@ -64,4 +47,3 @@ module.exports = {
   },
   plugins: [],
 };
->>>>>>> 586a27361392aa78c31e9ca12016ed8150528803

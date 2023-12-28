@@ -1,3 +1,8 @@
+# admin.py
 from django.contrib import admin
+from .models import Articles, Utilisateurs, Favoris
 
-# Register your models here.
+
+admin.site.register(Articles)
+admin.site.register(Utilisateurs)
+admin.site.register(Favoris)

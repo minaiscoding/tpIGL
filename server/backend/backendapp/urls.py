@@ -3,7 +3,10 @@ from .views import UtilisateursListView, ArticlesListView, FavorisListView,Searc
 #-----------------------------------------------------------------------------------------------
 from .views import pdf_text_view,analize_text_view,scientific_pdf_view,pdf_metadata_view
 #-----------------------------------------------------------------------------------------------
-
+from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView
 
 urlpatterns = [
     path('utilisateurs/', UtilisateursListView.as_view(), name='utilisateurs-list'),
@@ -23,4 +26,10 @@ urlpatterns = [
     path('articles_ctrl/external-upload/', ExternalUploadViewSet.as_view(), name='external-upload'),
     
     
+
+    path('login/', LoginView.as_view(), name='login'),
 ]
+
+# Serve static files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

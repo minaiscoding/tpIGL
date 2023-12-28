@@ -609,3 +609,4 @@ def parse_metadata_date(date_string):
 
     except ValueError:
         return None
+#------------------------------------------------------------------------------

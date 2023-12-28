@@ -1,15 +1,90 @@
-import React from "react";
-import Navbar from "../components/NavBar"; // Import your Navbar component
+// SearchResultPage.js
+import React, { useState, useEffect } from "react";
 import Displayer from "../components/Displayer";
 
+/**
+ * Functional component for the search result page.
+ *
+ * @returns {JSX.Element} - Rendered component.
+ */
 const SearchResultPage = () => {
+  // Function to get the value of a parameter from the URL
+  const getParameterByName = (name, url) => {
+    if (!url) url = window.location.href;
+    name = name.replace(/[[\]]/g, "\\$&");
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return "";
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+  };
+
+  // Get the value of the 'q' parameter from the URL
+  const qValue = getParameterByName("q");
+
+  // State variables for search query and results
+  const [searchQuery, setSearchQuery] = useState(qValue);
+  const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(() => {
+    console.log("useEffect triggered");
+
+    // Fetch search results when the component mounts or when searchQuery changes
+    if (searchQuery.trim() !== "") {
+      // Fetch search results from your Django API
+      console.log("Searching for:", searchQuery);
+      fetch(
+        `http://localhost:8000/api/search/?q=${encodeURIComponent(searchQuery)}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("API Response:", data);
+          // Convert the object into an array
+          const resultsArray = Object.keys(data).map((key) => data[key]);
+          setSearchResults(resultsArray);
+        })
+        .catch((error) => {
+          console.error("Error fetching search results:", error);
+        });
+    } else {
+      setSearchResults([]); // Clear search results if the query is empty
+    }
+  }, [searchQuery]);
+
+  // Function to handle the search action
+  const handleSearch = () => {
+    // Get the selected start and end dates from the date inputs
+    const startDate = document.getElementById("start_date").value;
+    const endDate = document.getElementById("end_date").value;
+
+    // Get the selected filter type
+    const filterType = document.querySelector(
+      'input[name="filterType"]:checked'
+    ).value;
+
+    // Fetch search results with dynamic filter from your Django API
+    fetch(
+      `http://localhost:8000/api/search/?q=${encodeURIComponent(
+        searchQuery
+      )}&start_date=${startDate}&end_date=${endDate}&filter_type=${filterType}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("API Response:", data);
+        // Convert the object into an array
+        const resultsArray = Object.keys(data).map((key) => data[key]);
+        setSearchResults(resultsArray);
+      })
+      .catch((error) => {
+        console.error("Error fetching search results:", error);
+      });
+  };
+
   return (
     <div
       className="h-full w-screen min-h-screen font-Futura bg-cover bg-center flex flex-col"
       style={{ backgroundImage: "url(../../../images/bgimg2.svg)" }}
     >
-      {/* Navbar Component */}
-      <Navbar />
       <div className="container mx-auto mt-[8vh]  bg-opacity-80 rounded-lg md:px-[10vw] px-[5vw] md:w-80% w-100%">
         <div className="flex flex-col md:flex-row items-start  space-x-4">
           {/* Search Bar */}
@@ -17,9 +92,14 @@ const SearchResultPage = () => {
             <input
               type="text"
               placeholder="Rechercher un article"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="rounded-l-md px-4 py-2 bg-white w-[100%] md:w-[30vw] focus:outline-none"
             />
-            <button className="bg-gray-800 text-white px-4 py-2 rounded-r-md hover:opacity-100">
+            <button
+              onClick={handleSearch}
+              className="bg-gray-800 text-white px-4 py-2 rounded-r-md hover:opacity-100"
+            >
               Search
             </button>
           </div>
@@ -29,12 +109,15 @@ const SearchResultPage = () => {
             <label>Du:</label>
             <input
               type="date"
+              id="start_date"
               className="border border-gray-300 rounded-md px-4 py-2"
             />
 
             <label>A:</label>
+
             <input
               type="date"
+              id="end_date"
               className="border border-gray-300 rounded-md px-4 py-2"
             />
           </div>
@@ -48,7 +131,7 @@ const SearchResultPage = () => {
               <input
                 type="radio"
                 name="filterType"
-                value="option1"
+                value="MotCle"
                 className="mr-2 h-5 w-5 border-gray-300 border rounded-full"
               />
               <span className="ml-1">Mot Clé</span>
@@ -58,7 +141,7 @@ const SearchResultPage = () => {
               <input
                 type="radio"
                 name="filterType"
-                value="option2"
+                value="auteurs"
                 className="mr-2 h-5 w-5 border-gray-300 border rounded-full"
               />
               <span className="ml-1">Auteur</span>
@@ -68,7 +151,7 @@ const SearchResultPage = () => {
               <input
                 type="radio"
                 name="filterType"
-                value="option2"
+                value="Titre"
                 className="mr-2 h-5 w-5 border-gray-300 border rounded-full"
               />
               <span className="ml-1">Titre</span>
@@ -78,7 +161,7 @@ const SearchResultPage = () => {
 
         {/* Display Search Results Here */}
         <div className="mt-8">
-          <Displayer />
+          <Displayer results={searchResults} />
         </div>
       </div>
     </div>

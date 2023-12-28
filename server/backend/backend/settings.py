@@ -44,9 +44,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'django_elasticsearch_dsl',
+<<<<<<< HEAD
     'django_elasticsearch_dsl_drf',
     'PyPDF2',
       
+=======
+    'rest_framework',
+>>>>>>> 586a27361392aa78c31e9ca12016ed8150528803
 ]
 
 
@@ -138,6 +142,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+<<<<<<< HEAD
 STATIC_URL = 'static/'
 #---------------------------------------------------
 # Media files (uploads) will be stored in this directory
@@ -148,8 +153,24 @@ MEDIA_URL = '/uploaded_media/'
 #---------------------------------------------------
 
 
+=======
+STATIC_URL = '/static/'
+>>>>>>> 586a27361392aa78c31e9ca12016ed8150528803
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+}

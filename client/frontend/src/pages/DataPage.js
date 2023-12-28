@@ -1,6 +1,6 @@
 // src/pages/DataPage.js
-import React from 'react';
-import DataDisplay from '../components/DataDisplay';
+import React from "react";
+import DataDisplay from "../components/DataDisplay";
 
 const DataPage = () => {
   return (

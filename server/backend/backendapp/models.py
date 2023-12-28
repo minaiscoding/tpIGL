@@ -30,6 +30,7 @@ class Utilisateurs(models.Model):
     def __str__(self):
         return self.NomUtilisateur
 
+<<<<<<< HEAD
 class Articles(models.Model): 
     Titre = models.CharField(max_length=255,null=True,blank=True)
     Resume = models.TextField(null=True,blank=True)
@@ -41,6 +42,20 @@ class Articles(models.Model):
     URL_Pdf = models.URLField(max_length=255,null=True,blank=True)
     RefBib = models.CharField(max_length=255,null=True,blank=True)
     pdf_File = models.FileField(upload_to='article_pdfs/',null=True,blank=True,validators=[FileExtensionValidator( ['pdf'] )]) 
+=======
+class Articles(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    Titre = models.CharField(max_length=255)
+    Resume = models.TextField()
+    auteurs = models.CharField(max_length=255)
+    Institution = models.CharField(max_length=255)
+    date = models.DateField()
+    MotsCles = models.CharField(max_length=255)
+    text = models.TextField()
+    URL_Pdf = models.CharField(max_length=255)
+    RefBib = models.CharField(max_length=255)
+    date = models.DateField()
+>>>>>>> 586a27361392aa78c31e9ca12016ed8150528803
 
     def __str__(self):
         return self.Titre 

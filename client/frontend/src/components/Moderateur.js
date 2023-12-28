@@ -102,8 +102,7 @@ function Moderateur({moderateur}) {
 }
 
 export default Moderateur;
-//on a commencé modifier il nous reste plus qu'à créer le formulaire et le bouton save
-// il faut créer le bouton ajouter
+
 // il faut creer le formulaire d'ajout position absolue hidden
 // il faut appliquer les styles
 //il faut se mettre au back

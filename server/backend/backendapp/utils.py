@@ -175,22 +175,38 @@ def column_boxes(page: fitz.Page, footer_margin: int = 0, no_image_text: bool = 
 #////////////////////////////////
 def clean_text(text):
     """
-    Clean the extracted text by removing unwanted symbols and formatting.
+    Clean the extracted text by removing unwanted symbols, formatting,
+    and lines matching specific patterns.
 
     :param str text: The text to be cleaned.
 
     :return: The cleaned text.
     :rtype: str
     """
+    # Remove lines that match the specified image pattern or contain links or emails
+    text_lines = text.split('\n')
+    text_lines = [
+        line for line in text_lines
+        if not re.match(r'image: ICCBased\(RGB,sRGB v4 ICC preference perceptual intent beta\), width: \d+, height: \d+, bpc: \d+', line)
+        and 'http' not in line  # Exclude lines containing 'http' (links)
+        and 'www.' not in line  # Exclude lines containing 'http' (links)
+        and '@' not in line  # Exclude lines containing '@' (emails)
+        and 'bpc:' not in line  # Exclude lines containing 'bpc:' (images conf)
+    ]
+
+    # Join the remaining lines back into a single string
+    text = '\n'.join(text_lines)
+
     # Remove special characters and symbols using regular expression
-    cleaned_text = re.sub(r'[^a-zA-Z0-9\s\.,;:()\-–!?]', '', text)
+    cleaned_text = re.sub(r'\[^a-zA-Z0-9\s\.,;:() - –!?\]', '', text)
 
     return cleaned_text
+
 #--------------------------------------------------------------------------------------------------------------
 #////////////////////////////////
 # extract_text_from_pdf Function
 #////////////////////////////////
-def extract_text_from_pdf(file, num_pages=1):
+def extract_text_from_pdf(file, num_pages=2):
     """
     Extract and organize text from a PDF file considering multi-column layout.
 
@@ -256,6 +272,11 @@ def extract_text_from_pdf(file, num_pages=1):
                     last_pages_text += b[4] + '\n'
 
     pdf_file.close()  # Close the PDF file.
+
+    # clean the texts 
+    full_text = clean_text(full_text)
+    first_pages_text = clean_text(first_pages_text)
+    last_pages_text = clean_text(last_pages_text)
 
     return full_text, first_pages_text, last_pages_text
 #--------------------------------------------------------------------------------------------------------------
@@ -357,32 +378,50 @@ def extract_article_info(text, first_pages, last_pages):
     """
     try:
         # Define regular expressions for each section
-        title_pattern = re.compile(r'^\s*(.*?)\n\n', re.DOTALL)
-        authors_pattern = re.compile(r'\b(.*?)\n(?:Dr|Prof|Mr|Mrs|Ms)\.?\s+(?:\w+\.?\s+)+\w+', re.DOTALL)
-        institutions_pattern = re.compile(r'\bDepartment\s+of\s+(.*?)\b\.', re.IGNORECASE)
+        title_pattern = re.compile(
+              r'^\s*(.*?)\n\n',
+              re.DOTALL  
+            )
+        #________________________________________________________________________________________________
+        authors_pattern = re.compile(
+              r'\b(.*?)\n(?:Dr|Prof|Mr|Mrs|Ms)\.?\s+(?:\w+\.?\s+)+\w+',
+              re.DOTALL
+            )
+        #________________________________________________________________________________________________
+        institutions_pattern = re.compile(
+             r'\bDepartment\s+of\s+(.*?)\b\.',
+             re.IGNORECASE
+            )
+        #________________________________________________________________________________________________
         abstract_pattern = re.compile(
-            r'\b (Abstract|A B S T R A C T|Abstract—|\d\s*abstract )\b'  # Abstract headings and numbering
-            r'(?:\s*.*?\s*\b(?:CCS CONCEPTS|\s{3,}\n|Categories and Subject Descriptors|keywords|introduction|General Terms|\d+\s*\n|$)\b)',  # Ending keywords
-           # r'\b(?:Abstract|Summary)\b(?:.*?)'
-           # r'(?:(?:\d|[A-Za-z]+\s+)[A-Za-z]+|$|'
-           # r'\b(?:Keywords|Introduction|\d+\s*\n)\b)',
-            re.DOTALL | re.IGNORECASE
-        )
+             r'Abstract\s*\n(.*?)\s*\n(?:Keywords|Introduction|Categories and Subject Descriptors(.*?)\n|1\. Introduction\n|\d+\s*\n|CCS CONCEPTS\n|$)',
+             re.DOTALL | re.IGNORECASE
+            )
+        #________________________________________________________________________________________________
         keywords_pattern = re.compile(
-         r'(Keywords:|Keywords)\n\s(.*?)(?=\n\s*(?:1\. Introduction\n|\s{3,}|\nACM Reference Format:|A B S T R A C T|\d\s*abstract|$))',
-         re.DOTALL | re.IGNORECASE
-        )
-        references_pattern = re.compile(r'(?i)(?:References|Bibliography)(.*?)(?=$|\Z)', re.DOTALL)
+             #r'Keywords\s*([\w\s,]+)\n|Keywords:(.*?)\n\n|Keywords\s*\n(.*?)\s*\n(?:ACM Reference Format|Introduction|1\. Introduction\n)',
+            #r'/bKeywords\s/b*([\w\s,]+)\n',
+            # re.IGNORECASE | re.DOTALL
+            r'\bKeywords\b\s*([\w\s,]+)\n|Keywords:(.*?)\n\n', re.IGNORECASE | re.DOTALL
+            )
+        #________________________________________________________________________________________________
+        references_pattern = re.compile(
+             r'(?i)(?:References|\d\.References|Bibliography)(.*?)(?=$|\Z)',
+              re.DOTALL | re.IGNORECASE 
+             #r'\b(?:References|Bibliography)\b.*?([\s\S]+?)(?=\b[A-Z]|$)',
+             #re.IGNORECASE | re.DOTALL
+            )
+        #________________________________________________________________________________________________
         date_pattern = re.compile(
-            r'Published:\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
-            r'[A-Z][a-z]+\s+\d{1,2}(?:–|-)\d{1,2},\s+\d{4})|'
-            r"\d{4}-\d{2}-\d{2}|"
-            r"\d{2}/\d{2}/\d{4}|"
-            r"[A-Z][a-z]+\d{1,2}-(?:\d{2}-){2}\d{2}|"
-            r"\d{1,2} [A-Z][a-z]+\s+\d{4}",
-            re.DOTALL
-        )
-
+             r'Published:\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
+             r'[A-Z][a-z]+\s+\d{1,2}(?:–|-)\d{1,2},\s+\d{4})|'
+             r"\d{4}-\d{2}-\d{2}|"
+             r"\d{2}/\d{2}/\d{4}|"
+             r"[A-Z][a-z]+\d{1,2}-(?:\d{2}-){2}\d{2}|"
+             r"\d{1,2} [A-Z][a-z]+\s+\d{4}",
+             re.DOTALL
+            )
+        #-----------------------------------------------------------------------------------------
         # Extract information using regular expressions
         title_match = title_pattern.search(first_pages)
         authors_match = authors_pattern.search(first_pages)
@@ -391,28 +430,39 @@ def extract_article_info(text, first_pages, last_pages):
         keywords_match = keywords_pattern.search(first_pages)
         references_match = references_pattern.search(last_pages) 
         date_match = date_pattern.search(first_pages)
-
+        #-----------------------------------------------------------------------------------------
         # Get the matched groups
         title = title_match.group(1).strip() if title_match else None
         authors = authors_match.group().strip() if authors_match else None
-        institutions = institutions_match.group().strip() if institutions_match else None
+        institutions = institutions_match.group().strip() if institutions_match else None  
         abstract = abstract_match.group().strip() if abstract_match else None
         keywords = keywords_match.group().strip() if keywords_match else None
         references_text = references_match.group().strip() if references_match else None
         date = date_match.group().strip() if date_match else None
 
         # Split references based on the pattern (digit followed by a dot)
-        references = re.split(r'\b\d+\.', references_text) if references_text else []
+        references = re.split(r'\b\[\d\]+\.|\b\[\d\]|\d\.', references_text) if references_text else []
         # Remove empty references (if any)
         references = [ref.strip() for ref in references if ref.strip()]
 
-        #if not keywords:
-        #    r = Rake()
-        #    r.extract_keywords_from_text(first_pages)
-        #    keywords_list = r.get_ranked_phrases()
+        references_string = '\n'.join(references)
+
+        if not keywords:
+
+            r = Rake()
+            r.extract_keywords_from_text(first_pages)
+            keywords_list = r.get_ranked_phrases()
 
             # Limit the number of keywords
-        #    keywords = keywords_list[:5]
+            keywords = keywords_list[:5]
+
+            cleaned_keywords = []
+            for keyword in keywords:
+            # Remove unwanted characters and digits
+                cleaned_keyword = ' '.join(filter(lambda x: x.isalpha(), keyword.split()))
+                cleaned_keywords.append(cleaned_keyword)
+
+            keywords=cleaned_keywords
 
         # If authors or institutions are not found using regex, use spaCy for entity recognition
         if not authors or not institutions:
@@ -431,12 +481,12 @@ def extract_article_info(text, first_pages, last_pages):
             # Eliminate duplicate authors and exclude emails
             filtered_authors = [author for author in authors_entities if not is_email(author) and len(author) <= 40]
             # Convert the list of authors to a pipe-separated string
-            authors = '| '.join(set(filtered_authors)) if filtered_authors else None
+            authors = ', '.join(set(filtered_authors)) if filtered_authors else None
 
             # Extract institution using spaCy
             institution_entities = [entity.text for entity in doc.ents if entity.label_ == "ORG" and not is_email(entity.text) and len(entity.text) >= 6]
             # Convert the list of authors to a comma-separated string
-            institutions = '| '.join(set(institution_entities)) if institution_entities else None
+            institutions = ', '.join(set(institution_entities)) if institution_entities else None
 
         # Return a dictionary with extracted information
         article_info = {
@@ -445,7 +495,7 @@ def extract_article_info(text, first_pages, last_pages):
             'institutions': institutions,
             'abstract': abstract,
             'keywords': keywords,
-            'references': references,
+            'references': references_string,
             'date': date
         }
         #print('title :',title)
@@ -491,7 +541,7 @@ def is_valid_scientific_pdf(file):
         all_pages_text += pdf_file[page_number].get_text("text").lower()
 
     # Scientific article structure validation
-    keywords_found = ["abstract", "introduction", "methods", "results", "conclusion", "keywords", "references", "bibliography"]
+    keywords_found = ["abstract", "ACM Reference Format","Categories and Subject Descriptors","Research paper", "methods","methodology", "results","CCS CONCEPTS", "keywords", "references", "bibliography"]
     if any(keyword in all_pages_text for keyword in keywords_found):
         logging.debug(f"Validation result for PDF: True")
         return True
@@ -502,7 +552,7 @@ def is_valid_scientific_pdf(file):
 #//////////////////////////
 # send_to_elasticsearch
 #//////////////////////////
-def send_to_elasticsearch(index_name, document_type, data):
+def send_to_elasticsearch(index_name, data):
     """
     Sends data to Elasticsearch.
 
@@ -510,8 +560,11 @@ def send_to_elasticsearch(index_name, document_type, data):
     :param str document_type: The type of the document.
     :param dict data: The data to be sent.
     """
-    es = Elasticsearch()
-    es.index(index=index_name, doc_type=document_type, body=data)
+    es = Elasticsearch(['http://localhost:9200'],  verify_certs=False)
+    # Index the data in Elasticsearch
+    for document in data:
+        es.index(index=index_name, body=document)
+    print("Successfully indexed dummy data.")
 #------------------------------------------------------------------------------
 #//////////////////////////
 # parse_and_validate_date

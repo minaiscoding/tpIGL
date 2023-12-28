@@ -10,7 +10,8 @@
     <p><strong>Institution:</strong> {{ result.institutions }}</p>
     <p><strong>Abstract:</strong> {{ result.abstract }}</p>
     <p><strong>Keywords:</strong> {{ result.keywords }}</p>
-
+    <p><strong>References:</strong> {{ result.references }}</p>
+    <p><strong>Date:</strong> {{ result.date }}</p>
     <p><strong>References:</strong></p>
     <ul>
         {% for reference in result.references %}
@@ -18,6 +19,6 @@
         {% endfor %}
     </ul>
 
-    <p><strong>Date:</strong> {{ result.date }}</p>
+    
 </body>
 </html>

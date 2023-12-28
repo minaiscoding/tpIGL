@@ -92,7 +92,7 @@ l article scientifique. Les informations extraites sont envoyées dans un index 
     #------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #-------------------------#
     #------------------------------------------------------------------------#
-article_test = "06"
+article_test = "01"
 #--------------------------------------------------------------------------------------------------------------#
 #///////////////////////
 # pdf_metadata_view
@@ -244,7 +244,8 @@ class LocalUploadViewSet(APIView):
         if serializer.is_valid():
             # Get the file from the serializer
             uploaded_file = serializer.validated_data["pdf_File"]
-
+            meta_data = extract_pdf_metadata(uploaded_file)
+            titre_meta_data = meta_data["Title"]
             # URL for the file
             file_url = f'http://127.0.0.1:8000/uploaded_media/article_pdfs/{uploaded_file.name}'
 
@@ -267,37 +268,29 @@ class LocalUploadViewSet(APIView):
             # Perform analysis on pdf_text
             analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
  
-            date_str = analysis_result.get('date', '')
-            date_obj = parse_and_validate_date(date_str)
-            # Create Article instances
-            article = Articles.objects.create(
-                Titre=analysis_result.get('title', ''),
-                date=date_obj,
-                auteurs=analysis_result.get('authors', ''),
-                Resume=analysis_result.get('abstract', ''),
-                Institution=analysis_result.get('institutions', ''),
-                RefBib=analysis_result.get('references', ''),
-                URL_Pdf=file_url,
-            )
-
-            # Save the uploaded file along with the article
-            article.pdf_File.save(uploaded_file.name, uploaded_file)
-
-            article.save()
+            #date_str = analysis_result.get('date', '')
+            #date_obj = parse_and_validate_date(date_str)
+            titre = analysis_result.get('title', '')
+            if titre != titre_meta_data:
+               titre = titre_meta_data + ' ' + titre
+                
+            article_data = [
+            { 'Titre': titre,
+              'Resume': analysis_result.get('abstract', ''),
+              'auteurs': analysis_result.get('authors', ''),
+              'Institution': analysis_result.get('institutions', ''),
+              'date': analysis_result.get('date', ''),
+              'MotsCles': analysis_result.get('keywords', ''),
+              'text': pdf_text,
+              'URL_Pdf': file_url,
+              'RefBib': analysis_result.get('references', ''),
+            },  
+            ]
 
             # Elasticsearch Indexing
-            # (Send article data to Elasticsearch - Uncomment if needed)
-            # send_to_elasticsearch('articles', '_doc', {
-            #     'title': analysis_result.get('title', ''),
-            #     'date': analysis_result.get('date', ''),
-            #     'abstract': analysis_result.get('abstract', ''),
-            #     'institutions': analysis_result.get('institutions', ''),
-            #     'references': analysis_result.get('references', ''),
-            #     'authors': analysis_result.get('authors', ''),
-            #     'pdf_text': pdf_text,
-            # })
-
-            return Response({'result': analysis_result, 'message': 'Files uploaded and processed successfully.'}, status=status.HTTP_200_OK)
+            # Send article data to Elasticsearch 
+            send_to_elasticsearch('articles',article_data)
+            return Response({'article_data': article_data, 'message': 'Files uploaded and processed successfully and sent to elastic search'}, status=status.HTTP_200_OK)
 
         # Return serializer errors if the serializer is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

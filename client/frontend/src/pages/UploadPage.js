@@ -5,6 +5,7 @@ import Navbar from "../components/NavBar";
 import add from "../../src/file_upload_icon.svg";
 import link from "../../src/url_icon.svg";
 import vector_bg from "../../src/Vector.svg";
+//import { CheckCircleIcon, FileIcon } from 'lucide-react';
 
 const UploadPage = () => {
   const backgroundImage = `url(${vector_bg})`;
@@ -12,6 +13,8 @@ const UploadPage = () => {
 
   const [files, setFiles] = useState([]);
   const [url, setUrl] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
@@ -19,17 +22,27 @@ const UploadPage = () => {
 
   const handleUpload = async () => {
     try {
+      setUploadError(null);
+
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
         // Upload file
-        await axios.post(
+        const response = await axios.post(
           "http://127.0.0.1:8000/api/articles_ctrl/local-upload/",
-          formData
+          formData,
+          {
+            onUploadProgress: (progressEvent) => {
+              const progress = Math.round(
+                (progressEvent.loaded / progressEvent.total) * 100
+              );
+              setUploadProgress(progress);
+            },
+          }
         );
 
-        console.log(`File ${file.name} uploaded successfully`);
+        console.log(`File ${file.name} uploaded successfully:`, response.data);
       });
 
       // if the URL field is not empty
@@ -50,6 +63,12 @@ const UploadPage = () => {
     } catch (error) {
       // Handle error, e.g., show an error message to the user
       console.error("Error uploading file:", error.message);
+      setUploadError("Error uploading file. Please try again.");
+    } finally {
+      // Reset progress after upload completion
+      setUploadProgress(0);
+      // Clear uploaded files
+      setFiles([]);
     }
   };
 
@@ -92,10 +111,10 @@ const UploadPage = () => {
 
         {/* Dropzone for file upload */}
         <div
-          {...getRootProps()}
+          {...getRootProps() }
           onKeyDown={handleDropZoneKeyPress}
           tabIndex={0}
-          className="w-[80%] px-4 py-2 flex flex-col items-center border-2 border-dashed border-gray-900 rounded-lg cursor-pointer text-center ml-2 mr-2 pt-6 pl-6 pb-6 pr-6 bg-gradient-to-b from-purple-600 to-purple-600 relative transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300"
+          className="w-[80%] dropzone px-4 py-2 flex flex-col items-center border-2 border-dashed border-gray-900 rounded-lg cursor-pointer text-center ml-2 mr-2 pt-6 pl-6 pb-6 pr-6 bg-gradient-to-b from-purple-600 to-purple-600 relative transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300"
           >
           <input {...getInputProps()} />
           <img className="w-20 mb-5 mt-5" src={add} alt="upload_file_icon" />
@@ -136,6 +155,26 @@ const UploadPage = () => {
           />
 
         </div>
+        {files.length > 0 && (
+        <div>
+          <h2>Selected Files</h2>
+          <ul>
+            {files.map((file) => (
+              <li key={file.name}>
+                {file.name} - {file.size} bytes
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {uploadProgress > 0 && (
+        <div>
+          <h2>Upload Progress: {uploadProgress}%</h2>
+          <progress value={uploadProgress} max="100" />
+        </div>
+      )}
+      {uploadError && <div>Error: {uploadError}</div>}
+      <button onClick={handleUpload}>Upload</button>
 
       </div>
 

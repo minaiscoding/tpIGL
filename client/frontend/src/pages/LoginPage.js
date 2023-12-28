@@ -4,9 +4,9 @@ import logo from "../logo.svg";
 import LoginImg from "../assets/login.png";
 
 const LoginPage = () => {
-  const [NomUtilisateur, setNomUtilisateur] = useState('');
-  const [Email, setEmail] = useState('');
-  const [MotDePasse, setMotDePasse] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error1, setError1] = useState('');
   const [error2, setError2] = useState('');
   const [error3, setError3] = useState('');
@@ -17,20 +17,20 @@ const LoginPage = () => {
     setError2("");
     setError3("");
 
-    if (NomUtilisateur === "") {
+    if (username === "") {
       setError1("Vérifier votre nom d'utilisateur ");
     }
-    if (Email === "") {
+    if (email === "") {
       setError2("Vérifiez votre Email");
     }
-    if (MotDePasse === "") {
+    if (password === "") {
       setError3("Vérifier votre mot de passe ");
     }
     {/* else {
       try {
         const response = await axios.post(
           "API",
-         {NomUtilisateur, Email,  MotDePasse }
+         { username, email, password }
         );
         const responseData = response.data;
         const token = responseData.data.member.memberId;
@@ -65,7 +65,7 @@ const LoginPage = () => {
               type="text"
               placeholder="Nom d'utilisateur"
               className={`border-[1.3px] border-solid border-rgba-54-53-206-1 rounded-md px-4 h-[46px] text-navBg text-base w-full ${error1 && 'border-yellow'}`}
-              onChange={(e) => setNomUtilisateur(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
             {error1 && <p className="text-yellow text-sm mt-2 absolute -bottom-5 left-2">{error1}</p>}
           </div>
@@ -85,7 +85,7 @@ const LoginPage = () => {
               type="password"
               placeholder="Mot de passe"
               className={`border-solid border-[1.3px] rounded-md px-4 h-[46px]  border-rgba-54-53-206-1 text-navBg text-base w-full ${error3 && 'border-yellow'}`}
-              onChange={(e) => setMotDePasse(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
             {error3 && <p className="text-yellow text-sm mt-2 absolute -bottom-5 left-2">{error3}</p>}
           </div>

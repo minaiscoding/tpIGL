@@ -13,15 +13,11 @@ const FavorisIcon = () => {
         setFavoris(true);
     };
 
-    const deleteFromFavorites = () => {
-       // Integration 
-        setFavoris(false);
-    };
 
     return (
         <div>
             {favoris ? (
-                <BsBookmarksFill className={style} onClick={deleteFromFavorites} />
+                <BsBookmarksFill className={style} />
             ) : (
                 <BsBookmarks className={style} onClick={addToFavorites} />
             )}

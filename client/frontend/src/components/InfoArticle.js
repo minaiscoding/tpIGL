@@ -1,23 +1,8 @@
-import React from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 // ADD AN ONCHANGE FUNCTION FOR THE EDIT FORM
 // ADD HANDLE SUBLIT FOR THE BUTTON SAVE (INTEGRAION FCTN)
 // ADD CANCEL INTEGRATION FNCTION
-
-const info = {
-  titre: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  auteurs: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  institutions:
-    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  resume:
-    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  motsCles:
-    "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-  texte:
-    "Some random text for the article content. Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  biblio:
-    "More random text for the bibliography. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-};
 
 const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
 const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2";
@@ -50,7 +35,7 @@ function InfoArticle(props) {
     }
   };
 
-  const handleDelete = async () => {
+  /*const handleDelete = async () => {
     try {
       await axios.delete(`http://localhost:8000/api/articles/${formData.id}`);
       // Assuming that the server returns a success status (2xx)
@@ -61,7 +46,7 @@ function InfoArticle(props) {
       console.error("Error deleting article:", error);
     }
   };
-
+*/
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));

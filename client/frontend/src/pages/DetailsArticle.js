@@ -52,11 +52,21 @@ const DetailsArticle = () => {
       console.log("Article Data:", articleData);
 
       if (articleData && articleData.id) {
-        await axios.delete(
+        const response = await axios.delete(
           `http://localhost:8000/api/articles/${articleData.id}/`
         );
-        console.log("Article deleted successfully");
-        // Add any additional logic after deletion if needed
+
+        console.log("Delete Response:", response.data); // Log the delete response
+
+        if (response.status === 204) {
+          console.log("Article deleted successfully");
+          // Add any additional logic after deletion if needed
+        } else {
+          console.error(
+            "Delete request was not successful. Status:",
+            response.status
+          );
+        }
       } else {
         console.error("Invalid article data or missing ID");
       }

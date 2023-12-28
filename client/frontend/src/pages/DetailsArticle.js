@@ -10,7 +10,7 @@ const DetailsArticle = () => {
   const [articleData, setArticleData] = useState(null);
   const [formData, setFormData] = useState(null);
 
-  useEffect(() => {
+  /*useEffect(() => {
     // Fetch article data from the API
     const fetchArticleData = async () => {
       try {
@@ -26,7 +26,23 @@ const DetailsArticle = () => {
     };
 
     fetchArticleData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts*/
+
+  useEffect(() => {
+    // Fetch articles when component mounts
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/articles/`);
+      const fetchedArticles = response.data;
+      setFormData(fetchedArticles[1] || {}); // Assuming you want to display the first article
+      setArticleData(fetchedArticles || {});
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const handleModifier = () => {
     setEdit(true);

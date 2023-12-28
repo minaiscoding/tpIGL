@@ -10,22 +10,20 @@ const style3 =
   "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ";
 
 function InfoArticle(props) {
-  const [formData, setFormData] = useState(props.article || {});
+  const [formData, setFormData] = useState(props.article);
   const [loading, setLoading] = useState(true);
+  const [articleData, setArticleData] = useState(null);
 
-  useEffect(() => {
-    if (props.edit) {
-      // Update form data when 'edit' prop changes
-      setFormData(props.article || {});
-    } else {
-      // Fetch articles when component mounts
-      fetchArticles();
-    }
-  }, [props.edit, props.article]);
+  /*useEffect(() => {
+    // Fetch articles when component mounts
+    fetchArticles();
+  }, []);
 
   const fetchArticles = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/articles");
+      const response = await axios.get(
+        `http://localhost:8000/api/articles/${articleData.id}/`
+      );
       const fetchedArticles = response.data;
       setFormData(fetchedArticles[1] || {}); // Assuming you want to display the first article
       setLoading(false);
@@ -33,7 +31,7 @@ function InfoArticle(props) {
       console.error("Error fetching data:", error);
       setLoading(false);
     }
-  };
+  };*/
 
   /*const handleDelete = async () => {
     try {
@@ -65,8 +63,8 @@ function InfoArticle(props) {
           <input
             type="text"
             id="titre"
-            name="titre"
-            value={formData.Titre || ""}
+            name="Titre"
+            value={formData.Titre}
             onChange={handleChange}
             className={style3}
           />
@@ -78,7 +76,7 @@ function InfoArticle(props) {
             type="text"
             id="auteurs"
             name="auteurs"
-            value={formData.auteurs || ""}
+            value={formData.auteurs}
             onChange={handleChange}
             className={style3}
           />
@@ -90,8 +88,8 @@ function InfoArticle(props) {
           <textarea
             type="text"
             id="institutions"
-            name="institutions"
-            value={formData.Institution || ""}
+            name="Institution"
+            value={formData.Institution}
             onChange={handleChange}
             className={style3}
           />
@@ -103,8 +101,8 @@ function InfoArticle(props) {
           <textarea
             type="text"
             id="resume"
-            name="resume"
-            value={formData.Resume || ""}
+            name="Resume"
+            value={formData.Resume}
             onChange={handleChange}
             className={style3}
           />
@@ -116,8 +114,8 @@ function InfoArticle(props) {
           <textarea
             type="text"
             id="motsCles"
-            name="motsCles"
-            value={formData.MotsCles || ""}
+            name="MotsCles"
+            value={formData.MotsCles}
             onChange={handleChange}
             className={style3}
           />
@@ -129,8 +127,8 @@ function InfoArticle(props) {
           <textarea
             type="text"
             id="texte"
-            name="texte"
-            value={formData.text || ""}
+            name="text"
+            value={formData.text}
             onChange={handleChange}
             className={style3}
           />
@@ -142,53 +140,34 @@ function InfoArticle(props) {
           <textarea
             type="text"
             id="biblio"
-            name="biblio"
-            value={formData.RefBib || ""}
+            name="RefBib"
+            value={formData.RefBib}
             onChange={handleChange}
             className={style3}
           />
-
-          <button
-            className="bg-[#6B30E4] text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
-            onClick={() => {
-              console.log("Save button clicked");
-              console.log(formData);
-            }}
-          >
-            Enregistrer
-          </button>
-          <button
-            className="bg-yellow text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
-            onClick={() => {
-              console.log("Cancel button clicked");
-              // props.setEdit(false);
-            }}
-          >
-            Annuler
-          </button>
         </div>
       ) : (
         <div className="flex flex-col items-start justify-center text-left">
           <h2 className={style1}> Titre de l'article :</h2>
-          <p className={style2}>{formData.Titre || ""}</p>
+          <p className={style2}>{formData.Titre}</p>
 
           <h2 className={style1}>Les auteurs :</h2>
-          <p className={style2}>{formData.auteurs || ""}</p>
+          <p className={style2}>{formData.auteurs}</p>
 
           <h2 className={style1}> Institusions :</h2>
-          <p className={style2}>{formData.Institution || ""}</p>
+          <p className={style2}>{formData.Institution}</p>
 
           <h2 className={style1}> Résumé :</h2>
-          <p className={style2}>{formData.Resume || ""}</p>
+          <p className={style2}>{formData.Resume}</p>
 
           <h2 className={`${style1} ml-2`}> Mots clés : </h2>
-          <p className={style2}>{formData.MotsCles || ""}</p>
+          <p className={style2}>{formData.MotsCles}</p>
 
           <h2 className={style1}> Texte :</h2>
-          <p className={`${style2} ml-2`}>{formData.text || ""}</p>
+          <p className={`${style2} ml-2`}>{formData.text}</p>
 
           <h2 className={style1}> Bibiliographie : </h2>
-          <p className={`${style2} ml-2`}>{formData.RefBib || ""}</p>
+          <p className={`${style2} ml-2`}>{formData.RefBib}</p>
         </div>
       )}
     </div>

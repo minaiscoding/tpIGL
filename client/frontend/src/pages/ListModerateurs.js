@@ -46,9 +46,9 @@ const ListModerateurs = () => {
   return (
     //background
     <div
-      className={`relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative ${
-        ajouté && "blur-sm"
-      }`}
+      className={`relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
+      ${ajouté && "blur-sm brightness-75	"}
+      `}
       style={{
         backgroundImage: "url(../../../images/background.svg)",
       }}
@@ -62,7 +62,7 @@ const ListModerateurs = () => {
       {
         //liste des modérateurs
       }
-      <div >
+      <div>
         <Moderateurs moderateurs={moderateurs} />
       </div>
       {
@@ -70,7 +70,7 @@ const ListModerateurs = () => {
       }
       <div>
         <button
-          className="place-self-center  bg-gray-800 rounded-md font-Futura text-white w-[10vw] h-[5vh] text-xl text-center "
+          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center "
           onClick={() => setAjouté(true)}
         >
           + Ajouter
@@ -80,9 +80,9 @@ const ListModerateurs = () => {
         //formulaire d'ajout
       }
       <div
-        className={` blur-none bg-white absolute rounded-xl border-3 border-gray-800 w-[30vw] h-[30vh] p-[1vw] items-center justify-center ${
+        className={` blur-none bg-white absolute border-2 border-dashed border-gray-800 rounded-rd w-[30vw] h-[30vh] p-[1vw] items-center justify-center ${
           !ajouté && "hidden"
-        }`}
+        } ${ajouté && "blur-none brightness-100	"}`}
       >
         <p className="font-Futura font-light text-5xl m-[0vw] flex flex-col items-center justify-center ">
           Ajouter un modérateur
@@ -133,7 +133,7 @@ const ListModerateurs = () => {
           }
           <div className="flex flex-row justify-center items-center h-full w-2/4">
             <button
-              className="place-self-center  bg-gray-800 rounded-md font-Futura text-white w-[10vw] h-[5vh] text-xl  "
+              className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl  "
               onClick={() => ajouter()}
             >
               Ajouter

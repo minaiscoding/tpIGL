@@ -29,7 +29,7 @@ function Moderateur({ moderateur }) {
     <div>
       {!clicked ? (
         <div
-          className="flex bg-white w-[80vw] h-[12vh] border-2 rounded-md p-[2vw] flex flex-row justify-between m-[3vh]  justify-items-center	font-Futura
+          className=" rounded-rd  bg-white w-[80vw] h-[12vh] border-2  p-[2vw] flex flex-row justify-between m-[3vh]  justify-items-center	font-Futura
 	 	"
           onClick={() => setClicked(!clicked)}
         >
@@ -46,14 +46,14 @@ function Moderateur({ moderateur }) {
           </div>
           <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center pt-[0vh]">
             <button
-              className="bg-gray-800 rounded-md font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+              className="bg-gray-800 rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
               onClick={() => supprimer(moderateur.nom)}
             >
               Supprimer
             </button>
             <button
-              className="bg-yellow rounded-md font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
-              onClick={() => modifier(moderateur.nom)}
+              className="bg-yellow rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+              onClick={() => modifier(moderateur.NomUtilisateu)}
             >
               Modifier
             </button>
@@ -61,58 +61,102 @@ function Moderateur({ moderateur }) {
         </div>
       ) : !modifié ? (
         <div
-          className="flex bg-white w-[80vw] h-[12vh] border-2 rounded-md p-[2vw] flex flex-row justify-between m-[3vh]  justify-items-center	font-Futura
-	 	"
+          className=" bg-white w-[80vw] h-[18vh] border-2 rounded-rd	 p-[2vw] m-[3vh] flex  flex-col justify-items-center justify-between"
           onClick={() => setClicked(!clicked)}
         >
-          <div>
-            <div>
-              <img src={iconUser} alt="iconUser" />
+          <div className="flex  flex-row justify-items-center justify-between">
+            <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center ">
+              <img
+                src={iconUser}
+                alt="iconUser"
+                className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+              />
               {moderateur.NomUtilisateur}
             </div>
-            <div>
-              <img src={iconEmail} alt="iconEmail" />
+            <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center">
+              <img
+                src={iconEmail}
+                alt="iconEmail"
+                className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+              />
               {moderateur.Email}
             </div>
             <div>
-              <button onClick={() => supprimer()}>Supprimer</button>
-              <button onClick={() => modifier()}>Modifier</button>
+              <button
+                className="bg-gray-800 rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+                onClick={() => supprimer(moderateur.NomUtilisateu)}
+              >
+                Supprimer
+              </button>
+              <button
+                className="bg-yellow rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+                onClick={() => modifier(moderateur.NomUtilisateu)}
+              >
+                Modifier
+              </button>
             </div>
           </div>
-          <div>
-            <img src={iconMdp} alt="iconMdp" />
-            {moderateur.MotDePasse}
+          <div className="flex flex-row mt[0.5vh] text-3xl	font-normal	justify-items-center justify-start py-[1vw]">
+            <img
+              src={iconMdp}
+              alt="iconMdp"
+              className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+            />
+            <div className="pt-[0.5vh]">{moderateur.MotDePasse}</div>
           </div>
         </div>
       ) : (
-        <div>
-          <div>
-            <div>
-              <img src={iconUser} alt="iconUser" />
+        <div className=" bg-white w-[80vw] h-[18vh] border-2 rounded-rd	 p-[2vw] m-[3vh] flex  flex-col justify-items-center justify-between">
+          <div className="flex  flex-row justify-items-center justify-between">
+            <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center ">
+              <img
+                src={iconUser}
+                alt="iconUser"
+                className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center"
+              />
               <input
                 type="text"
-                value={moderateur.nom}
+                value={moderateur.NomUtilisateur}
+                className=""
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
-            <div>
-              <img src={iconEmail} alt="iconEmail" />
+            <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center">
+              <img
+                src={iconEmail}
+                alt="iconEmail"
+                className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+              />
               <input
                 type="email"
-                value={moderateur.mail}
+                value={moderateur.Email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <button onClick={() => supprimer()}>Supprimer</button>
-              <button onClick={() => save()}>Save</button>
+              <button
+                className="bg-gray-800 rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+                onClick={() => supprimer()}
+              >
+                Supprimer
+              </button>
+              <button
+                className="bg-yellow rounded-rd font-Futura text-white w-[8vw] h-[5vh] text-2xl text-center justify-self-center mr-[1vw] "
+                onClick={() => save()}
+              >
+                Save
+              </button>
             </div>
           </div>
-          <div>
-            <img src={iconMdp} alt="iconMdp" />
+          <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-start py-[0.5vw]">
+            <img
+              src={iconMdp}
+              alt="iconMdp"
+              className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+            />
             <input
               type="text"
-              value={moderateur.mdp}
+              value={moderateur.MotDePasse}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>

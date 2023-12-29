@@ -1,46 +1,24 @@
-import os
-import shutil
 import requests
+import string
 import logging
-import validators
-#--------------------------------------------------------------------------------------------------------------
-# managing files
-from urllib.parse import urlparse, unquote
-import tempfile
-from django.core.files.base import ContentFile
-from dateutil import parser
 from datetime import datetime, timedelta
 #--------------------------------------------------------------------------------------------------------------
 # extract info using python bib
 from io import BytesIO
 import spacy
-from spacy.matcher import PhraseMatcher
-import nltk
 import re
 from rake_nltk import Rake
 #--------------------------------------------------------------------------------------------------------------
 # manipulating pdfs
-import PyPDF2
 import fitz  # PyMuPDF
-from pdfreader import PDFDocument
-import pdfreader.viewer
-import pdfminer
 from bs4 import BeautifulSoup
-#--------------------------------------------------------------------------------------------------------------
-# for ocr
-from PIL import Image
-import pytesseract
 #-----------------------------------------------------------------------------
 from elasticsearch import Elasticsearch
 #-----------------------------------------------------------------------------
 
 #                               utils.py --> functions used in views
 
-#----------------------------------------------------------------------------------------------------
-# for config ocr
-#os.environ["PATH"] += os.pathsep + r"C:\Program Files\Tesseract-OCR"
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-#----------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 #///////////////////////
 # extract_pdf_metadata 
 #///////////////////////
@@ -48,19 +26,27 @@ def extract_pdf_metadata(file):
     """
     Extract metadata from a PDF file.
 
-    :param str pdf_path: The path to the PDF file.
+    :param file: The PDF file content as either a BytesIO object or raw bytes.
     
     :return: A dictionary containing the extracted metadata.
-             Keys include 'Title', 'Authors', 'CreationDate', and 'Subject'.
+             Keys include 'Title', 'Authors', 'CreationDate', 'Abstract', and 'Keywords'.
     :rtype: dict
     """
 
-    file_content = file.read()
-    # Create a BytesIO object to wrap the file content
-    pdf_bytes_io = BytesIO(file_content)
+    # If file is an InMemoryUploadedFile, read its content
+    if hasattr(file, 'read'):
+        file_content = file.read()
+        file = BytesIO(file_content)
+    elif isinstance(file, bytes):
+        # If file is raw bytes, wrap it in a BytesIO object
+        file = BytesIO(file)
+
+    # If file is a BytesIO object, rewind it
+    if isinstance(file, BytesIO):
+        file.seek(0)
 
     # Open the PDF using fitz
-    doc = fitz.open(stream=pdf_bytes_io)
+    doc = fitz.open(stream=file, filetype="pdf")
 
     # Extract metadata information
     metadata = {
@@ -76,79 +62,6 @@ def extract_pdf_metadata(file):
 
     # Return the extracted metadata
     return metadata
-#--------------------------------------------------------------------------------------------------------------
-#///////////////////////
-#    pdf_to_images 
-#///////////////////////
-def pdf_to_images(file):
-    """
-    Convert PDF pages to a list of images.
-
-    :param str file_path: The path to the PDF file.
-
-    :return: A list of PIL Image objects representing each page in the PDF.
-    :rtype: list[Image.Image]
-    """
-    file_content = file.read()
-    # Create a BytesIO object to wrap the file content
-    pdf_bytes_io = BytesIO(file_content)
-
-    # Open the PDF document using PyMuPDF (fitz)
-    pdf_document = fitz.open(stream=pdf_bytes_io)
-    
-
-    # Initialize an empty list to store images
-    images = []
-
-    # Iterate through each page in the PDF
-    for page_num in range(pdf_document.page_count):
-        # Get the page object
-        page = pdf_document[page_num]
-
-        # Get the pixmap of the page
-        image = page.get_pixmap()
-
-        # Convert the pixmap to a PIL Image
-        img = Image.frombytes("RGB", [image.width, image.height], image.samples)
-
-        # Append the image to the list
-        images.append(img)
-
-    # Close the PDF document
-    pdf_document.close()
-
-    # Return the list of images
-    return images
-
-#--------------------------------------------------------------------------------------------------------------
-#//////////////////////////////////////////
-#  extract_text_with_ocr from pdf images
-#//////////////////////////////////////////
-def extract_text_with_ocr(images):
-    """
-    Extract text using OCR from a list of images.
-
-    :param list images: A list of PIL Image objects.
-
-    :return: The extracted text from the images.
-    :rtype: str
-    """
-    # Initialize an empty string to store the extracted text
-    extracted_text = ''
-
-    # Iterate through each image in the list
-    for image in images:
-        # Perform OCR on the image using pytesseract
-        text = pytesseract.image_to_string(image, lang='eng')
-
-        # Add the extracted text to the overall text, with newlines between pages
-        extracted_text += text + '\n'
-
-        # Clean the extracted text (assuming a clean_text function is defined)
-        extracted_text = clean_text(extracted_text)
-
-    # Return the extracted text
-    return extracted_text
 #--------------------------------------------------------------------------------------------------------------
 #///////////////////////
 # column_boxes  
@@ -216,19 +129,24 @@ def extract_text_from_pdf(file, num_pages=2):
     :return: Three strings representing the full text, text of the first `num_pages` pages, and text of the last `num_pages` pages.
     :rtype: tuple
     """
-    # Read the content of the file
-    file_content = file.read()
-    
+    # If file is an InMemoryUploadedFile, read its content
+    if hasattr(file, 'read'):
+        file_content = file.read()
+        file = BytesIO(file_content)
+    elif isinstance(file, bytes):
+        # If file is raw bytes, wrap it in a BytesIO object
+        file = BytesIO(file)
+
+    # If file is a BytesIO object, rewind it
+    if isinstance(file, BytesIO):
+        file.seek(0)
+
     # Check if the file content is not empty
-    if not file_content:
+    if not file:
        raise ValueError("File content is empty.")
 
-    # Create a BytesIO object to wrap the file content
-
-    pdf_bytes_io = BytesIO(file_content)
-
-    # Open the PDF file using PyMuPDF's fitz module.
-    pdf_file = fitz.open(stream=pdf_bytes_io) 
+    # Open the PDF using fitz
+    pdf_file = fitz.open(stream=file, filetype="pdf")
 
     # Determine the actual number of pages to extract based on the total number of pages in the PDF
     num_pages_to_extract = min(num_pages, pdf_file.page_count)
@@ -283,29 +201,6 @@ def extract_text_from_pdf(file, num_pages=2):
 #////////////////////////////////
 # download_pdf_from_url
 #////////////////////////////////
-
-#def download_pdf_from_url(url):
-    """
-    Download a PDF file from the given URL and return the file object.
-
-    :param str url: The URL of the PDF file.
-
-    :return: The file object containing the downloaded PDF content.
-    :rtype: io.BytesIO
-    """
-#    try:
-#       response = requests.get(url,stream=True)
-#        response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
-
-        # Create a BytesIO object to hold the PDF content
-#        pdf_file = BytesIO(response.content)
-
-#       return pdf_file
-#    except requests.exceptions.RequestException as e:
-        # Handle request-related exceptions (e.g., network issues)
-#        print(f"Error downloading PDF: {e}")
-#        return None
-    
 def download_pdf_from_url(url):
     """
     Download a PDF file from a given URL and return the file object.
@@ -334,6 +229,7 @@ def download_pdf_from_url(url):
 
         # If the content is already a PDF, return it
         elif 'application/pdf' in response.headers['Content-Type']:
+           
 
             return response.content
 
@@ -390,8 +286,7 @@ def extract_article_info(text, first_pages, last_pages):
         #________________________________________________________________________________________________
         institutions_pattern = re.compile(
              r'\bDepartment\s+of\s+(.*?)\b\.',
-             #r'(.+?)(?=\b(?:[A-Za-z\s]*\b\s*,\s*)?[A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)$'
-             re.IGNORECASE
+             re.IGNORECASE | re.DOTALL
             )
         #________________________________________________________________________________________________
         abstract_pattern = re.compile(
@@ -400,7 +295,7 @@ def extract_article_info(text, first_pages, last_pages):
             )
         #________________________________________________________________________________________________
         keywords_pattern = re.compile(
-             r'\bKeywords\b\s*([\w\s,]+)\n|Keywords:(.*?)\n\n|\bINDEX TERMS\b\s*([\w\s,]+)\n|INDEX TERMS(.*?)\n\n',
+             r'\bKeywords\s*([\w\s,]+)\n|Keywords(.*?)\n\n|\bINDEX TERMS\b\s*([\w\s,]+)\n|INDEX TERMS(.*?)\n\n',
              re.IGNORECASE | re.DOTALL
             )
         #________________________________________________________________________________________________
@@ -410,7 +305,8 @@ def extract_article_info(text, first_pages, last_pages):
             )
         #________________________________________________________________________________________________
         date_pattern = re.compile(
-             r'Published:\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
+             #r'Published\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
+             r'\bReceived\b\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
              r'[A-Z][a-z]+\s+\d{1,2}(?:–|-)\d{1,2},\s+\d{4})|'
              r"\d{4}-\d{2}-\d{2}|"
              r"\d{2}/\d{2}/\d{4}|"
@@ -426,7 +322,7 @@ def extract_article_info(text, first_pages, last_pages):
         abstract_match = abstract_pattern.search(first_pages)
         keywords_match = keywords_pattern.search(first_pages)
         references_match = references_pattern.search(last_pages) 
-        date_match = date_pattern.search(first_pages)
+        date_match = date_pattern.search(text)
         #-----------------------------------------------------------------------------------------
         # Get the matched groups
         title = title_match.group(1).strip() if title_match else None
@@ -444,6 +340,8 @@ def extract_article_info(text, first_pages, last_pages):
 
         references_string = '\n'.join(references)
 
+        
+
         if not keywords:
 
             r = Rake()
@@ -460,7 +358,7 @@ def extract_article_info(text, first_pages, last_pages):
                 cleaned_keywords.append(cleaned_keyword)
 
             keywords=cleaned_keywords
-
+        
         # If authors or institutions are not found using regex, use spaCy for entity recognition
         if not authors or not institutions:
             # Specify the number of lines to consider for entity recognition
@@ -476,15 +374,15 @@ def extract_article_info(text, first_pages, last_pages):
             authors_entities = [entity.text for entity in doc.ents if entity.label_ == "PERSON"]
 
             # Eliminate duplicate authors and exclude emails
-            filtered_authors = [author for author in authors_entities if not is_email(author) and len(author) <= 40]
+            filtered_authors = [author for author in authors_entities if not is_email(author) and len(author) <= 80]
             # Convert the list of authors to a pipe-separated string
             authors = ', '.join(set(filtered_authors)) if filtered_authors else None
 
             # Extract institution using spaCy
-            institution_entities = [entity.text for entity in doc.ents if entity.label_ == "ORG" and not is_email(entity.text) and len(entity.text) >= 6]
+            institution_entities = [entity.text for entity in doc.ents if entity.label_ == "ORG" and not is_email(entity.text) and len(entity.text) <= 60]
             # Convert the list of authors to a comma-separated string
             institutions = ', '.join(set(institution_entities)) if institution_entities else None
-
+        
         # Return a dictionary with extracted information
         article_info = {
             'title': title,
@@ -495,14 +393,6 @@ def extract_article_info(text, first_pages, last_pages):
             'references': references_string,
             'date': date
         }
-        #print('title :',title)
-        #print('authors :',authors)
-        #print('institutions :',institutions)
-        #print('abstract :',abstract)
-        #print('keywords :',keywords)
-        #print('references :',references)
-        #print('date :',date)
-
         return article_info
     except Exception as e:
         print(f"Error: {e}")
@@ -520,12 +410,21 @@ def is_valid_scientific_pdf(file):
     :return: True if the PDF is a valid scientific article, False otherwise.
     :rtype: bool
     """
-    file_content = file.read()
-    # Create a BytesIO object to wrap the file content
-    pdf_bytes_io = BytesIO(file_content)
+    # If file is an InMemoryUploadedFile, read its content
+    if hasattr(file, 'read'):
+        file_content = file.read()
+        file = BytesIO(file_content)
+    elif isinstance(file, bytes):
+        # If file is raw bytes, wrap it in a BytesIO object
+        file = BytesIO(file)
 
-    # Open the PDF file using PyMuPDF's fitz module.
-    pdf_file = fitz.open(stream=pdf_bytes_io) 
+    # If file is a BytesIO object, rewind it
+    if isinstance(file, BytesIO):
+        file.seek(0)
+
+    # Open the PDF using fitz
+    pdf_file = fitz.open(stream=file, filetype="pdf")
+     
 
     # Check if there is at least one page
     if pdf_file.page_count < 1:
@@ -583,27 +482,87 @@ def parse_and_validate_date(date_string):
 # parse_metadata_date
 #//////////////////////////   
 def parse_metadata_date(date_string):
+    if date_string is None:
+        return None
+
     try:
-        # Extract date and time components
-        date_time_str = date_string[2:14]
-        timezone_offset_str = date_string[14:]
-
-        # Convert timezone offset to hours and minutes
-        hours = int(timezone_offset_str[:3])
-        minutes = int(timezone_offset_str[3:])
-
-        # Create a timedelta object for the timezone offset
-        timezone_offset = timedelta(hours=hours, minutes=minutes)
-
-        # Parse the date and time string
-        parsed_date = datetime.strptime(date_time_str, '%Y%m%d%H%M%S')
-
-        # Apply the timezone offset
-        parsed_date -= timezone_offset
+        # Extract year, month, and day components
+        year = int(date_string[2:6])
+        month = int(date_string[6:8])
+        day = int(date_string[8:10])
 
         # Return the parsed date in YYYY-MM-DD format
-        return parsed_date.strftime('%Y-%m-%d')
+        return f"{year:04d}-{month:02d}-{day:02d}"
 
-    except ValueError:
+    except (ValueError, IndexError):
+        # Handle invalid date string
         return None
+#------------------------------------------------------------------------------
+#//////////////////////////
+# upload_article_process
+#//////////////////////////   
+def upload_article_process(file):
+    """
+    Process the uploaded PDF file, extract metadata, validate,
+    extract text, perform analysis, and return the article data.
+
+    :param file: The uploaded PDF file.
+
+    :return: Article data dictionary.
+    """
+
+    # Ensure the file cursor is at the beginning
+    file.seek(0)
+
+    # Extract metadata from the PDF file
+    meta_data = extract_pdf_metadata(file)
+    print(meta_data)
+    titre_meta_data = meta_data.get("Title","")
+    date_meta_data = meta_data.get("CreationDate","")
+
+    # URL for the file
+    file_url = f'http://127.0.0.1:8000/uploaded_media/article_pdfs/{file.name}'
+
+    # Extract text from the uploaded PDF
+    file.seek(0)
+    pdf_text, first_pages_text, last_pages_text = extract_text_from_pdf(file)
+
+    # Perform analysis on pdf_text
+    analysis_result = extract_article_info(pdf_text, first_pages_text, last_pages_text)
+
+    # Combine title from metadata and analysis result
+
+    titre = analysis_result.get('title', '')
+
+    # Define a translation table to remove specific characters
+    translator = str.maketrans('', '', string.whitespace + "''’")
+
+    # Remove spaces and specified characters from titre and titre_meta_data
+    titre_without_spaces = titre.translate(translator)
+    titre_meta_data_without_spaces = titre_meta_data.translate(translator)
+
+    # Compare the modified strings
+    if titre_without_spaces != titre_meta_data_without_spaces:
+       titre = titre_meta_data + ' ' + titre
+    
+    date = analysis_result.get('date', '')
+
+    if date_meta_data and not date :
+        date = parse_metadata_date(date_meta_data)
+
+
+    # Prepare the article data dictionary
+    article_data = [{
+        'Titre': titre,
+        'Resume': analysis_result.get('abstract', ''),
+        'auteurs': analysis_result.get('authors', ''),
+        'Institution': analysis_result.get('institutions', ''),
+        'date': date,
+        'MotsCles': analysis_result.get('keywords', ''),
+        'text': pdf_text,
+        'URL_Pdf': file_url,
+        'RefBib': analysis_result.get('references', ''),
+    }]
+
+    return article_data
 #------------------------------------------------------------------------------

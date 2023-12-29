@@ -16,13 +16,19 @@ const ListModerateurs = () => {
     setAjouté(false)
   };
   let moderateur = {
-    NomUtilisateur:" yasmine",
+    NomUtilisateur:" yasmine choukrane",
     Email:"ly-choukrane@esi.dz",
     MotDePasse:"azerty",
     role: "moderateur"
   };
+   let moderateur1 = {
+     NomUtilisateur: " yasmine choukrane",
+     Email: "ly-choukrane@esi.dz",
+     MotDePasse: "azerty",
+     role: "moderateur",
+   };
   
-  useEffect(()=>{setModerateurs([moderateur])},[])
+  useEffect(()=>{setModerateurs([moderateur,moderateur1])},[])
 
   // useEffect(() => {
   //   console.log("fetching les modérateurs");
@@ -50,13 +56,13 @@ const ListModerateurs = () => {
       {
         //titre
       }
-      <div className="text-black text-[3vw] z-20 font-Futura-bold mb-[60vh]">
+      <div className="text-black text-[3vw] z-20 font-Futura-bold mb-[5vh] absolute top-[80px]">
         La liste des modérateurs
       </div>
       {
         //liste des modérateurs
       }
-      <div>
+      <div >
         <Moderateurs moderateurs={moderateurs} />
       </div>
       {

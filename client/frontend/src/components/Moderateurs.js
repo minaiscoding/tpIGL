@@ -3,7 +3,7 @@ import Moderateur from "./Moderateur";
 
 function Moderateurs({ moderateurs }) {
   return (
-    <div>
+    <div className="flex flex-col  justify-start items-start h-full w-full">
       {moderateurs.map((moderateur) => (
         <Moderateur key={moderateur.nom} moderateur={moderateur} />
       ))}

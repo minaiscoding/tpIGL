@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
@@ -117,13 +117,13 @@ const UploadArticle = () => {
           />
            <ToastContainer />
           {/* URL input */}
-          <div className="w-[80%] text-black px-4 py-2 mt-10 flex flex-col border border-black rounded-rd relative bg-gradient-to-b from-purple-600 to-purple-600 mb-32 sm:mb-40 md:mb-48 lg:mb-56 xl:mb-64 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300">
+          <div className="w-[80%] text-black px-4 py-2 mt-10 flex flex-col border-2 border-black rounded-rd relative bg-gradient-to-b from-purple-600 to-purple-600 mb-32 sm:mb-40 md:mb-48 lg:mb-56 xl:mb-64 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300">
             <input
               type="url"
               placeholder="Enter URL"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="text-2xl font-Futura  bg-transparent border-none focus:outline-none placeholder-gray-500 pl-4 bg-gradient-to-b from-purple-600 to-purple-600 "
+              className="text-2xl font-Futura  bg-transparent border-none focus:outline-none placeholder-gray-900 pl-4 bg-gradient-to-b from-purple-600 to-purple-600 "
             />
             <img
               src={link}

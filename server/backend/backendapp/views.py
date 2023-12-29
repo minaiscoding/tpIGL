@@ -1,5 +1,8 @@
 from django.contrib.auth.hashers import check_password
 from rest_framework import generics
+from rest_framework.decorators import schema, parser_classes
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer, FavoriteArticleSerializer
 from rest_framework.views import APIView
@@ -15,6 +18,10 @@ class UtilisateursListView(generics.ListAPIView):
     queryset = Utilisateurs.objects.all()
     serializer_class = UtilisateursSerializer
 
+@swagger_auto_schema(
+    operation_summary="Get a list of articles",
+    operation_description="Retrieve a list of articles from Elasticsearch."
+)
 class ArticlesListView(APIView):
     renderer_classes = [JSONRenderer]
 
@@ -36,8 +43,19 @@ class ArticlesListView(APIView):
 
 from django.http import JsonResponse
 
+
 class SearchView(APIView):
     renderer_classes = [JSONRenderer]
+    @swagger_auto_schema(
+        operation_summary="Perform a search",
+        operation_description="Perform a search based on the provided query parameters.",
+        manual_parameters=[
+            openapi.Parameter('q', openapi.IN_QUERY, description="Search query", type=openapi.TYPE_STRING),
+            openapi.Parameter('start_date', openapi.IN_QUERY, description="Start date for date range filter", type=openapi.TYPE_STRING),
+            openapi.Parameter('end_date', openapi.IN_QUERY, description="End date for date range filter", type=openapi.TYPE_STRING),
+            openapi.Parameter('filter_type', openapi.IN_QUERY, description="Filter type", type=openapi.TYPE_STRING),
+        ],
+    )
 
     def get(self, request):
         # Get the search query from the request parameters

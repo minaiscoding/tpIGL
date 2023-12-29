@@ -18,9 +18,6 @@ const Displayer = ({ results }) => {
           className="bg-white border border-black rounded-md p-4 mb-4 result-container"
           style={{ display: "flex", flexDirection: "column" }}
         >
-          <div style={{ alignSelf: "flex-end" }}>
-            <FavorisIcon></FavorisIcon>
-          </div>
           <h2>{result.Titre}</h2>
           <p>{result.Resume}</p>
           {/* 

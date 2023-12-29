@@ -1,3 +1,4 @@
+```js
 // Displayer.js
 import React from "react";
 import FavorisIcon from "./FavorisIcon";
@@ -34,3 +35,4 @@ const Displayer = ({ results }) => {
 };
 
 export default Displayer;
+```;

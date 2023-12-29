@@ -19,7 +19,7 @@ const Displayer = ({ results }) => {
           style={{ display: "flex", flexDirection: "column" }}
         >
           <div style={{ alignSelf: "flex-end" }}>
-            <FavorisIcon></FavorisIcon>
+            <FavorisIcon>f
           </div>
           <h2>{result.Titre}</h2>
           <p>{result.Resume}</p>

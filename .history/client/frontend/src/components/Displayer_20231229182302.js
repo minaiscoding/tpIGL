@@ -1,3 +1,4 @@
+
 // Displayer.js
 import React from "react";
 import FavorisIcon from "./FavorisIcon";
@@ -19,7 +20,7 @@ const Displayer = ({ results }) => {
           style={{ display: "flex", flexDirection: "column" }}
         >
           <div style={{ alignSelf: "flex-end" }}>
-            <FavorisIcon></FavorisIcon>
+            <FavorisIcon articleId={result.id}/>
           </div>
           <h2>{result.Titre}</h2>
           <p>{result.Resume}</p>

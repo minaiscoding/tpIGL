@@ -26,6 +26,7 @@ class ArticlesListView(APIView):
         # Extract relevant information from search hits
         hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
         
+
         # Serialize the search results using your existing serializer
         serializer = ArticlesSerializer(data=hits, many=True)
         serializer.is_valid()

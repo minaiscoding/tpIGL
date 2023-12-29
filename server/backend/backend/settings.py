@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,15 +42,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'backendapp',
     'corsheaders',
-    'django_elasticsearch_dsl',
     'rest_framework',
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
+    'PyPDF2',
+      
 ]
+
 
 ELASTICSEARCH_DSL = {
     'default': {
         'hosts': 'http://localhost:9200',
     }
 }
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app's origin
@@ -130,7 +138,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
+#---------------------------------------------------
+# Media files (uploads) will be stored in this directory
+MEDIA_ROOT = BASE_DIR / 'uploaded_media'
+MEDIA_URL = '/uploaded_media/'
+
+
+#---------------------------------------------------
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

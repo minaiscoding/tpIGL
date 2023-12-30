@@ -16,20 +16,10 @@ from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions
 from rest_framework.permissions import AllowAny
 from elasticsearch import Elasticsearch
+from django.core.exceptions import MultipleObjectsReturned
 
 
-@api_view(['DELETE'])
-def delete_article(request, pk):
-    try:
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-        index_name = 'articles'
 
-        es.delete(index=index_name, doc_type='_doc', id=pk)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    except Exception as e:
-        return Response(data={'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UtilisateursListView(generics.ListAPIView):
     queryset = Utilisateurs.objects.all()
@@ -66,7 +56,7 @@ class ArticleDetailView(APIView):
 
         return Response(hit)
     
-    
+
     
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
@@ -93,121 +83,43 @@ class SearchView(APIView):
 
         # Return the serialized results as JSON
         return Response(serializer.data)
-
-
-    
     
 
 
-class LogoutView(APIView):
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-    
-'''class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('NomUtilisateur')
-        password = request.data.get('MotDePasse')
-
-        user = authenticate(request, NomUtilisateur=username, MotDePasse=password)
-
-        if user is not None:
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
 class LoginView(APIView):
-    @csrf_exempt  # Use this decorator if you disable CSRF in your settings or for testing purposes
-    def post(self, request, *args, **kwargs):
-        nom_utilisateur = request.data.get('NomUtilisateur')
-        password = request.data.get('MotDePasse')
+  @csrf_exempt
+  def post(self, request, *args, **kwargs):
+    nom_utilisateur = request.data.get('NomUtilisateur')
+    email = request.data.get('Email')
+    password = request.data.get('MotDePasse')
 
-        # Debug: Print request data
-        print('Request data:', request.data)
+    # Debug: Print request data
+    print('Request data:', request.data)
 
-        # Debug: Print user model fields
-        print('User model fields:', Utilisateurs._meta.get_fields())
+    # Debug: Print user model fields
+    print('User model fields:', Utilisateurs._meta.get_fields())
 
-        try:
-            # Retrieve user based on the provided username
-            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur)
-            
-            # Check if the provided password matches the stored password
-            if check_password(password, utilisateur.MotDePasse):
-                # Login the user
-                request.user = utilisateur
-                print(utilisateur.Role)
-                # Check user role and respond accordingly
-                if utilisateur.Role == 'admin':
-                    return Response({'role': 'admin', 'message': 'Login successful'}, status=status.HTTP_200_OK)
-                elif utilisateur.Role == 'moderator':
-                    return Response({'role': 'moderator', 'message': 'Login successful'}, status=status.HTTP_200_OK)
-                elif utilisateur.Role == 'user':
-                    return Response({'role': 'user', 'message': 'Login successful'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
-        except Utilisateurs.DoesNotExist:
-            return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)          
+    try:
+        # Attempt to retrieve user based on both username and email
+        utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
+        
+        # Check if the provided password matches the stored password
+        if check_password(password, utilisateur.MotDePasse):
+            # Serialize the user instance
+            serializer = UtilisateursSerializer(utilisateur)
 
-'''class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+            # Add the role information to the response
+            response_data = {
+                'role': utilisateur.Role,
+                'message': 'Login successful',
+                'utilisateur': serializer.data,  # Include the serialized user data
+            }
 
-        # Fetch user by username
-        try:
-            user = Utilisateurs.objects.get(NomUtilisateur=username)
-        except Utilisateurs.DoesNotExist:
-            user = None
-
-        if user is not None and check_password(password, user.MotDePasse):
-            # If user is authenticated, log them in
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            return Response(response_data, status=status.HTTP_200_OK)
         else:
-            # If authentication fails, return an error response
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
-            
-            
-'''class LoginAPI(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
+            return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+    except Utilisateurs.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
+    except MultipleObjectsReturned:
+        return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def post(self, request, *args, **kwargs):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data
-        login(request, user)
-        token, created = Token.objects.get_or_create(user=user)
-
-        utilisateurs_serializer_data = UtilisateursSerializer(user.user).data if hasattr(user, 'user') else None
-
-        return Response({
-            'token': token.key,
-            'utilisateurs': utilisateurs_serializer_data
-        })'''
-'''@api_view(['POST'])
-@permission_classes([AllowAny])
-def register_user(request):
-    serializer = CustomUserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def custom_login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(username=username, password=password)
-
-    if user:
-        token, created = Token.objects.get_or_create(user=user)
-        serializer = CustomUserSerializer(user)
-        return Response({'token': token.key, 'user': serializer.data})
-    else:
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)'''

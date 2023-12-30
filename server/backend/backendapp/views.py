@@ -16,20 +16,10 @@ from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions
 from rest_framework.permissions import AllowAny
 from elasticsearch import Elasticsearch
+from django.core.exceptions import MultipleObjectsReturned
 
 
-@api_view(['DELETE'])
-def delete_article(request, pk):
-    try:
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-        index_name = 'articles'
 
-        es.delete(index=index_name, doc_type='_doc', id=pk)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    except Exception as e:
-        return Response(data={'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UtilisateursListView(generics.ListAPIView):
     queryset = Utilisateurs.objects.all()
@@ -66,7 +56,7 @@ class ArticleDetailView(APIView):
 
         return Response(hit)
     
-    
+
     
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
@@ -119,55 +109,40 @@ class SearchView(APIView):
     
 
 
-class LogoutView(APIView):
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-    
-'''class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('NomUtilisateur')
-        password = request.data.get('MotDePasse')
 
-        user = authenticate(request, NomUtilisateur=username, MotDePasse=password)
-
-        if user is not None:
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
 class LoginView(APIView):
-    @csrf_exempt  # Use this decorator if you disable CSRF in your settings or for testing purposes
-    def post(self, request, *args, **kwargs):
-        nom_utilisateur = request.data.get('NomUtilisateur')
-        password = request.data.get('MotDePasse')
+  @csrf_exempt
+  def post(self, request, *args, **kwargs):
+    nom_utilisateur = request.data.get('NomUtilisateur')
+    email = request.data.get('Email')
+    password = request.data.get('MotDePasse')
 
-        # Debug: Print request data
-        print('Request data:', request.data)
+    # Debug: Print request data
+    print('Request data:', request.data)
 
-        # Debug: Print user model fields
-        print('User model fields:', Utilisateurs._meta.get_fields())
+    # Debug: Print user model fields
+    print('User model fields:', Utilisateurs._meta.get_fields())
 
-        try:
-            # Retrieve user based on the provided username
-            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur)
-            
-            # Check if the provided password matches the stored password
-            if check_password(password, utilisateur.MotDePasse):
-                # Login the user
-                #request.user = utilisateur
-               # Serialize the user instance
-                serializer = UtilisateursSerializer(utilisateur)
+    try:
+        # Attempt to retrieve user based on both username and email
+        utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
+        
+        # Check if the provided password matches the stored password
+        if check_password(password, utilisateur.MotDePasse):
+            # Serialize the user instance
+            serializer = UtilisateursSerializer(utilisateur)
 
-                # Add the role information to the response
-                response_data = {
-                    'role': utilisateur.Role,
-                    'message': 'Login successful',
-                    'utilisateur': serializer.data,  # Include the serialized user data
-                }
+            # Add the role information to the response
+            response_data = {
+                'role': utilisateur.Role,
+                'message': 'Login successful',
+                'utilisateur': serializer.data,  # Include the serialized user data
+            }
 
-                return Response(response_data, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
-        except Utilisateurs.DoesNotExist:
-            return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)  
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+    except Utilisateurs.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
+    except MultipleObjectsReturned:
+        return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

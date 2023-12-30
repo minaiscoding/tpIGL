@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import vector_bg from "../assets/Vector.svg";
 import pdf_img from "../assets/pdf.png"
 import axios from "axios";
+import { useParams } from "react-router";
 
 export const TextArticlePage = () => {
     const backgroundImage = `url(${vector_bg})`;
@@ -13,14 +14,17 @@ export const TextArticlePage = () => {
         // Fetch articles when the component mounts
         fetchArticles();
     }, []);
+    
+    const articleId =useParams ();
+
 
     const fetchArticles = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/articles/`);
-            const fetchedArticles = response.data;
+            const response = await axios.get( `http://localhost:9200/articles/_doc/SILvsYwByJ8brC2scB_6`);
+            const fetchedArticles = response.data._source;
 
-            setArticleData({ ...fetchedArticles[1] });
-            setUrl(fetchedArticles[1].URL_Pdf);
+            setArticleData({ ...fetchedArticles});
+            setUrl(fetchedArticles.URL_Pdf);
         } catch (error) {
             console.error("Error fetching data:", error);
         }

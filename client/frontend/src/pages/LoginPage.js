@@ -29,6 +29,7 @@ const LoginPage = ({ onRoleChange }) => {
         const response = await axios.post("http://127.0.0.1:8000/api/login/", {
           NomUtilisateur: username,
           MotDePasse: password,
+          Email: email,
         });
 
         const responseData = response.data;

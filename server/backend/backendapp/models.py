@@ -25,13 +25,6 @@ class Utilisateurs(models.Model):
     def __str__(self):
         return self.NomUtilisateur
 
-from django.contrib.auth.models import AbstractUser
-
-'''class Utilisateurs(AbstractUser):
-    Role = models.CharField(max_length=50, choices=[("admin", "Admin"), ("moderator", "Moderator"), ("user", "User")])
-
-    def __str__(self):
-        return self.username  # Use the 'username' field from AbstractUser'''
 
 class Articles(models.Model):
     id = models.CharField(max_length=255, primary_key=True)

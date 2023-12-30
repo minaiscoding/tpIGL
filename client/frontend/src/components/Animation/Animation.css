@@ -25,14 +25,6 @@
   .letter-5 { animation: type 0.5s forwards 3s; }
   .letter-6 { animation: type 0.5s forwards 3.5s; }
   
-  .cursor {
-    background-color: #000; /* Adjust color as needed */
-    width: 2px; /* Adjust width as needed */
-    height: 20px; /* Adjust height as needed */
-    display: inline-block;
-    opacity: 1;
-    animation: blink 1s infinite;
-  }
   
   @keyframes type {
     from { opacity: 0; }

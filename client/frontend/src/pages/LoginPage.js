@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../logo.svg";
 import LoginImg from "../assets/login.png";
 
-const LoginPage = () => {
-  const navigate = useNavigate();
+const LoginPage = ({ onRoleChange }) => {
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -15,54 +14,71 @@ const LoginPage = () => {
   const [error2, setError2] = useState("");
   const [error3, setError3] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
-    setError1("");
-    setError2("");
-    setError3("");
 
-    if (username === "") {
-      setError1("Vérifier votre nom d'utilisateur ");
-    }
-    if (email === "") {
-      setError2("Vérifiez votre Email");
-    }
-    if (password === "") {
-      setError3("Vérifier votre mot de passe ");
-    } else {
-      try {
-        const response = await axios.post("http://127.0.0.1:8000/api/login/", {
-          NomUtilisateur: username,
-          MotDePasse: password,
-        });
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/login/", {
+        NomUtilisateur: username,
+        MotDePasse: password,
+      });
 
-        const responseData = response.data;
+      const responseData = response.data;
+      const token = response.data.token; // Retrieve the token from the response data
+      localStorage.setItem('token', token);
+      localStorage.setItem("userRole", responseData.role);
+      localStorage.setItem("NomUtilisateurs", responseData.utilisateur.NomUtilisateur);
+      console.log(responseData.utilisateur.NomUtilisateur);
+      onRoleChange(responseData.role);
 
-        switch (responseData.role) {
-          case "admin":
-            navigate("/Moderateurs");
-            break;
-          case "moderator":
-            navigate("/details");
-            break;
-          case "user":
-            navigate("/search");
-            break;
-          default:
-            break;
-        }
+      localStorage.setItem('id', responseData.utilisateur.id);
+      console.log(responseData.utilisateur.id);
 
-        console.log("Login successful", responseData);
-      } catch (error) {
-        console.error("Error:", error);
-        if (error.response) {
-          console.error("Server Error Message:", error.response.data);
-          setErrorMsg(error.response.data.message || "Sign-in failed");
-        } else {
-          setErrorMsg("An error occurred during sign-in");
-        }
+      switch (responseData.role) {
+        case "admin":
+          navigate("/Moderateurs");
+          break;
+        case "moderator":
+          navigate("/details");
+          break;
+        case "user":
+
+          navigate("/search");
+          break;
+        default:
+          break;
       }
+
+      console.log("Login successful", responseData);
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+
+    } catch (error) {
+      console.error("Error:", error);
+      if (error.response) {
+        console.error("Server Error Message:", error.response.data);
+        console.log("Server Error Message:", error.response.data);
+
+
+        if (error.response.data.message === 'User not found') {
+          setError1('vérifier votre nom d`utilisateur');
+        }/* else if (error.response.data.field === "Email") {
+          setError2(error.response.data.message || "Error in email");
+        } */else if (error.response.data.message === 'Invalid password') {
+          setError3('mot de passe incorrecte');
+        } else {
+          setErrorMsg(error.response.data.message || "Sign-in failed");
+        }
+      } else {
+        setErrorMsg("An error occurred during sign-in");
+      }
+      
     }
+
+
+
   };
   return (
     <div className="sm:flex sm:flex-row flex flex-col items-center overflow-y-hidden">
@@ -75,7 +91,12 @@ const LoginPage = () => {
         />
       </div>
       <div className="w-full sm:w-[55%] h-[70%] flex flex-col justify-center items-center">
-        <form className="flex flex-col justify-center items-center align-middle gap-10 w-[75%] sm:w-[65%]">
+        <form className="flex flex-col justify-center items-center align-middle gap-10 w-[75%] sm:w-[65%]"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
           <h1 className="text-rgba-54-53-206-1 font-avantgarde text-center text-2xl sm:text-3xl font-extrabold mt-4">
             {" "}
             Se Connecter{" "}
@@ -85,9 +106,8 @@ const LoginPage = () => {
             <input
               type="text"
               placeholder="Nom d'utilisateur"
-              className={`border-[1.3px] border-solid border-rgba-54-53-206-1 rounded-md px-4 h-[46px] text-navBg text-base w-full ${
-                error1 && "border-yellow"
-              }`}
+              className={`border-[1.3px] border-solid border-rgba-54-53-206-1 rounded-md px-4 h-[46px] text-navBg text-base w-full ${error1 && "border-yellow"
+                }`}
               onChange={(e) => setUsername(e.target.value)}
             />
             {error1 && (
@@ -101,9 +121,8 @@ const LoginPage = () => {
             <input
               type="email"
               placeholder="Email"
-              className={`border-[1.3px] border-solid rounded-md border-rgba-54-53-206-1 px-4 h-[46px] text-navBg text-base w-full ${
-                error2 && "border-yellow"
-              }`}
+              className={`border-[1.3px] border-solid rounded-md border-rgba-54-53-206-1 px-4 h-[46px] text-navBg text-base w-full ${error2 && "border-yellow"
+                }`}
               onChange={(e) => setEmail(e.target.value)}
             />
             {error2 && (
@@ -117,9 +136,8 @@ const LoginPage = () => {
             <input
               type="password"
               placeholder="Mot de passe"
-              className={`border-solid border-[1.3px] rounded-md px-4 h-[46px]  border-rgba-54-53-206-1 text-navBg text-base w-full ${
-                error3 && "border-yellow"
-              }`}
+              className={`border-solid border-[1.3px] rounded-md px-4 h-[46px]  border-rgba-54-53-206-1 text-navBg text-base w-full ${error3 && "border-yellow"
+                }`}
               onChange={(e) => setPassword(e.target.value)}
             />
             {error3 && (
@@ -131,7 +149,7 @@ const LoginPage = () => {
 
           <button
             className="px-4 h-[55px] bg-rgba-54-53-206-1 w-full rounded-md text-[#fff] font-Futura text-center text-2xl"
-            onClick={handleLogin}
+            type="submit"
           >
             Connecter
           </button>

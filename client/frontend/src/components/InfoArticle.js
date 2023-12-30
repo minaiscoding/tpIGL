@@ -10,45 +10,18 @@ const style3 =
   "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ";
 
 function InfoArticle(props) {
-  const [formData, setFormData] = useState(props.article);
+  const [formData, setFormData] = useState({ ...props.article });
   const [loading, setLoading] = useState(true);
   const [articleData, setArticleData] = useState(null);
 
-  /*useEffect(() => {
-    // Fetch articles when component mounts
-    fetchArticles();
-  }, []);
 
-  const fetchArticles = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/api/articles/${articleData.id}/`
-      );
-      const fetchedArticles = response.data;
-      setFormData(fetchedArticles[1] || {}); // Assuming you want to display the first article
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  };*/
-
-  /*const handleDelete = async () => {
-    try {
-      await axios.delete(`http://localhost:8000/api/articles/${formData.id}`);
-      // Assuming that the server returns a success status (2xx)
-      // You may want to handle different response status codes appropriately
-      console.log("Article deleted successfully");
-      // Add any additional logic after deletion if needed
-    } catch (error) {
-      console.error("Error deleting article:", error);
-    }
-  };
-*/
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+
+
+
 
   return (
     <div
@@ -160,7 +133,7 @@ function InfoArticle(props) {
           <h2 className={style1}> Résumé :</h2>
           <p className={style2}>{formData.Resume}</p>
 
-          <h2 className={`${style1} ml-2`}> Mots clés : </h2>
+          <h2 className={style1}> Mots clés : </h2>
           <p className={style2}>{formData.MotsCles}</p>
 
           <h2 className={style1}> Texte :</h2>

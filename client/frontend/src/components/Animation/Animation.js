@@ -21,7 +21,6 @@ function Animation() {
           alt={`letter-${index}`}
         />
       ))}
-      <span className="cursor"></span>
     </div>
   );
 }

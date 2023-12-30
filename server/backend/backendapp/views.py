@@ -155,79 +155,19 @@ class LoginView(APIView):
             # Check if the provided password matches the stored password
             if check_password(password, utilisateur.MotDePasse):
                 # Login the user
-                request.user = utilisateur
-                print(utilisateur.Role)
-                # Check user role and respond accordingly
-                if utilisateur.Role == 'admin':
-                    return Response({'role': 'admin', 'message': 'Login successful'}, status=status.HTTP_200_OK)
-                elif utilisateur.Role == 'moderator':
-                    return Response({'role': 'moderator', 'message': 'Login successful'}, status=status.HTTP_200_OK)
-                elif utilisateur.Role == 'user':
-                    return Response({'role': 'user', 'message': 'Login successful'}, status=status.HTTP_200_OK)
+                #request.user = utilisateur
+               # Serialize the user instance
+                serializer = UtilisateursSerializer(utilisateur)
+
+                # Add the role information to the response
+                response_data = {
+                    'role': utilisateur.Role,
+                    'message': 'Login successful',
+                    'utilisateur': serializer.data,  # Include the serialized user data
+                }
+
+                return Response(response_data, status=status.HTTP_200_OK)
             else:
                 return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
         except Utilisateurs.DoesNotExist:
-            return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)          
-
-'''class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        # Fetch user by username
-        try:
-            user = Utilisateurs.objects.get(NomUtilisateur=username)
-        except Utilisateurs.DoesNotExist:
-            user = None
-
-        if user is not None and check_password(password, user.MotDePasse):
-            # If user is authenticated, log them in
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # If authentication fails, return an error response
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
-            
-            
-'''class LoginAPI(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, *args, **kwargs):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data
-        login(request, user)
-        token, created = Token.objects.get_or_create(user=user)
-
-        utilisateurs_serializer_data = UtilisateursSerializer(user.user).data if hasattr(user, 'user') else None
-
-        return Response({
-            'token': token.key,
-            'utilisateurs': utilisateurs_serializer_data
-        })'''
-'''@api_view(['POST'])
-@permission_classes([AllowAny])
-def register_user(request):
-    serializer = CustomUserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def custom_login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(username=username, password=password)
-
-    if user:
-        token, created = Token.objects.get_or_create(user=user)
-        serializer = CustomUserSerializer(user)
-        return Response({'token': token.key, 'user': serializer.data})
-    else:
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)'''
+            return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)  

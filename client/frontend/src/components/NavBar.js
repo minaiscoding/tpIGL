@@ -9,9 +9,10 @@ import { IoIosLogOut } from 'react-icons/io';
 import { SlMenu } from 'react-icons/sl';
 import { CgClose } from "react-icons/cg";
 import line from "../assets/Line.png";
+import { PiUserCircleLight } from "react-icons/pi";
 
-export default function Navbar() {
-    const [role, setRole] = useState('user');
+
+const Navbar = ({ role, profile }) => {
     const [deconect, setDeconect] = useState(false);
     const location = useLocation();
     const [shownav, setShownav] = useState(false);
@@ -26,6 +27,15 @@ export default function Navbar() {
     function changeActiveClassName(name) {
         setActiveClassName(name);
     }
+
+    const logOutHandler = async () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("NomUtilisateurs");
+        localStorage.removeItem("id");
+        console.log("yes");
+        window.location.href = "/";
+    };
 
     return (
         <div>
@@ -84,10 +94,10 @@ export default function Navbar() {
                 </div>
                 <div className="flex relative flex-row text-center gap-[10px] items-center">
                     <div className="w-[36px] h-[36px] rounded-full overflow-hidden">
-                        <img className="w-full h-full object-cover bg-[#fff]" alt="" />
+                        <PiUserCircleLight className="w-full h-full object-cover text-xs  text-[#FFFF]" />
                     </div>
-                    <div className=" flex flex-row items-center justify-center gap-1 mr-4">
-                        <p className="text-[#fff] font-Futura">Mon Profile</p>
+                    <div className=" flex flex-row items-center justify-center gap-2 mr-4">
+                        <p className="text-[#fff] font-Futura">{profile}</p>
                         <div className="flex flex-col">
                             {deconect ? (
                                 <FaAngleUp className="text-[#fff] cursor-pointer top-1 relative" onClick={() => setDeconect(false)} />
@@ -96,7 +106,11 @@ export default function Navbar() {
                             )}
                             {deconect && (
                                 <div className=" absolute top-10 right-4 z-50">
-                                    <button className=' text-navBg flex gap-2 justify-center text-lg font-Futura text-center bg-[#fff] rounded-sm mt-1 px-4 py-2 shadow-navBg'>
+                                    <button className=' text-navBg flex gap-2 justify-center text-lg font-Futura text-center bg-[#fff] rounded-sm mt-1 px-4 py-2 shadow-navBg'
+                                        onClick={() => {
+                                            logOutHandler();
+                                        }}
+                                    >
                                         <IoIosLogOut className='relative   top-1 ' />
                                         Déconnecter
                                     </button>
@@ -123,10 +137,10 @@ export default function Navbar() {
 
                             <CgClose className=' absolute top-1 right-6 text-[#ffff] z-50 cursor-pointer' onClick={() => setShownav(false)} />
                             <div className='flex flex-row gap-4 items-center justify-center  pb-3  pt-6 bg-yellow w-full '>
-                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-[#ffff]">
-                                    <img className="w-full h-full object-cover" alt="" />
+                                <div className="w-[36px] h-[36px] rounded-full overflow-hidden ">
+                                    <PiUserCircleLight className="w-full h-full object-cover  text-[#000]" />
                                 </div>
-                                <p>Amina </p>
+                                <p>{profile} </p>
                             </div>
                             <img src={line} />
 
@@ -168,11 +182,11 @@ export default function Navbar() {
                                         <LuFileText
                                             className={` text-navBg `}
                                         />
-                                        <Link to="/search" onClick={() => changeActiveClassName('/search')}>
+                                        <Link to="/UploadArticle" onClick={() => changeActiveClassName('/UploadArticle')}>
                                             <p
                                                 className={` font-Futura text-navBg`}
                                             >
-                                                Uplaod Article
+                                                Upload Article
                                             </p>
                                         </Link>
                                     </div>
@@ -183,7 +197,7 @@ export default function Navbar() {
                                         <TfiWidgetized
                                             className={` text-navBg `}
                                         />
-                                        <Link to="/mesFavoris" onClick={() => changeActiveClassName('/mesFavoris')}>
+                                        <Link to="/Moderateurs" onClick={() => changeActiveClassName('/Moderateurs')}>
                                             <p
                                                 className={` font-Futura text-navBg `}
                                             >
@@ -195,7 +209,10 @@ export default function Navbar() {
 
                                 </>
                             ) : null}
-                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  cursor-pointer`} >
+                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  cursor-pointer`}
+                                onClick={() => {
+                                    logOutHandler();
+                                }} >
 
                                 <IoIosLogOut
                                     className={` text-navBg `}
@@ -219,3 +236,4 @@ export default function Navbar() {
         </div >
     );
 }
+export default Navbar

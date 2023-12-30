@@ -4,6 +4,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch_dsl.connections import connections
 from django.core.validators import FileExtensionValidator
+import uuid
 
 
 
@@ -31,7 +32,9 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model): 
-    id = models.CharField(max_length=255, primary_key=True)
+    #id =models.CharField(max_length=255, primary_key=True)
+    #id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True,max_length=255, default=uuid.uuid4, editable=False)
     Titre = models.CharField(max_length=255,null=True,blank=True)
     Resume = models.TextField(null=True,blank=True)
     auteurs = models.CharField(max_length=255,null=True,blank=True)

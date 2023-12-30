@@ -214,7 +214,7 @@ const DetailsArticle = ({ role }) => {
                     </div>
 
 
-                    {role === "modérateur" || role === "admin" && (
+                    {role === "moderator" || role === "admin" && (
                         <div className="flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 xl:gap-24">
                             {!edit ? (
                                 <>

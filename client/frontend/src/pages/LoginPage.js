@@ -13,8 +13,7 @@ const LoginPage = ({ onRoleChange }) => {
   const [error1, setError1] = useState("");
   const [error2, setError2] = useState("");
   const [error3, setError3] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const navigate = useNavigate();
+  const [Erreutmsg,setErrorMsg] = useState ("");
 
   const handleLogin = async () => {
     if (username === '') {
@@ -42,26 +41,24 @@ const LoginPage = ({ onRoleChange }) => {
 
         localStorage.setItem('id', responseData.utilisateur.id);
         console.log(responseData.utilisateur.id);
+       
 
         switch (responseData.role) {
           case "admin":
-            navigate("/Moderateurs");
+            window.location.href="/UploadArticle";
             break;
           case "moderator":
-            navigate("/details");
+            window.location.href="/details";
             break;
           case "user":
 
-            navigate("/search");
+          window.location.href="/search";
             break;
           default:
             break;
         }
 
-        console.log("Login successful", responseData);
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
+       
 
       } catch (error) {
         console.error("Error:", error);

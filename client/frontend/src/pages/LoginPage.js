@@ -17,64 +17,72 @@ const LoginPage = ({ onRoleChange }) => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (username === '') {
+      setError1("Nom d'utilisateur ne doit pas etre vide")
+    }
+    else if (email === '') {
+      setError2("Mot de passe ne doit pas etre vide")
+    } else if (password === '') {
+      setError3("Mot de passe  ne doit pas etre vide")
+    }
+    else {
+      try {
+        const response = await axios.post("http://127.0.0.1:8000/api/login/", {
+          NomUtilisateur: username,
+          MotDePasse: password,
+        });
 
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login/", {
-        NomUtilisateur: username,
-        MotDePasse: password,
-      });
+        const responseData = response.data;
+        const token = response.data.token; // Retrieve the token from the response data
+        localStorage.setItem('token', token);
+        localStorage.setItem("userRole", responseData.role);
+        localStorage.setItem("NomUtilisateurs", responseData.utilisateur.NomUtilisateur);
+        console.log(responseData.utilisateur.NomUtilisateur);
+        onRoleChange(responseData.role);
 
-      const responseData = response.data;
-      const token = response.data.token; // Retrieve the token from the response data
-      localStorage.setItem('token', token);
-      localStorage.setItem("userRole", responseData.role);
-      localStorage.setItem("NomUtilisateurs", responseData.utilisateur.NomUtilisateur);
-      console.log(responseData.utilisateur.NomUtilisateur);
-      onRoleChange(responseData.role);
+        localStorage.setItem('id', responseData.utilisateur.id);
+        console.log(responseData.utilisateur.id);
 
-      localStorage.setItem('id', responseData.utilisateur.id);
-      console.log(responseData.utilisateur.id);
+        switch (responseData.role) {
+          case "admin":
+            navigate("/Moderateurs");
+            break;
+          case "moderator":
+            navigate("/details");
+            break;
+          case "user":
 
-      switch (responseData.role) {
-        case "admin":
-          navigate("/Moderateurs");
-          break;
-        case "moderator":
-          navigate("/details");
-          break;
-        case "user":
+            navigate("/search");
+            break;
+          default:
+            break;
+        }
 
-          navigate("/search");
-          break;
-        default:
-          break;
-      }
+        console.log("Login successful", responseData);
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
 
-      console.log("Login successful", responseData);
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
-
-    } catch (error) {
-      console.error("Error:", error);
-      if (error.response) {
-        console.error("Server Error Message:", error.response.data);
-        console.log("Server Error Message:", error.response.data);
+      } catch (error) {
+        console.error("Error:", error);
+        if (error.response) {
+          console.error("Server Error Message:", error.response.data);
+          console.log("Server Error Message:", error.response.data);
 
 
-        if (error.response.data.message === 'User not found') {
-          setError1('vérifier votre nom d`utilisateur');
-        }/* else if (error.response.data.field === "Email") {
+          if (error.response.data.message === 'User not found') {
+            setError1('vérifier votre nom d`utilisateur');
+          }/* else if (error.response.data.field === "Email") {
           setError2(error.response.data.message || "Error in email");
         } */else if (error.response.data.message === 'Invalid password') {
-          setError3('mot de passe incorrecte');
+            setError3('mot de passe incorrecte');
+          } else {
+            setErrorMsg(error.response.data.message || "Sign-in failed");
+          }
         } else {
-          setErrorMsg(error.response.data.message || "Sign-in failed");
+          setErrorMsg("An error occurred during sign-in");
         }
-      } else {
-        setErrorMsg("An error occurred during sign-in");
       }
-      
     }
 
 

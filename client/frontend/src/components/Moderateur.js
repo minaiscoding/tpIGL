@@ -106,18 +106,18 @@ function Moderateur({ moderateur }) {
           </div>
         </div>
       ) : (
-        <div className=" bg-white w-[80vw] h-[18vh] border-2 rounded-rd	 p-[2vw] m-[3vh] flex  flex-col justify-items-center justify-between">
+        <div className=" bg-white w-[80vw] h-[18vh] text-gray-800 border-2 rounded-rd	 p-[2vw] m-[3vh] flex  flex-col justify-items-center justify-between">
           <div className="flex  flex-row justify-items-center justify-between">
             <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center ">
               <img
                 src={iconUser}
                 alt="iconUser"
-                className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center"
+                className="mr-[1vw] mt-[0vh] w-[2vw] h-[5vh] pb-[1vh] w-full h-full"
               />
               <input
                 type="text"
                 value={moderateur.NomUtilisateur}
-                className=""
+                className="p-[0.5vw] pt-[0] mb-[0.3vh] "
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -130,6 +130,7 @@ function Moderateur({ moderateur }) {
               <input
                 type="email"
                 value={moderateur.Email}
+                className="p-[0.5vw] pt-[0] mb-[0.3vh] "
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -152,11 +153,12 @@ function Moderateur({ moderateur }) {
             <img
               src={iconMdp}
               alt="iconMdp"
-              className="mr-[1vw] w-[2vw] h-[5vh] pb-[1vh]"
+              className="mr-[1vw] mt-[0.5vh] w-[2vw] h-[5vh] pb-[1vh] "
             />
             <input
               type="text"
               value={moderateur.MotDePasse}
+              className="p-[0.5vw]  "
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>

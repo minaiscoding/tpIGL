@@ -36,11 +36,9 @@ const LoginPage = ({ onRoleChange }) => {
         localStorage.setItem('token', token);
         localStorage.setItem("userRole", responseData.role);
         localStorage.setItem("NomUtilisateurs", responseData.utilisateur.NomUtilisateur);
-        console.log(responseData.utilisateur.NomUtilisateur);
         onRoleChange(responseData.role);
 
         localStorage.setItem('id', responseData.utilisateur.id);
-        console.log(responseData.utilisateur.id);
        
 
         switch (responseData.role) {

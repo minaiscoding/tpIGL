@@ -68,7 +68,6 @@ const App = () => {
     return () => clearTimeout(delay);
   }, []); // Empty dependency array ensures this runs once on mount
 
-  console.log("Rendering App component:", { username, loading }); // Log relevant information
 
   return (
 

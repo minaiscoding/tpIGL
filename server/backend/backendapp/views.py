@@ -1,12 +1,22 @@
+from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
-from rest_framework import generics
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
+#--------------------------------------------------------------------------------
 from .models import  Articles, Favoris, Utilisateurs
 from .serializers import  ArticlesSerializer, FavorisSerializer, AuthTokenSerializer,UtilisateursSerializer
+#--------------------------------------------------------------------------------
+from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from elasticsearch_dsl import Search
 from rest_framework.renderers import JSONRenderer
 from rest_framework import status
+from rest_framework.decorators import action,api_view
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+#--------------------------------------------------------------------------------
+from elasticsearch_dsl import Search
+#------------------------------------------------------------------
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -17,14 +27,27 @@ from rest_framework import permissions
 from rest_framework.permissions import AllowAny
 from elasticsearch import Elasticsearch
 from django.core.exceptions import MultipleObjectsReturned
+from .utils import (  extract_text_from_pdf,
+                      extract_pdf_metadata,
+                      is_valid_scientific_pdf,
+                      extract_article_info,
+                      download_pdf_from_url,
+                      send_to_elasticsearch,  
+                      upload_article_process,          
+                   )
+from rest_framework.decorators import schema, parser_classes
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+#--------------------------------------------------------------------------------------------------------------
 
+#                               views.py --> api endpoints
 
-
+#--------------------------------------------------------------------------------------------------------------
 
 class UtilisateursListView(generics.ListAPIView):
     queryset = Utilisateurs.objects.all()
     serializer_class = UtilisateursSerializer
-    
+#--------------------------------------------------------------------------------------------------------------
 class ArticlesListView(APIView):
     renderer_classes = [JSONRenderer]
 
@@ -61,12 +84,19 @@ class ArticleDetailView(APIView):
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
     serializer_class = FavorisSerializer
-
-
-from django.http import JsonResponse
-
+#--------------------------------------------------------------------------------------------------------------
 class SearchView(APIView):
     renderer_classes = [JSONRenderer]
+    @swagger_auto_schema(
+        operation_summary="Perform a search",
+        operation_description="Perform a search based on the provided query parameters.",
+        manual_parameters=[
+            openapi.Parameter('q', openapi.IN_QUERY, description="Search query", type=openapi.TYPE_STRING),
+            openapi.Parameter('start_date', openapi.IN_QUERY, description="Start date for date range filter", type=openapi.TYPE_STRING),
+            openapi.Parameter('end_date', openapi.IN_QUERY, description="End date for date range filter", type=openapi.TYPE_STRING),
+            openapi.Parameter('filter_type', openapi.IN_QUERY, description="Filter type", type=openapi.TYPE_STRING),
+        ],
+    )
 
     def get(self, request):
         # Get the search query from the request parameters
@@ -99,17 +129,201 @@ class SearchView(APIView):
             serializer = ArticlesSerializer(data=hits, many=True)
             serializer.is_valid()
 
-            # Return the serialized results as JSON
-            return Response(serializer.data)
-
         except Exception as e:
             # Handle exceptions, log them, or return an appropriate error response
             return JsonResponse({'error': str(e)}, status=500)
 
+        # Return the serialized results as JSON            
+        return Response(serializer.data)
+#--------------------------------------------------------------------------------------------------------------#  
+ 
+    #------------------------------------------------------------------------#
+    #----------------------# ArticlesControl Views #-------------------------#
+    #------------------------------------------------------------------------#
+
+#--------------------------------------------------------------------------------------------------------------#
+
+#//////////////////////////////////////////////////////////////
+#     LocalUploadViewSet
+#//////////////////////////////////////////////////////////////   
+class LocalUploadViewSet(APIView):
+    """
+    API endpoint for handling local file uploads and processing.
+
+    This ViewSet provides an endpoint for uploading PDF files of research scientific papers, validating them,
+    extracting text, performing analysis, and sending the information of the analysis to a search index of elasticsearch.
+
+    The endpoint is accessible via a POST request to 'api/articles_ctrl/local-upload/'.
+    """
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = ArticlesSerializer
+
+    def post(self, request, *args, **kwargs):
+        """
+        Endpoint for uploading one PDF file of research scientific papers, validating them, extracting text,
+        performing analysis,and sending the information of the analysis to a search index of elasticsearch. 
+
+        :param HttpRequest request: The request object -->  file object.
+
+        :return: Response with information about uploaded file and processing result.
+        """
+        #uploaded_files = request.FILES.getlist('pdf_File')
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            
+            uploaded_file = serializer.validated_data['pdf_File']
+            # Ensure the file cursor is at the beginning
+            uploaded_file.seek(0)
+            # Check if the uploaded PDF is a valid scientific article
+            is_valid = is_valid_scientific_pdf(uploaded_file)
+
+            # Handle the case where the PDF is not valid
+            if not is_valid:
+                return {'error': 'Invalid scientific PDF. The provided URL does not lead to a valid scientific article.'}
+            # Process the article data for each file
+
+            article_data = upload_article_process(uploaded_file)
+            # Send the processed data to Elasticsearch
+            send_to_elasticsearch('articles', article_data)
+
+            # Create Article instance and then delete it to save the url for the local uploaded files in the media root
+            article = serializer.save()
+            article.delete()
+
+            file_url = article_data[0]['URL_Pdf']
+
+            return Response({
+            'article_data': article_data,'url_pdf':file_url,
+              'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+#--------------------------------------------------------------------------------
+#//////////////////////////////////////////////////////////////
+#     ExternalUploadViewSet
+#//////////////////////////////////////////////////////////////
     
+class ExternalUploadViewSet(APIView):
+    """
+    API endpoint for handling external PDF file of research scientific papers uploads  via URL and processing.
 
+    This ViewSet provides an endpoint for uploading PDF files from a URL,
+    downloading them, validating, extracting text, performing analysis,
+    and sending the information of the analysis to a search index of elasticsearch.
 
+    The endpoint is accessible via a POST request to 'articles_ctrl/external-upload/'.
+    """
 
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = ArticlesSerializer
+
+    def post(self, request, *args, **kwargs):
+        """
+        Endpoint for uploading one PDF file  of research scientific papers from a URL, downloading them,
+        validating, extracting text, performing analysis, and sending the information of the analysis to a search index of elasticsearch.
+
+        :param HttpRequest request: The request object -->  file object.
+
+        :return: Response with information about the uploaded file and processing result.
+        """
+        # Create a serializer instance with the request data
+        serializer = self.serializer_class(data=request.data)
+
+        # Check if the serializer is valid
+        if serializer.is_valid():
+            # Get the file URL from the serializer
+            url_file = serializer.validated_data["URL_Pdf"]
+
+            # Check if the URL is provided
+            if not url_file:
+                return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Download the file from the URL
+            article_file = download_pdf_from_url(url_file)
+
+            if not article_file:
+                return Response({'error': 'Failed to download PDF from the URL'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Ensure the file cursor is at the beginning
+            article_data = []
+
+            # Check if the uploaded PDF is a valid scientific article
+            is_valid = is_valid_scientific_pdf(article_file)
+
+            if not is_valid:
+                # Handle the case where the PDF is not valid
+                return Response(
+                    {'error': 'Invalid scientific PDF. The provided URL does not lead to a valid scientific article.'},
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            # Get the URL to the uploaded file in the media root
+            file_url = url_file
+
+            # Extract metadata from the downloaded PDF
+            meta_data = extract_pdf_metadata(article_file)
+            titre_meta_data = meta_data["Title"]
+
+            # Extract text from the downloaded PDF
+            pdf_text, f_txt, l_txt = extract_text_from_pdf(article_file)
+
+            # Perform analysis on pdf_text
+            analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
+
+            # Combine titles if they are different
+            titre = analysis_result.get('title', '')
+            if titre != titre_meta_data:
+                titre = titre_meta_data + ' ' + titre
+
+            # Prepare data for Article creation
+            article_data = [{
+                'Titre': titre,
+                'Resume': analysis_result.get('abstract', ''),
+                'auteurs': analysis_result.get('authors', ''),
+                'Institution': analysis_result.get('institutions', ''),
+                'date': analysis_result.get('date', ''),
+                'MotsCles': analysis_result.get('keywords', ''),
+                'text': pdf_text,
+                'URL_Pdf': file_url,
+                'RefBib': analysis_result.get('references', ''),
+            }]
+
+            # Elasticsearch Indexing
+            # Send article data to Elasticsearch
+            send_to_elasticsearch('articles', article_data)
+
+            return Response({'article_data': article_data,
+                             'message': 'Files uploaded and processed successfully and sent to Elasticsearch'},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Failed to download PDF from the URL'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+#--------------------------------------------------------------------------------
+#/////////////////////////
+#  LogoutView   
+#/////////////////////////
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+    
+'''class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('NomUtilisateur')
+        password = request.data.get('MotDePasse')
+
+        user = authenticate(request, NomUtilisateur=username, MotDePasse=password)
+
+        if user is not None:
+            login(request, user)
+            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
+            
+#--------------------------------------------------------------------------------
+#/////////////////////////
+#  LoginView   
+#/////////////////////////
 class LoginView(APIView):
   @csrf_exempt
   def post(self, request, *args, **kwargs):

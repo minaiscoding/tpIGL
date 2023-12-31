@@ -17,6 +17,9 @@ module.exports = {
         s: "500px",
       },
     },
+    borderRadius: {
+      'rd': '6px',
+    },
     fontFamily: {
       Futura: "Futura Book BT",
       "Futura-bold": "Futura bold",
@@ -35,7 +38,8 @@ module.exports = {
       yellow2: "rgba(54, 53, 206, 0.9)",
       purple2: "rgba(107, 48, 228, 0.86)",
       blue2: "rgba(246, 178, 55, 0.9)",
-      "purple-3OO": "#bdbdec",
+      'purple-600': '#8A88E2',
+      'purple-300':'#bdbdec',
       white: "#FFFFFF",
       "gray-800": "#1E1E1E",
 

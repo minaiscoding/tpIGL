@@ -23,7 +23,7 @@ const SearchPage = () => {
     <div className="h-full w-screen flex-col items-center flex font-Futura">
       {/* Background Image */}
       <div
-        className="relative w-full justify-center flex flex-col items-center lg:h-[57vh] h-[40vh] bg-cover bg-center relative"
+        className=" w-full justify-center flex flex-col items-center lg:h-[57vh] h-[40vh] bg-cover bg-center relative"
         style={{
           backgroundImage: "url(../../../images/bgimg1.svg)",
         }}

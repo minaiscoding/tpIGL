@@ -290,7 +290,7 @@ def extract_article_info(text, first_pages, last_pages):
             )
         #________________________________________________________________________________________________
         abstract_pattern = re.compile(
-             r'Abstract\s*\n(.*?)\s*\n(?:Keywords|Introduction|Categories and Subject Descriptors(.*?)\n|1\. Introduction\n|\d+\s*\n|CCS CONCEPTS\n|$)',
+             r'Abstract:(.*?)\n\n|Abstract\s*\n(.*?)\s*\n(?:Keywords|Introduction|Categories and Subject Descriptors(.*?)\n|1\. Introduction\n|\d+\s*\n|CCS CONCEPTS\n|$)',
              re.DOTALL | re.IGNORECASE
             )
         #________________________________________________________________________________________________
@@ -305,8 +305,8 @@ def extract_article_info(text, first_pages, last_pages):
             )
         #________________________________________________________________________________________________
         date_pattern = re.compile(
-             #r'Published\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
-             r'\bReceived\b\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
+             r'\b(Published:|Received:|Accepted:)\b\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
+             #r'\bReceived:\b\s+(?P<date>\d{1,2}\s+[A-Z][a-z]+\s+\d{4}|'
              r'[A-Z][a-z]+\s+\d{1,2}(?:–|-)\d{1,2},\s+\d{4})|'
              r"\d{4}-\d{2}-\d{2}|"
              r"\d{2}/\d{2}/\d{4}|"
@@ -436,11 +436,21 @@ def is_valid_scientific_pdf(file):
     for page_number in range(pdf_file.page_count):
         all_pages_text += pdf_file[page_number].get_text("text").lower()
 
-    # Scientific article structure validation
-    keywords_found = ["abstract", "ACM Reference Format","Categories and Subject Descriptors","Research paper", "methods","methodology", "results","CCS CONCEPTS", "keywords", "references", "bibliography"]
-    if any(keyword in all_pages_text for keyword in keywords_found):
-        logging.debug(f"Validation result for PDF: True")
-        return True
+    keywords_found = ["abstract","introduction","literature review","background","related work","problem statement","research question",
+    "objective","hypothesis","methodology","methods","experimental design","data collection","data analysis","results","discussion",
+    "conclusion","future work","limitations","acknowledgments","references","bibliography","appendix",
+    "figure","table","algorithm","model","analysis","evaluation","findings","contribution","implications",
+    "recommendations","keywords","ACM Reference Format","Categories and Subject Descriptors","CCS CONCEPTS","INDEX TERMS"
+    ]
+
+    # Count the number of keywords found in all_pages_text
+    count_keywords = sum(keyword in all_pages_text for keyword in keywords_found)
+
+    # Check if at least 3 keywords are found
+    if count_keywords >= 5:
+       logging.debug(f"Validation result for PDF: True")
+       print("****the article is scientifique*****")
+       return True
     else:
         logging.debug(f"PDF does not contain scientific article keywords.")
         return False

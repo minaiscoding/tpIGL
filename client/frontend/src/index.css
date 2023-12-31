@@ -39,6 +39,7 @@ code {
 }
 button {
   transition: opacity 0.3s ease; /* Change 'opacity' to the property you want to transition */
+  
 }
 
 button:hover {

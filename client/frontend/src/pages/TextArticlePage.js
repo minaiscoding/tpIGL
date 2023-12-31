@@ -14,7 +14,7 @@ export const TextArticlePage = () => {
         // Fetch articles when the component mounts
         fetchArticles();
     }, []);
-    
+
     const articleId =useParams ();
 
 
@@ -38,7 +38,7 @@ export const TextArticlePage = () => {
     return (
         <div
             style={{ backgroundImage }}
-            className=" relative w-screen h-screen min-h-screen bg-purple-3OO bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8"
+            className=" relative w-screen h-screen min-h-screen bg-purple300  bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8"
         >
             {articleData ? (
 

@@ -209,7 +209,7 @@ const Navbar = ({ role, profile }) => {
 
                                 </>
                             ) : null}
-                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  cursor-pointer`}
+                            <div className={`flex flex-row gap-2 items-center py-6 w-full justify-center  cursor-pointer rounded-[2px]`}
                                 onClick={() => {
                                     logOutHandler();
                                 }} >

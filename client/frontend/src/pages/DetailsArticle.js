@@ -113,7 +113,7 @@ const DetailsArticle = ({ role }) => {
   return (
     <div
       style={{ backgroundImage }}
-      className="w-screen h-full min-h-screen bg-purple-3OO bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8 overflow-y-scroll"
+      className="w-screen h-full min-h-screen bg-purple300 bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8 overflow-y-scroll"
     >
       {articleData ? (
         <>

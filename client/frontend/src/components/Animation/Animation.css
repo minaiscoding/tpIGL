@@ -1,33 +1,32 @@
 /* Animation.css */
 
 .animation-container {
-    display: flex;
-  }
-  
-  .letter {
- 
-        margin-right: 20px; /* Adjust as needed */
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-       
-  }
-  
-  .visible {
-    opacity: 1;
-  }
-  
-  /* Add a delay to each letter based on its index */
-  .letter-0 { animation: type 0.5s forwards 0.5s; }
-  .letter-1 { animation: type 0.5s forwards 1s; }
-  .letter-2 { animation: type 0.5s forwards 1.5s; }
-  .letter-3 { animation: type 0.5s forwards 2s; }
-  .letter-4 { animation: type 0.5s forwards 2.5s; }
-  .letter-5 { animation: type 0.5s forwards 3s; }
-  .letter-6 { animation: type 0.5s forwards 3.5s; }
-  
-  
-  @keyframes type {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
+  display: flex;
+}
+
+.letter {
+
+      margin-right: 20px; /* Adjust as needed */
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+     
+}
+
+.visible {
+  opacity: 1;
+}
+
+/* Add a delay to each letter based on its index */
+.letter-0 { animation: type 0.5s forwards 0.5s; }
+.letter-1 { animation: type 0.5s forwards 1s; }
+.letter-2 { animation: type 0.5s forwards 1.5s; }
+.letter-3 { animation: type 0.5s forwards 2s; }
+.letter-4 { animation: type 0.5s forwards 2.5s; }
+.letter-5 { animation: type 0.5s forwards 3s; }
+.letter-6 { animation: type 0.5s forwards 3.5s; }
+
+
+@keyframes type {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

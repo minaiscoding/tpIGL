@@ -22,6 +22,7 @@ const UploadArticle = () => {
 
   // Function to handle file upload
   const handleFileUpload = async () => {
+    let response = null;
     try {
       if (files.length === 0) {
         return;
@@ -32,7 +33,7 @@ const UploadArticle = () => {
       if (nonPdfFiles.length > 0) {
         const nonPdfFileNames = nonPdfFiles.map((file) => file.name).join(', ');
         //alert(`Invalid file(s): ${nonPdfFileNames}. Only PDF files are accepted.`);
-        toast.error(`Invalid file(s): ${nonPdfFileNames}. Only PDF files are accepted.`);
+        toast.error(`fichier(s) invalide(s): ${nonPdfFileNames}. que des fichiers PDF qui sont acceptés.`);
         return;
       }
 
@@ -42,16 +43,14 @@ const UploadArticle = () => {
         
         formData.append('pdf_File', file);
 
-        const response = await axios.post(
+        response = await axios.post(
           'http://127.0.0.1:8000/api/articles_ctrl/local-upload/',
           formData,
         );
-
        // console.log('File uploaded successfully:', response.data);
        // alert(`File ${file.name} uploaded successfully`);
-       //toast.success(`Article ${file.name} : ${response.data.url_pdf} joint avec succès`);
-       toast.success(`Article ${file.name}: ${response.data.url_pdf} joint avec succès`);
-        console.log("Article joint avec succès:", response.data);
+       toast.success(`Article ${file.name}: ${response.data.url_pdf} est joint avec succès`);
+        console.log("Article est joint avec succès:", response.data);
       }
 
       //alert('All files uploaded successfully');
@@ -59,15 +58,21 @@ const UploadArticle = () => {
       toast.success("tout les articles séléctionés sont joints avec succès");
     } catch (error) {
       console.error('Erreur uploading:', error.message);
-      const errorMessage = error.response?.data?.detail || error.message;
+      const errorMessage = error.response?.data?.error || error.message;
       //alert(`Erreur uploading: ${errorMessage}`);
-      toast.error(`Error uploading files: ${errorMessage}`);
+      // Display specific error message from the backend, if available
+      if (error.response?.data?.error) {
+         toast.error(`Erreur uploading fichiers: ${error.response.data.error}`);
+      } else {
+        toast.error(`Error uploading fichiers: ${errorMessage}`);
+      }
     } finally {
       setFiles([]);
     }
   };
 
   const handleUrlSubmit = async () => {
+    let response = null;
     try {
       if (!url) {
         return;
@@ -76,7 +81,7 @@ const UploadArticle = () => {
       const formData = new FormData();
       formData.append("URL_Pdf", url);
 
-      const response = await axios.post(
+      response = await axios.post(
         "http://127.0.0.1:8000/api/articles_ctrl/external-upload/",
         formData
       );
@@ -86,8 +91,13 @@ const UploadArticle = () => {
       //alert("URL submitted successfully");
     } catch (error) {
       console.error("Erreur submitting URL:", error.message);
-      const errorMessage = error.response?.data?.detail || error.message;
-      toast.error(`Erreur submitting URL: ${errorMessage}`);
+      const errorMessage = error.response?.data?.error || error.message;
+
+      if (error.response?.data?.error) {
+        toast.error(`Erreur submitting URL: ${error.response.data.error}`);
+      } else {
+        toast.error(`Erreur submitting URL: ${errorMessage}`);
+      }
     } finally {
       setUrl("");
     }

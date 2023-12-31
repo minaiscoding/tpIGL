@@ -67,7 +67,7 @@ const FileUpload = ({ handleFileUpload, files, setFiles }) => {
 
               {/* Display file information in the middle */}
               <div className="flex-grow ">
-                <p className="text-left font-Futura pt-2 pb-2">{file.name} - {file.size} bytes </p>
+              <p className="text-left font-Futura pt-2 pb-2">{file.name} - {(file.size / 1024).toFixed(2)} Ko </p>
               </div>
 
               {/* Display trash icon on the right */}

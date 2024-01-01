@@ -339,9 +339,9 @@ class ModerateursAdd(APIView):
             return Response(status=200)
         return Response(serializeobj.errors)
 class ModerateursUpdate(APIView):
-    def post(self,request,nom):
+    def post(self,request,id):
         try:
-            UtilisateurObj=Utilisateurs.objects.get(NomUtilisateur=nom)
+            UtilisateurObj=Utilisateurs.objects.get(id=id)
         except:
             return Response("Not Found in Database")
 
@@ -351,9 +351,9 @@ class ModerateursUpdate(APIView):
             return Response(200)
         return Response(serializeobj.errors)
 class ModerateurDelete(APIView):
-    def post(self,request,nom):
+    def post(self,request,id):
         try:
-            UtilisateurObj=Utilisateurs.objects.get(NomUtilisateur=nom)
+            UtilisateurObj=Utilisateurs.objects.get(id=id)
         except:
             return Response("Not Found in Database")
         UtilisateurObj.delete()

@@ -42,8 +42,8 @@ urlpatterns = [
     #--------------------------------------------------------------------------------------------------#
     path('moderateurs/', Moderateurs.as_view(), name='moderateurs-add'),
     path('moderateurs/add', ModerateursAdd.as_view(), name='moderateurs-add'),
-    path('moderateurs/update/<str:nom>', ModerateursUpdate.as_view(), name='moderateurs-update'),
-    path('moderateurs/delete/<str:nom>',ModerateurDelete.as_view(), name='moderateurs-delete'),
+    path('moderateurs/update/<int:id>', ModerateursUpdate.as_view(), name='moderateurs-update'),
+    path('moderateurs/delete/<int:id>',ModerateurDelete.as_view(), name='moderateurs-delete'),
 ]
 
 # Serve static files during development

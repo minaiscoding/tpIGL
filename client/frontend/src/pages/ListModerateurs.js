@@ -11,28 +11,32 @@ const ListModerateurs = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const ajouter = () => {
-    setAjouté(false)
-      let moderateur = {
-        NomUtilisateur: username,
-        Email: email,
-        MotDePasse: password,
-      role: "moderator",
-      };
-       axios
-         .post("http://localhost:8000/api/moderateurs/add", moderateur)
-         .then(() => {
-           setAjouté(false);
-         })
-         .catch((error) => {
-           console.error("Error adding moderator:", error);
-         });
+const ajouter = () => {
+  setAjouté(false);
 
+  let moderateur = {
+    NomUtilisateur: username,
+    Email: email,
+    MotDePasse: password,
+    role: "moderator",
   };
 
-   useEffect(() => {
+  axios
+    .post("http://localhost:8000/api/moderateurs/add", moderateur)
+    .then(() => {
+      // Rafraîchir la liste des modérateurs après l'ajout
+      rafraichirModerateur();
+      setAjouté(false);
+      console.log(moderateur);
+    })
+    .catch((error) => {
+      console.error("Erreur lors de l'ajout du modérateur:", error);
+    });
+};
+
+   const rafraichirModerateur=()=>{
      console.log("fetching les modérateurs");
-     fetch(`http://localhost:8000/api/utilisateurs`)
+     fetch(`http://localhost:8000/api/moderateurs`)
        .then((response) => response.json())
        .then((data) => {
          console.log("API Response:", data);
@@ -42,7 +46,8 @@ const ListModerateurs = () => {
        .catch((error) => {
         console.error("Error fetching les modérateurs:", error);
        });
-   }, []);
+   }
+   useEffect(() => {rafraichirModerateur()},[])
   return (
     //background
     <div
@@ -63,7 +68,7 @@ const ListModerateurs = () => {
         //liste des modérateurs
       }
       <div>
-        <Moderateurs moderateurs={moderateurs} />
+        <Moderateurs moderateurs={moderateurs} setModerateurs={setModerateurs} />
       </div>
       {
         //boutton ajouter

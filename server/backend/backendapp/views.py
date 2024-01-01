@@ -22,9 +22,12 @@ from .utils import (  extract_text_from_pdf,
                       is_valid_scientific_pdf,
                       extract_article_info,
                       download_pdf_from_url,
-                      send_to_elasticsearch,  
+                      send_to_elasticsearch, 
+                       parse_metadata_date, 
                       upload_article_process,          
                    )
+import string
+#--------------------------------------------------------------------------------
 from rest_framework.decorators import schema, parser_classes
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -61,6 +64,7 @@ class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
     serializer_class = FavorisSerializer
 #--------------------------------------------------------------------------------------------------------------
+
 class SearchView(APIView):
     renderer_classes = [JSONRenderer]
     @swagger_auto_schema(
@@ -111,6 +115,7 @@ class SearchView(APIView):
 
         # Return the serialized results as JSON            
         return Response(serializer.data)
+
 #--------------------------------------------------------------------------------------------------------------#  
  
     #------------------------------------------------------------------------#
@@ -143,7 +148,7 @@ class LocalUploadViewSet(APIView):
 
         :return: Response with information about uploaded file and processing result.
         """
-        #uploaded_files = request.FILES.getlist('pdf_File')
+        
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             
@@ -155,7 +160,7 @@ class LocalUploadViewSet(APIView):
 
             # Handle the case where the PDF is not valid
             if not is_valid:
-                return {'error': 'Invalid scientific PDF. The provided URL does not lead to a valid scientific article.'}
+                return Response({'error': 'PDF scientifique invalide. Le fichier fournie ne mène pas à un article scientifique valide.'}, status= status.HTTP_400_BAD_REQUEST)
             # Process the article data for each file
 
             article_data = upload_article_process(uploaded_file)
@@ -164,13 +169,16 @@ class LocalUploadViewSet(APIView):
 
             # Create Article instance and then delete it to save the url for the local uploaded files in the media root
             article = serializer.save()
+
+            # Restore 'id' field to the serializer
             article.delete()
 
             file_url = article_data[0]['URL_Pdf']
 
             return Response({
-            'article_data': article_data,'url_pdf':file_url,
-              'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
+            'article_data': article_data,
+            'url_pdf': file_url,
+            'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
             }, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
@@ -202,6 +210,7 @@ class ExternalUploadViewSet(APIView):
 
         :return: Response with information about the uploaded file and processing result.
         """
+
         # Create a serializer instance with the request data
         serializer = self.serializer_class(data=request.data)
 
@@ -218,7 +227,7 @@ class ExternalUploadViewSet(APIView):
             article_file = download_pdf_from_url(url_file)
 
             if not article_file:
-                return Response({'error': 'Failed to download PDF from the URL'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Échec du téléchargement du PDF depuis l\'URL.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Ensure the file cursor is at the beginning
             article_data = []
@@ -229,7 +238,7 @@ class ExternalUploadViewSet(APIView):
             if not is_valid:
                 # Handle the case where the PDF is not valid
                 return Response(
-                    {'error': 'Invalid scientific PDF. The provided URL does not lead to a valid scientific article.'},
+                    {'error': 'PDF scientifique invalide. L\'URL fournie ne mène pas à un article scientifique valide.'},
                     status=status.HTTP_400_BAD_REQUEST)
 
             # Get the URL to the uploaded file in the media root
@@ -237,7 +246,8 @@ class ExternalUploadViewSet(APIView):
 
             # Extract metadata from the downloaded PDF
             meta_data = extract_pdf_metadata(article_file)
-            titre_meta_data = meta_data["Title"]
+            titre_meta_data = meta_data.get("Title","")
+            date_meta_data = meta_data.get("CreationDate","")
 
             # Extract text from the downloaded PDF
             pdf_text, f_txt, l_txt = extract_text_from_pdf(article_file)
@@ -245,10 +255,25 @@ class ExternalUploadViewSet(APIView):
             # Perform analysis on pdf_text
             analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
 
-            # Combine titles if they are different
+            # Combine title/date from metadata and analysis result
+
             titre = analysis_result.get('title', '')
-            if titre != titre_meta_data:
-                titre = titre_meta_data + ' ' + titre
+            date = analysis_result.get('date', '')
+
+            # Define a translation table to remove specific characters
+            translator = str.maketrans('', '', string.whitespace + "''’")
+
+            # Remove spaces and specified characters from titre and titre_meta_data
+            titre_without_spaces = titre.translate(translator)
+            titre_meta_data_without_spaces = titre_meta_data.translate(translator)
+
+            # Compare the modified strings
+            if titre_without_spaces != titre_meta_data_without_spaces:
+               titre = titre_meta_data + ' ' + titre
+
+
+            if date_meta_data and not date :
+               date = parse_metadata_date(date_meta_data)
 
             # Prepare data for Article creation
             article_data = [{
@@ -263,15 +288,18 @@ class ExternalUploadViewSet(APIView):
                 'RefBib': analysis_result.get('references', ''),
             }]
 
+
             # Elasticsearch Indexing
             # Send article data to Elasticsearch
             send_to_elasticsearch('articles', article_data)
 
-            return Response({'article_data': article_data,
-                             'message': 'Files uploaded and processed successfully and sent to Elasticsearch'},
-                            status=status.HTTP_200_OK)
+            return Response( {
+                             'article_data': article_data,
+                             'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
+                             },
+                             status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Failed to download PDF from the URL'},
+            return Response({'error': 'Échec du téléchargement du PDF depuis l\'URL.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
 #--------------------------------------------------------------------------------

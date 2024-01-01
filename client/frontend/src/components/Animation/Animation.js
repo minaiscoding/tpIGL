@@ -1,5 +1,5 @@
 import React from 'react';
-//import './Animation.css';
+import './Animation.css';
 import a from '../../assets/a.png';
 import r from '../../assets/r.png';
 import t from '../../assets/t.png';

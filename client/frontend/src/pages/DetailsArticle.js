@@ -1,39 +1,33 @@
 import React, { useState, useEffect } from "react";
 import vector_bg from "../assets/Vector.svg";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const DetailsArticle = ({ role }) => {
-    const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
-    const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2";
-    const style3 =
-        "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ";
+  const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
+  const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2";
+  const style3 =
+    "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ";
 
-    const backgroundImage = `url(${vector_bg})`;
-    const [edit, setEdit] = useState(false);
-    const [articleData, setArticleData] = useState(null);
-    const [formData, setFormData] = useState(null);
+  const backgroundImage = `url(${vector_bg})`;
+  const [edit, setEdit] = useState(false);
+  const [articleData, setArticleData] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const articleId = useParams();
 
-    useEffect(() => {
-        // Fetch articles when the component mounts
-        fetchArticles();
-    }, []);
+  useEffect(() => {
+    // Fetch articles when the component mounts
+    fetchArticles();
+  }, []);
 
-   
+
 
 
   const fetchArticles = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:9200/articles/_doc/SILvsYwByJ8brC2scB_6`
+        `http://localhost:9200/articles/_doc/${articleId}`
       );
-      //const fetchedArticles = response.data;
-      //setFormData(selectedArticle);
-      // Assuming you want to display the first articles
-      //  const selectedArticle = fetchedArticles[0] || {};
-      //setArticleData(fetchedArticles[0] || {});
-      // Save the article ID in local storage
-      //localStorage.setItem("selectedArticleId", selectedArticle.id);
       console.log(response.data._source);
       setFormData(response.data._source);
       setArticleData(response.data._source);
@@ -51,12 +45,7 @@ const DetailsArticle = ({ role }) => {
     setEdit(true);
   };
 
-  const handleEnregistrer = () => {
-    console.log("Save button clicked");
-    console.log(formData); // FormData is available here for further processing
-    // Add your logic to send the formData to the server or perform any other actions
-    setEdit(false);
-  };
+
 
   const handleAnnuler = () => {
     setFormData(articleData);
@@ -103,7 +92,7 @@ const DetailsArticle = ({ role }) => {
         setEdit(false);
       } else {
         console.error("Failed to update document in Elasticsearch", response);
-       
+
       }
     } catch (error) {
       console.error("Error updating document:", error);
@@ -247,40 +236,40 @@ const DetailsArticle = ({ role }) => {
           </div>
 
           {role === "moderator" || role === "admin" && (
-              <div className="flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 xl:gap-24">
-                {!edit ? (
-                  <>
-                    <button
-                      className="bg-[#ffff] text-lg font-Futura text-navBg text-center rounded-sm px-6 md:px-12 py-2"
-                      onClick={handleModifier}
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      className="bg-[#6B30E4] text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
-                      onClick={handleDelete}
-                    >
-                      Supprimer
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="bg-[#6B30E4] text-lg font-Futura text-[#fff]text-center rounded-sm px-6 md:px-12 py-2"
-                      onClick={handleUpdate}
-                    >
-                      Enregistrer
-                    </button>
-                    <button
-                      className="bg-yellow text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
-                      onClick={handleAnnuler}
-                    >
-                      Annuler
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+            <div className="flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 xl:gap-24">
+              {!edit ? (
+                <>
+                  <button
+                    className="bg-[#ffff] text-lg font-Futura text-navBg text-center rounded-sm px-6 md:px-12 py-2"
+                    onClick={handleModifier}
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    className="bg-[#6B30E4] text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
+                    onClick={handleDelete}
+                  >
+                    Supprimer
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="bg-[#6B30E4] text-lg font-Futura text-[#fff]text-center rounded-sm px-6 md:px-12 py-2"
+                    onClick={handleUpdate}
+                  >
+                    Enregistrer
+                  </button>
+                  <button
+                    className="bg-yellow text-lg font-Futura text-[#fff] text-center rounded-sm px-6 md:px-12 py-2"
+                    onClick={handleAnnuler}
+                  >
+                    Annuler
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </>
       ) : (
         <p>Loading...</p>

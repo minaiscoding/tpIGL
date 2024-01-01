@@ -94,23 +94,23 @@ const App = () => {
                       <Route path="/search" element={<SearchPage />} />
 
                       {/* Route for the DetailsPage */}
-                      <Route path="/details" element={<DetailsArticle role={role} />} />
+                      <Route path="/details/:articleId" element={<DetailsArticle role={role} />} />
 
                       {/* Route for the Home page */}
                       <Route path="/Data" element={<DataPage />} />
 
                       {/* Route for the text of the article page */}
-                      <Route path="/TextIntegral" element={< TextArticlePage />} />
+                      <Route path="/TextIntegral/:articleId" element={< TextArticlePage />} />
 
                       {/* Route for the ModérateurPage */}
                       <Route path="/Moderateurs" element={<ListModerateurs />} />
 
                       {/* Route for the UplaodArticlePage */}
-                      {/*<Route path="/UploadArticle" element={<UploadArticle />} />*/}
                       <Route path="/UploadArticle" element={<UploadArticle />} />
 
                       {/* Route for the SearchResultPage */}
                       <Route path="/result" element={<SearchResultPage />} />
+
                       {/* Route for the favorie page */}
                       <Route path="/mesFavoris" element={<FavoriePage />} />
 

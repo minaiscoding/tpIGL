@@ -10,20 +10,21 @@ export const TextArticlePage = () => {
     const [url, setUrl] = useState("");
 
 
+
     useEffect(() => {
         // Fetch articles when the component mounts
         fetchArticles();
     }, []);
 
-    const articleId =useParams ();
+    const articleId = useParams();
 
 
     const fetchArticles = async () => {
         try {
-            const response = await axios.get( `http://localhost:9200/articles/_doc/SILvsYwByJ8brC2scB_6`);
+            const response = await axios.get(`http://localhost:9200/articles/_doc/${articleId}`);
             const fetchedArticles = response.data._source;
 
-            setArticleData({ ...fetchedArticles});
+            setArticleData({ ...fetchedArticles });
             setUrl(fetchedArticles.URL_Pdf);
         } catch (error) {
             console.error("Error fetching data:", error);

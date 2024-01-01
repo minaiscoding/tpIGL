@@ -59,9 +59,5 @@ class Favoris(models.Model):
     UtilisateurID = models.ForeignKey(Utilisateurs, on_delete=models.CASCADE)
     ArticleID = models.ForeignKey(Articles, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ('UtilisateurID', 'ArticleID')
-
-    def __str__(self):
-        return f'{self.UtilisateurID.NomUtilisateur} - {self.ArticleID.Titre}'
-
+    def str(self):
+        return f'{self.UtilisateurID.NomUtilisateur} - {self.ArticleID.Titre}' 

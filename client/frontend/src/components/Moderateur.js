@@ -48,12 +48,16 @@ function Moderateur({ moderateur, setModerateurs }) {
 
   const save = (id) => {
     // Construire l'objet modifié avec les nouvelles valeurs
+    
     let modifieModerateur = {
-      NomUtilisateur: username,
-      Email: email,
-      MotDePasse: password,
+      NomUtilisateur: username || moderateur.NomUtilisateur,
+      Email: email || moderateur.Email,
+      MotDePasse: password || moderateur.MotDePasse,
       Role: "moderator",
     };
+    console.log(modifieModerateur)
+    console.log(password)
+    console.log(moderateur.MotDePasse)
 
     // Envoyer une requête pour mettre à jour le modérateur avec le nom spécifié
     axios
@@ -161,8 +165,10 @@ function Moderateur({ moderateur, setModerateurs }) {
               <input
                 type="text"
                 placeholder={moderateur.NomUtilisateur}
+                value={username || moderateur.NomUtilisateur}
                 className="p-[0.5vw] pt-[0] mb-[0.3vh] "
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => 
+                  setUsername(e.target.value)}
               />
             </div>
             <div className="flex flex-row  text-3xl	font-normal	justify-items-center justify-center">
@@ -174,6 +180,7 @@ function Moderateur({ moderateur, setModerateurs }) {
               <input
                 type="email"
                 placeholder={moderateur.Email}
+                value={email || moderateur.Email}
                 className="p-[0.5vw] pt-[0] mb-[0.3vh] "
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -202,6 +209,7 @@ function Moderateur({ moderateur, setModerateurs }) {
             <input
               type="text"
               placeholder={moderateur.MotDePasse}
+              value={ password || moderateur.MotDePasse}
               className="p-[0.5vw]  "
               onChange={(e) => setPassword(e.target.value)}
             />

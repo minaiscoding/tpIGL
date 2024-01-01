@@ -52,7 +52,7 @@ function Moderateur({ moderateur, setModerateurs }) {
       NomUtilisateur: username,
       Email: email,
       MotDePasse: password,
-      role: "moderator",
+      Role: "moderator",
     };
 
     // Envoyer une requête pour mettre à jour le modérateur avec le nom spécifié

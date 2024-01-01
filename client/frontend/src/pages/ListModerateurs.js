@@ -4,50 +4,54 @@ import Moderateurs from "../components/Moderateurs";
 import iconUser from "../assets/user.png";
 import iconMdp from "../assets/iconMdp.png";
 import iconEmail from "../assets/iconEmail.png";
-import axios from 'axios' 
 const ListModerateurs = () => {
   const [moderateurs, setModerateurs] = useState([]);
   const [ajouté, setAjouté] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-const ajouter = () => {
-  setAjouté(false);
 
-  let moderateur = {
-    NomUtilisateur: username,
-    Email: email,
-    MotDePasse: password,
-    role: "moderator",
-  };
 
-  axios
-    .post("http://localhost:8000/api/moderateurs/add", moderateur)
-    .then(() => {
-      // Rafraîchir la liste des modérateurs après l'ajout
-      rafraichirModerateur();
-      setAjouté(false);
-      console.log(moderateur);
-    })
-    .catch((error) => {
-      console.error("Erreur lors de l'ajout du modérateur:", error);
-    });
-};
-
-   const rafraichirModerateur=()=>{
-     console.log("fetching les modérateurs");
-     fetch(`http://localhost:8000/api/moderateurs`)
-       .then((response) => response.json())
-       .then((data) => {
-         console.log("API Response:", data);
-         const resultsArray = Object.keys(data).map((key) => data[key]);
-         setModerateurs(resultsArray);
-       })
-       .catch((error) => {
+  const rafraichirModerateur = () => {
+    console.log("fetching les modérateurs");
+    fetch(`http://localhost:8000/api/moderateurs`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("API Response:", data);
+        const resultsArray = Object.keys(data).map((key) => data[key]);
+        setModerateurs(resultsArray);
+      })
+      .catch((error) => {
         console.error("Error fetching les modérateurs:", error);
-       });
-   }
-   useEffect(() => {rafraichirModerateur()},[])
+      });
+  };
+  useEffect(() => {
+    rafraichirModerateur();
+  }, []);
+    const ajouter = () => {
+      let moderateur = {
+        NomUtilisateur: username,
+        Email: email,
+        MotDePasse: password,
+        Role: "moderator",
+      };
+
+      fetch("http://localhost:8000/api/moderateurs/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(moderateur),
+      })
+        .then((response) => response.json())
+        .then(() => {
+          setAjouté(false);
+          rafraichirModerateur();
+        })
+        .catch((error) => {
+          console.error("Error adding moderator:", error);
+        });
+    };
   return (
     //background
     <div
@@ -68,7 +72,10 @@ const ajouter = () => {
         //liste des modérateurs
       }
       <div>
-        <Moderateurs moderateurs={moderateurs} setModerateurs={setModerateurs} />
+        <Moderateurs
+          moderateurs={moderateurs}
+          setModerateurs={setModerateurs}
+        />
       </div>
       {
         //boutton ajouter

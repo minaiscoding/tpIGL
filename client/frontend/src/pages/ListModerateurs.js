@@ -71,6 +71,14 @@ const ListModerateurs = () => {
       {
         //liste des modérateurs
       }
+      <div className="sm:w-[80vw] ">
+        <button
+          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:block w-[25vw] ml-[3vw] md:hidden "
+          onClick={() => setAjouté(true)}
+        >
+          + Ajouter
+        </button>
+      </div>
       <div>
         <Moderateurs
           moderateurs={moderateurs}
@@ -82,7 +90,7 @@ const ListModerateurs = () => {
       }
       <div>
         <button
-          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center "
+          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:hidden md:block"
           onClick={() => setAjouté(true)}
         >
           + Ajouter

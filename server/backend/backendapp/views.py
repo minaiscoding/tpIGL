@@ -319,4 +319,44 @@ class LoginView(APIView):
             # If authentication fails, return an error response
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 #--------------------------------------------------------------------------------
-        
+#/////////////////////////
+#  ModerateurControlers   
+#/////////////////////////
+class Moderateurs(APIView):
+     def get(self, request):
+        # Assuming 'roles' is a field in your User model
+        moderators = Utilisateurs.objects.filter(Role='moderator')
+
+        # Serialize the queryset
+        serializer = UtilisateursSerializer(moderators, many=True)
+
+        return Response(serializer.data)
+class ModerateursAdd(APIView):
+    def post(self, request):
+        serializeobj = UtilisateursSerializer(data=request.data)
+        if serializeobj.is_valid():
+            serializeobj.save()
+            return Response(status=200)
+        return Response(serializeobj.errors)
+class ModerateursUpdate(APIView):
+    def post(self,request,nom):
+        try:
+            UtilisateurObj=Utilisateurs.objects.get(NomUtilisateur=nom)
+        except:
+            return Response("Not Found in Database")
+
+        serializeobj=UtilisateursSerializer(UtilisateurObj,data=request.data)
+        if serializeobj.is_valid():
+            serializeobj.save()
+            return Response(200)
+        return Response(serializeobj.errors)
+class ModerateurDelete(APIView):
+    def post(self,request,nom):
+        try:
+            UtilisateurObj=Utilisateurs.objects.get(NomUtilisateur=nom)
+        except:
+            return Response("Not Found in Database")
+        UtilisateurObj.delete()
+        return Response(200)
+
+    

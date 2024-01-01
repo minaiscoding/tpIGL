@@ -4,7 +4,7 @@ import Moderateurs from "../components/Moderateurs";
 import iconUser from "../assets/user.png";
 import iconMdp from "../assets/iconMdp.png";
 import iconEmail from "../assets/iconEmail.png";
-
+import axios from 'axios' 
 const ListModerateurs = () => {
   const [moderateurs, setModerateurs] = useState([]);
   const [ajouté, setAjouté] = useState(false);
@@ -12,37 +12,37 @@ const ListModerateurs = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const ajouter = () => {
-    //integration part
     setAjouté(false)
-  };
-  let moderateur = {
-    NomUtilisateur:" yasmine choukrane",
-    Email:"ly-choukrane@esi.dz",
-    MotDePasse:"azerty",
-    role: "moderateur"
-  };
-   let moderateur1 = {
-     NomUtilisateur: " yasmine choukrane",
-     Email: "ly-choukrane@esi.dz",
-     MotDePasse: "azerty",
-     role: "moderateur",
-   };
-  
-  useEffect(()=>{setModerateurs([moderateur,moderateur1])},[])
+      let moderateur = {
+        NomUtilisateur: username,
+        Email: email,
+        MotDePasse: password,
+      role: "moderator",
+      };
+       axios
+         .post("http://localhost:8000/api/moderateurs/add", moderateur)
+         .then(() => {
+           setAjouté(false);
+         })
+         .catch((error) => {
+           console.error("Error adding moderator:", error);
+         });
 
-  // useEffect(() => {
-  //   console.log("fetching les modérateurs");
-  //   fetch(`http://localhost:8000/api/moderateurs`)
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("API Response:", data);
-  //       const resultsArray = Object.keys(data).map((key) => data[key]);
-  //       setModerateurs(resultsArray);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching les modérateurs:", error);
-  //     });
-  // }, []);
+  };
+
+   useEffect(() => {
+     console.log("fetching les modérateurs");
+     fetch(`http://localhost:8000/api/utilisateurs`)
+       .then((response) => response.json())
+       .then((data) => {
+         console.log("API Response:", data);
+         const resultsArray = Object.keys(data).map((key) => data[key]);
+         setModerateurs(resultsArray);
+       })
+       .catch((error) => {
+        console.error("Error fetching les modérateurs:", error);
+       });
+   }, []);
   return (
     //background
     <div

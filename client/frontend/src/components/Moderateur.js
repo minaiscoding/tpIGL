@@ -13,6 +13,7 @@ function Moderateur({ moderateur }) {
 
   const supprimer = (nom) => {
     // integration part
+    setClicked(false)
   };
 
   const modifier = (nom) => {

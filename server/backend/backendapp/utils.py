@@ -349,7 +349,7 @@ def extract_article_info(text, first_pages, last_pages):
         # Remove empty references (if any)
         references = [ref.strip() for ref in references if ref.strip()]
 
-        references_string = '\n'.join(references)
+        references_string = '\n\n'.join(references)
        
         if not references : 
             # if the refernces is none (not found in the last_pages text) we are obliged to check the holl text 
@@ -359,7 +359,7 @@ def extract_article_info(text, first_pages, last_pages):
             references = re.split(r'\b\[\d\]+\.|\b\[\d\]|\d\.', references_text) if references_text else []
             # Remove empty references (if any)
             references = [ref.strip() for ref in references if ref.strip()]
-            references_string = '\n'.join(references)
+            references_string = '\n\n'.join(references)
         #-----------------------------------------------------------------------------------------
         # if ther is no keywords mentioned we can find the most ranked phrases instead
         print(keywords)

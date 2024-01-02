@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch_dsl.connections import connections
 from django.core.validators import FileExtensionValidator
-import uuid
+
 
 
 
@@ -45,6 +45,14 @@ class Articles(models.Model):
 
     def __str__(self):
         return self.Titre 
+    
+class ArticleFile(models.Model): 
+    id = models.AutoField(primary_key=True)
+    URL_Pdf = models.URLField(max_length=255,null=True,blank=True)
+    pdf_File = models.FileField(upload_to='article_pdfs/',null=True,blank=True,validators=[FileExtensionValidator( ['pdf'] )]) 
+
+    def __str__(self):
+        return self.pdf_File.name
 
 class Favoris(models.Model):
     UtilisateurID = models.ForeignKey(Utilisateurs, on_delete=models.CASCADE)

@@ -10,6 +10,10 @@ import FavorisIcon from "./FavorisIcon";
  * @returns {JSX.Element} - Rendered component.
  */
 const Displayer = ({ results }) => {
+  if (results.length === 0) {
+    return <p style={{ color: "black" }}>Pas de résultat</p>;
+  }
+
   return (
     <div>
       {results.map((result) => (

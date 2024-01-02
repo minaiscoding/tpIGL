@@ -1,10 +1,12 @@
+import os
+from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
-from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer
+from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
 #--------------------------------------------------------------------------------
 from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
@@ -137,10 +139,10 @@ class LocalUploadViewSet(APIView):
     The endpoint is accessible via a POST request to 'api/articles_ctrl/local-upload/'.
     """
     parser_classes = (MultiPartParser, FormParser)
-    serializer_class = ArticlesSerializer
+    serializer_class = UploadArticlesSerializer
 
     @swagger_auto_schema(
-        request_body=ArticlesSerializer,
+        request_body=UploadArticlesSerializer,
         operation_summary="Upload and process a PDF file of research scientific papers.",
         operation_description="This endpoint handles the upload, validation, text extraction, analysis, and indexing of scientific articles.",
         responses={200: "OK", 400: "Bad Request"},
@@ -166,6 +168,8 @@ class LocalUploadViewSet(APIView):
             article_data = upload_article_process(uploaded_file)
             send_to_elasticsearch('articles', article_data)
 
+            
+            # Save the PDF file to the media root   
             article = serializer.save()
             article.delete()
 
@@ -194,10 +198,10 @@ class ExternalUploadViewSet(APIView):
     The endpoint is accessible via a POST request to 'articles_ctrl/external-upload/'.
     """
     parser_classes = (MultiPartParser, FormParser)
-    serializer_class = ArticlesSerializer
+    serializer_class = UploadArticlesSerializer
 
     @swagger_auto_schema(
-        request_body=ArticlesSerializer,
+        request_body= UploadArticlesSerializer,
         operation_summary="Upload and process a PDF file of research scientific papers from a URL.",
         operation_description="This endpoint handles the download, validation, text extraction, analysis, and indexing of scientific articles from an external URL.",
         responses={200: "OK", 400: "Bad Request"},

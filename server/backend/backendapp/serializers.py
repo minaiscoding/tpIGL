@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Utilisateurs, Articles, Favoris
-from django.core.validators import FileExtensionValidator
+from .models import Utilisateurs, Articles, Favoris ,ArticleFile
 from django.db import models
 
 
@@ -13,7 +12,13 @@ class ArticlesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Articles
-        fields = ('URL_Pdf','pdf_File','Titre','Resume','auteurs','Institution','date','text','RefBib')
+        fields = '__all__'
+
+class UploadArticlesSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ArticleFile
+        fields = ('URL_Pdf','pdf_File')
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

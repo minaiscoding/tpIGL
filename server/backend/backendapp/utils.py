@@ -362,6 +362,7 @@ def extract_article_info(text, first_pages, last_pages):
             references_string = '\n'.join(references)
         #-----------------------------------------------------------------------------------------
         # if ther is no keywords mentioned we can find the most ranked phrases instead
+        print(keywords)
         if not keywords:
            r = Rake()
            r.extract_keywords_from_text(first_pages)
@@ -371,15 +372,15 @@ def extract_article_info(text, first_pages, last_pages):
            keywords = keywords_list[:5]
 
            cleaned_keywords = []
-        for keyword in keywords:
-            # Remove unwanted characters and digits
-            cleaned_keyword = ' '.join(filter(lambda x: x.isalpha(), keyword.split()))
-            cleaned_keywords.append(cleaned_keyword)
+           for keyword in keywords:
+               # Remove unwanted characters and digits
+               cleaned_keyword = ' '.join(filter(lambda x: x.isalpha(), keyword.split()))
+               cleaned_keywords.append(cleaned_keyword)
 
-            # Convert the list of cleaned keywords to a string
-            keywords_string = ', '.join(cleaned_keywords)
+               # Convert the list of cleaned keywords to a string
+               keywords_string = ', '.join(cleaned_keywords)
 
-            keywords = keywords_string
+               keywords = keywords_string
         #-----------------------------------------------------------------------------------------
         # If authors or institutions are not found using regex, use spaCy for entity recognition
         if not authors or not institutions:
@@ -411,7 +412,7 @@ def extract_article_info(text, first_pages, last_pages):
             'authors': authors,
             'institutions': institutions,
             'abstract': abstract,
-            'keywords': keywords_string,
+            'keywords': keywords,
             'references': references_string,
             'date': date
         }

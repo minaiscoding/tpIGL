@@ -31,7 +31,7 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model): 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)# auto string generator for unique id of the articles better than char feild
+    id = models.CharField(max_length=255,primary_key=True)
     Titre = models.CharField(max_length=255,null=True,blank=True)
     Resume = models.TextField(null=True,blank=True)
     auteurs = models.CharField(max_length=255,null=True,blank=True)

@@ -27,6 +27,7 @@ const Displayer = ({ results }) => {
           </div>
           <h2>{result.Titre}</h2>
           <p>{result.Resume}</p>
+          <p>{result.id}</p>
           {/* 
             Additional content can be added here.
             For example, you can include more information from the 'result' object.

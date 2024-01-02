@@ -13,7 +13,7 @@ class ArticlesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Articles
-        fields = '__all__'
+        fields = ('URL_Pdf','pdf_File','Titre','Resume','auteurs','Institution','date','text','RefBib')
 
 class FavorisSerializer(serializers.ModelSerializer):
     class Meta:

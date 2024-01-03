@@ -507,17 +507,41 @@ def parse_and_validate_date(date_string):
              or None if the parsing fails.
     :rtype: str or None
     """
-    try:
-        # Parse the date string using the expected format
-        parsed_date = datetime.strptime(date_string, '%d %b %Y')
-        
-        # Format the date into YYYY-MM-DD format
-        formatted_date = parsed_date.strftime('%Y-%m-%d')
-        
-        return formatted_date
+    # Check if the input date string contains a time component
+    if 'T' in date_string:
+        # Handle the format "2023-04-15T00:00:00"
+        supported_format = '%Y-%m-%dT%H:%M:%S'
+    else:
+        # Handle other formats without a time component
+        supported_format = None
 
-    except ValueError:
-        return None
+    supported_formats = [
+        '%d %B %Y',        # Example: 15 April 2023
+        '%d-%m-%Y',        # Example: 15-04-2023
+        '%Y-%m-%d',        # Example: 2023-04-15
+        '%d/%m/%Y',        # Example: 15/04/2023
+        '%B %d, %Y',       # Example: April 15, 2023
+        '%d %b %Y',        # Example: 2 Aug 2023
+        
+    ]
+
+    if supported_format:
+        supported_formats.insert(0, supported_format)
+
+    for date_format in supported_formats:
+        try:
+            # Parse the date string using the current format
+            parsed_date = datetime.strptime(date_string, date_format)
+            
+            # Format the date into YYYY-MM-DD format
+            formatted_date = parsed_date.strftime('%Y-%m-%d')
+            
+            return formatted_date
+        except ValueError:
+            pass  # Continue to the next format if the current one fails
+
+    return None  # Return None if no valid format is found
+
 #------------------------------------------------------------------------------
 #//////////////////////////
 # parse_metadata_date
@@ -567,9 +591,11 @@ def upload_article_process(file):
 
     # Extract metadata from the PDF file
     meta_data = extract_pdf_metadata(file)
-    print(meta_data)
+    
     titre_meta_data = meta_data.get("Title", "")
     date_meta_data = meta_data.get("CreationDate", "")
+    keywords_meta_data = meta_data.get("Keywords", "")
+    #-------------------------------------------------------------------
 
     # URL for the file
     file_url = f'http://127.0.0.1:8000/uploaded_media/article_pdfs/{file.name}'
@@ -580,7 +606,7 @@ def upload_article_process(file):
 
     # Perform analysis on pdf_text
     analysis_result = extract_article_info(pdf_text, first_pages_text, last_pages_text)
-
+    #------------------------------------------------------------------------
     # Combine title from metadata and analysis result
     titre = analysis_result.get('title', '')
 
@@ -595,10 +621,23 @@ def upload_article_process(file):
     if titre_without_spaces != titre_meta_data_without_spaces:
         titre = titre_meta_data + ' ' + titre
 
+    #------------------------------------------------------------------------
+        
     date = analysis_result.get('date', '')
-
-    if date_meta_data and not date:
+    if date_meta_data  and not date:
         date = parse_metadata_date(date_meta_data)
+
+    date = parse_and_validate_date(date)
+
+    #------------------------------------------------------------------------   
+   
+    keywords = analysis_result.get('keywords', '')
+    if keywords_meta_data:
+       if keywords_meta_data != keywords:
+           keywords = keywords +' '+keywords_meta_data
+
+    #------------------------------------------------------------------------
+        
 
     # Prepare the article data dictionary
     article_data = [{
@@ -607,7 +646,7 @@ def upload_article_process(file):
         'auteurs': analysis_result.get('authors', ''),
         'Institution': analysis_result.get('institutions', ''),
         'date': date,
-        'MotsCles': analysis_result.get('keywords', ''),
+        'MotsCles': keywords,
         'text': pdf_text,
         'URL_Pdf': file_url,
         'RefBib': analysis_result.get('references', ''),

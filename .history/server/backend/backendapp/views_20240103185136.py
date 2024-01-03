@@ -358,7 +358,7 @@ class LoginView(APIView):
 #--------------------------------------------------------------------------------------------
 class FavoriteArticleListView(APIView):
      renderer_classes = [JSONRenderer]
-     def get(self, request, user_id):
+ def get(self, request, user_id):
         # Get the article IDs favorited by the user
         article_ids = get_user_favorite_article_ids(user_id)
 

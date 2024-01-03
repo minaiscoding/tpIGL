@@ -355,10 +355,12 @@ class LoginView(APIView):
             # If authentication fails, return an error response
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 #--------------------------------------------------------------------------------
+    
 #--------------------------------------------------------------------------------------------
 class FavoriteArticleListView(APIView):
      renderer_classes = [JSONRenderer]
-     def get(self, request, user_id):
+
+    def get(self, request, user_id):
         # Get the article IDs favorited by the user
         article_ids = get_user_favorite_article_ids(user_id)
 

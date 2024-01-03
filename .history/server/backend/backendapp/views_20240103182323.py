@@ -4,9 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer,UploadArticlesSerializer, FavoriteArticleSerializer
@@ -355,32 +353,7 @@ class LoginView(APIView):
             # If authentication fails, return an error response
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 #--------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
-class FavoriteArticleListView(APIView):
-     renderer_classes = [JSONRenderer]
-     def get(self, request, user_id):
-        # Get the article IDs favorited by the user
-        article_ids = get_user_favorite_article_ids(user_id)
-
-        # Perform the Elasticsearch search to get articles with specific IDs
-        search = Search(index='articles').filter('terms', id=article_ids)
-        response = search.execute()
-
-        # Extract relevant information from search hits
-        hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
-
-        # Serialize the search results using your existing serializer
-        serializer = ArticlesSerializer(data=hits, many=True)
-        serializer.is_valid()
-
-        # Return the serialized results as JSON
-        return Response(serializer.data)
-
-def get_user_favorite_article_ids(user_id):
-    user = get_object_or_404(Utilisateurs, id=user_id)
-    favorite_articles = Favoris.objects.filter(user=user)
-    article_ids = [favorite.article.id for favorite in favorite_articles]
-    return article_ids
+from rest_framework.permissions import IsAuthenticated
 
 class SaveFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -414,5 +387,16 @@ class SaveFavoriteView(APIView):
                 {"detail": f"Error saving favorite article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+    from django.shortcuts import get_object_or_404
+    
+class FavoriteArticleListView(ListAPIView):
+    serializer_class = FavoriteArticleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Retrieve the favorite articles for the authenticated user
+        return Favoris.objects.filter(UtilisateurID=self.request.user)
+    
+    
 
 

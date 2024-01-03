@@ -20,6 +20,7 @@ const FavorisIcon = ({ articleId, user_id }) => {
           articleId: articleId,
           userId: user_id,
         },
+        
       );
       if (response.status === 200) {
         setFavoris(true);

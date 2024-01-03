@@ -20,6 +20,11 @@ const FavorisIcon = ({ articleId, user_id }) => {
           articleId: articleId,
           userId: user_id,
         },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       if (response.status === 200) {
         setFavoris(true);

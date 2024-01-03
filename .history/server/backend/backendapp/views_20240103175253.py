@@ -4,9 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer,UploadArticlesSerializer, FavoriteArticleSerializer
@@ -355,64 +353,30 @@ class LoginView(APIView):
             # If authentication fails, return an error response
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 #--------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
-class FavoriteArticleListView(APIView):
-     renderer_classes = [JSONRenderer]
-     def get(self, request, user_id):
-        # Get the article IDs favorited by the user
-        article_ids = get_user_favorite_article_ids(user_id)
-
-        # Perform the Elasticsearch search to get articles with specific IDs
-        search = Search(index='articles').filter('terms', id=article_ids)
-        response = search.execute()
-
-        # Extract relevant information from search hits
-        hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
-
-        # Serialize the search results using your existing serializer
-        serializer = ArticlesSerializer(data=hits, many=True)
-        serializer.is_valid()
-
-        # Return the serialized results as JSON
-        return Response(serializer.data)
-
-def get_user_favorite_article_ids(user_id):
-    user = get_object_or_404(Utilisateurs, id=user_id)
-    favorite_articles = Favoris.objects.filter(user=user)
-    article_ids = [favorite.article.id for favorite in favorite_articles]
-    return article_ids
+from rest_framework.permissions import IsAuthenticated
 
 class SaveFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        try:
-            # Get the articleId and userId from the request data
-            article_id = request.data.get("articleId")
-            user_id = request.data.get("userId")
+         article_id = request.data.get("articleId")
+        user_id = request.data.get("userId")
 
-            # Check if the article is already marked as a favorite for this user
-            existing_favorite = Favoris.objects.filter(
-                ArticleID=article_id, UtilisateursID=user_id
-            ).exists()
+        # Check if the article is already favorited by the user
+        if Favoris.objects.filter(UtilisateurID=request.user, ArticleID=article_id).exists():
+            return Response({'detail': 'Article already favorited'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if not existing_favorite:
-                # If not, create a new favorite entry in the database
-                favorite = Favoris.objects.create(
-                    ArticleID=article_id, UtilisateursID=user_id
-                )
-                serializer = FavoriteArticleSerializer(favorite)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                # If already favorited, return a 400 Bad Request response
-                return Response(
-                    {"detail": "Article is already marked as a favorite."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        except Exception as e:
-            return Response(
-                {"detail": f"Error saving favorite article: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        # Save the favorite article for the user
+        Favoris.objects.create(UtilisateurID=request.user, ArticleID=article_id)
+
+        return Response({'detail': 'Article favorited successfully'}, status=status.HTTP_200_OK)
+    
+class FavoriteArticleListView(ListAPIView):
+    serializer_class = FavoriteArticleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Retrieve the favorite articles for the authenticated user
+        return Favoris.objects.filter(UtilisateurID=self.request.user)
 
 

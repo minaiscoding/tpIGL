@@ -355,10 +355,21 @@ class LoginView(APIView):
             # If authentication fails, return an error response
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 #--------------------------------------------------------------------------------
+    def get_user_favorite_article_ids(user_id):
+        user = get_object_or_404(Utilisateurs, id=user_id)
+
+    # Retrieve the favorite articles for the user
+        favorite_articles = Favoris.objects.filter(user=user)
+
+    # Extract and return the article IDs
+        article_ids = [favorite.article.id for favorite in favorite_articles]
+
+        return article_ids
 #--------------------------------------------------------------------------------------------
 class FavoriteArticleListView(APIView):
      renderer_classes = [JSONRenderer]
-     def get(self, request, user_id):
+
+    def get(self, request, user_id):
         # Get the article IDs favorited by the user
         article_ids = get_user_favorite_article_ids(user_id)
 
@@ -381,6 +392,8 @@ def get_user_favorite_article_ids(user_id):
     favorite_articles = Favoris.objects.filter(user=user)
     article_ids = [favorite.article.id for favorite in favorite_articles]
     return article_ids
+
+
 
 class SaveFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -414,5 +427,18 @@ class SaveFavoriteView(APIView):
                 {"detail": f"Error saving favorite article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+    
+    
+
+
+    
+    #-----------------------------function to retrieve all the user's favorite articles IDs-------------------------------
+    
+
+
+    
+
+    
+
 
 

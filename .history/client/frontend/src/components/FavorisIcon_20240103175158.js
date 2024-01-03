@@ -5,10 +5,10 @@ import axios from "axios";
 import React from "react";
 import { BsBookmarks } from "react-icons/bs";
 import { BsBookmarksFill } from "react-icons/bs";
+import { useSelector } from "react-redux";
 
-
-const FavorisIcon = ({ articleId, user_id }) => {
- 
+const FavorisIcon = ({ articleId, }) => {
+  const authToken = useSelector((state) => state.auth.token);
   const [favoris, setFavoris] = useState(false);
   const style = "size-8 text-yellow";
 
@@ -18,8 +18,12 @@ const FavorisIcon = ({ articleId, user_id }) => {
         "http://localhost:8000/api/saveFavorite/",
         {
           articleId: articleId,
-          userId: user_id,
         },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
       );
       if (response.status === 200) {
         setFavoris(true);

@@ -13,7 +13,7 @@ const LoginPage = ({ onRoleChange }) => {
   const [error1, setError1] = useState("");
   const [error2, setError2] = useState("");
   const [error3, setError3] = useState("");
-  const [Erreutmsg,setErrorMsg] = useState ("");
+  const [Erreutmsg, setErrorMsg] = useState("");
 
   const handleLogin = async () => {
     if (username === '') {
@@ -40,24 +40,24 @@ const LoginPage = ({ onRoleChange }) => {
         onRoleChange(responseData.role);
 
         localStorage.setItem('id', responseData.utilisateur.id);
-       
+
 
         switch (responseData.role) {
           case "admin":
-            window.location.href="/UploadArticle";
+            window.location.href = "/UploadArticle";
             break;
           case "moderator":
-            window.location.href="/details";
+            window.location.href = "/articles";
             break;
           case "user":
 
-          window.location.href="/search";
+            window.location.href = "/search";
             break;
           default:
             break;
         }
 
-       
+
 
       } catch (error) {
         console.error("Error:", error);

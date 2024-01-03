@@ -37,8 +37,8 @@ const Displayer = ({ results }) => {
         <div
           key={result.Titre}
           className="bg-white border-2 rounded-rd border-black rounded-md p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out hover:border-4"
-          style={{ display: "flex", flexDirection: "column" }}
-        
+          style={{ display: "flex", flexDirection: "column" }}>
+
           <div style={{ alignSelf: "flex-end" }} className="w-10">
 
             <FavorisIcon></FavorisIcon>

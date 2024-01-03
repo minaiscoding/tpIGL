@@ -28,6 +28,7 @@ const Displayer = ({ results }) => {
           </div>
           <h1 className="pl-5 pr-5 text-3xl font-bold">{result.Titre}</h1>
           <p className="text-gray-800 text-opacity-75 italic mb-2 mt-2 pl-5 pr-5">{result.auteurs}</p>
+          <p className="text-gray-800 text-opacity-75 italic mb-1 mt-1 pl-5 pr-5">{result.date}</p>
           <p className="pl-5 pr-5 mb-2 mt-2">{result.Resume}</p>
           <a
            href={result.URL_Pdf}

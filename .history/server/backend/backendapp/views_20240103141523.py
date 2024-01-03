@@ -371,7 +371,7 @@ class SaveFavoriteView(APIView):
         return Response({'detail': 'Article favorited successfully'}, status=status.HTTP_200_OK)
     
 class FavoriteArticleListView(ListAPIView):
-    serializer_class = FavoriteArticleSerializer
+    serializer_class = FavorisArticleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):

@@ -359,23 +359,28 @@ class SaveFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        # This method is called when a POST request is made to this view. 
+        # It extracts information from the request and processes it.
         article_id = request.data.get('articleId')
+        # retrieves the articleId from the request data
 
         # Check if the article is already favorited by the user
-        if Favoris.objects.filter(UtilisateurID=request.user, ArticleID=article_id).exists():
+        if Favoris.objects.filter(user=request.user, article_id=article_id).exists():
             return Response({'detail': 'Article already favorited'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save the favorite article for the user
-        Favoris.objects.create(UtilisateurID=request.user, ArticleID=article_id)
+        Favoris.objects.create(user=request.user, article_id=article_id)
 
         return Response({'detail': 'Article favorited successfully'}, status=status.HTTP_200_OK)
     
 class FavoriteArticleListView(ListAPIView):
+
+    queryset = Favoris.objects.all()
     serializer_class = FavoriteArticleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Retrieve the favorite articles for the authenticated user
-        return Favoris.objects.filter(UtilisateurID=self.request.user)
+        user = self.request.user
+        return Favoris.objects.filter(UtilisateurID=user)
 
 

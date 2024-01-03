@@ -371,11 +371,13 @@ class SaveFavoriteView(APIView):
         return Response({'detail': 'Article favorited successfully'}, status=status.HTTP_200_OK)
     
 class FavoriteArticleListView(ListAPIView):
+
+    queryset = Favoris.objects.all()
     serializer_class = FavoriteArticleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Retrieve the favorite articles for the authenticated user
-        return Favoris.objects.filter(UtilisateurID=self.request.user)
+        user = self.request.user
+        return Favoris.objects.filter(UtilisateurID=user)
 
 

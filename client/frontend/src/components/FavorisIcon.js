@@ -5,7 +5,7 @@ import { BsBookmarksFill } from "react-icons/bs";
 
 const FavorisIcon = () => {
     const [favoris, setFavoris] = useState(false);
-    const  style ='size-8 text-yellow';
+    const  style ='size-10 text-yellow';
 
     const addToFavorites = (props) => {
         // Integration

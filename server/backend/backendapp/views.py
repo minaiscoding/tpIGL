@@ -1,10 +1,12 @@
+import os
+from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
 #--------------------------------------------------------------------------------
-from .models import  Articles, Favoris, Utilisateurs
-from .serializers import  ArticlesSerializer, FavorisSerializer, AuthTokenSerializer,UtilisateursSerializer
+from .models import Utilisateurs, Articles, Favoris
+from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
 #--------------------------------------------------------------------------------
 from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
@@ -156,56 +158,54 @@ class LocalUploadViewSet(APIView):
     API endpoint for handling local file uploads and processing.
 
     This ViewSet provides an endpoint for uploading PDF files of research scientific papers, validating them,
-    extracting text, performing analysis, and sending the information of the analysis to a search index of elasticsearch.
+    extracting text, performing analysis, and sending the information of the analysis to a search index of Elasticsearch.
 
     The endpoint is accessible via a POST request to 'api/articles_ctrl/local-upload/'.
     """
     parser_classes = (MultiPartParser, FormParser)
-    serializer_class = ArticlesSerializer
+    serializer_class = UploadArticlesSerializer
 
+    @swagger_auto_schema(
+        request_body=UploadArticlesSerializer,
+        operation_summary="Upload and process a PDF file of research scientific papers.",
+        operation_description="This endpoint handles the upload, validation, text extraction, analysis, and indexing of scientific articles.",
+        responses={200: "OK", 400: "Bad Request"},
+    )
     def post(self, request, *args, **kwargs):
         """
         Endpoint for uploading one PDF file of research scientific papers, validating them, extracting text,
-        performing analysis,and sending the information of the analysis to a search index of elasticsearch. 
+        performing analysis, and sending the information of the analysis to a search index of Elasticsearch.
 
         :param HttpRequest request: The request object -->  file object.
 
         :return: Response with information about uploaded file and processing result.
         """
-        
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            
             uploaded_file = serializer.validated_data['pdf_File']
-            # Ensure the file cursor is at the beginning
             uploaded_file.seek(0)
-            # Check if the uploaded PDF is a valid scientific article
             is_valid = is_valid_scientific_pdf(uploaded_file)
 
-            # Handle the case where the PDF is not valid
             if not is_valid:
-                return Response({'error': 'PDF scientifique invalide. Le fichier fournie ne mène pas à un article scientifique valide.'}, status= status.HTTP_400_BAD_REQUEST)
-            # Process the article data for each file
+                return Response({'error': 'Invalid scientific PDF. The provided file does not lead to a valid scientific article.'}, status=status.HTTP_400_BAD_REQUEST)
 
             article_data = upload_article_process(uploaded_file)
-            # Send the processed data to Elasticsearch
             send_to_elasticsearch('articles', article_data)
 
-            # Create Article instance and then delete it to save the url for the local uploaded files in the media root
+            
+            # Save the PDF file to the media root   
             article = serializer.save()
-
-            # Restore 'id' field to the serializer
             article.delete()
 
             file_url = article_data[0]['URL_Pdf']
 
             return Response({
-            'article_data': article_data,
-            'url_pdf': file_url,
-            'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
+                'article_data': article_data,
+                'url_pdf': file_url,
+                'message': 'Files uploaded and processed successfully and sent to Elasticsearch'
             }, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 #--------------------------------------------------------------------------------
 #//////////////////////////////////////////////////////////////
 #     ExternalUploadViewSet
@@ -213,24 +213,29 @@ class LocalUploadViewSet(APIView):
     
 class ExternalUploadViewSet(APIView):
     """
-    API endpoint for handling external PDF file of research scientific papers uploads  via URL and processing.
+    API endpoint for handling external PDF file of research scientific papers uploads via URL and processing.
 
     This ViewSet provides an endpoint for uploading PDF files from a URL,
     downloading them, validating, extracting text, performing analysis,
-    and sending the information of the analysis to a search index of elasticsearch.
+    and sending the information of the analysis to a search index of Elasticsearch.
 
     The endpoint is accessible via a POST request to 'articles_ctrl/external-upload/'.
     """
-
     parser_classes = (MultiPartParser, FormParser)
-    serializer_class = ArticlesSerializer
+    serializer_class = UploadArticlesSerializer
 
+    @swagger_auto_schema(
+        request_body= UploadArticlesSerializer,
+        operation_summary="Upload and process a PDF file of research scientific papers from a URL.",
+        operation_description="This endpoint handles the download, validation, text extraction, analysis, and indexing of scientific articles from an external URL.",
+        responses={200: "OK", 400: "Bad Request"},
+    )
     def post(self, request, *args, **kwargs):
         """
-        Endpoint for uploading one PDF file  of research scientific papers from a URL, downloading them,
-        validating, extracting text, performing analysis, and sending the information of the analysis to a search index of elasticsearch.
+        Endpoint for uploading one PDF file of research scientific papers from a URL, downloading them,
+        validating, extracting text, performing analysis, and sending the information of the analysis to a search index of Elasticsearch.
 
-        :param HttpRequest request: The request object -->  file object.
+        :param HttpRequest request: The request object --> file object.
 
         :return: Response with information about the uploaded file and processing result.
         """

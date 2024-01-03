@@ -1,41 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes, BrowserRouter as Router, useNavigate } from 'react-router-dom';
-import SearchPage from './pages/SearchPage';
-import DataPage from './pages/DataPage';
+import { Route, Routes, BrowserRouter as Router, useNavigate } from "react-router-dom";
+import SearchPage from "./pages/SearchPage";
+import DataPage from "./pages/DataPage";
 import Navbar from "./components/NavBar";
-import LoginPage from './pages/LoginPage';
-import AccueilPage from './pages/AccueilPage';
+import LoginPage from "./pages/LoginPage";
+import AccueilPage from "./pages/AccueilPage";;
 import UploadArticle from "./pages/UploadArticle";
 import ListModerateurs from "./pages/ListModerateurs";
 import DetailsArticle from "./pages/DetailsArticle";
 import './App.css';
 import FavoriePage from './pages/FavoriePage';
 import SearchResultPage from './pages/SearchResultPage';
-import { TextArticlePage } from "./pages/TextArticlePage";
-import axios from "axios";
+import AllArticles from "./pages/AllArticles";
 
 
-const CheckAuth = () => {
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log()
-    if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-      const checkAuthStatus = async () => {
-        const isAuthenticated = localStorage.getItem('token');
-        if (!isAuthenticated) {
-          navigate("/");
-        }
-      };
-
-      checkAuthStatus();
-    }
-  }, [navigate]);
-
-  return null;
-};
-
-// Defining the App component
 const App = () => {
   // State variables and constants
   const storedRole = localStorage.getItem("userRole");
@@ -70,7 +49,6 @@ const App = () => {
 
 
   return (
-
     <>
       {loading ? (
         "Loading ..."
@@ -88,8 +66,6 @@ const App = () => {
                     <CheckAuth />
                     <Navbar role={role} profile={username} />
                     <Routes>
-
-
                       {/* Route for the SearchPage */}
                       <Route path="/search" element={<SearchPage />} />
 
@@ -98,33 +74,39 @@ const App = () => {
 
                       {/* Route for the Home page */}
                       <Route path="/Data" element={<DataPage />} />
+                      {/* Route for the articles page */}
+                      <Route path="/articles" element={<AllArticles />} />
 
-                      {/* Route for the text of the article page */}
-                      <Route path="/TextIntegral/:articleId" element={< TextArticlePage />} />
 
                       {/* Route for the ModérateurPage */}
-                      <Route path="/Moderateurs" element={<ListModerateurs />} />
+                      <Route
+                        path="/Moderateurs"
+                        element={<ListModerateurs />}
+                      />
+
 
                       {/* Route for the UplaodArticlePage */}
-                      <Route path="/UploadArticle" element={<UploadArticle />} />
+                      {/*<Route path="/UploadArticle" element={<UploadArticle />} />*/}
+                      <Route
+                        path="/UploadArticle"
+                        element={<UploadArticle />}
+                      />
 
                       {/* Route for the SearchResultPage */}
                       <Route path="/result" element={<SearchResultPage />} />
 
                       {/* Route for the favorie page */}
                       <Route path="/mesFavoris" element={<FavoriePage />} />
-
                     </Routes>
                   </>
                 }
               />
             </Routes>
           </Router>
-
         </div>
       )}
     </>
   );
-}
+};
 
 export default App;

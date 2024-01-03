@@ -27,10 +27,12 @@ def extract_pdf_metadata(file):
     Extract metadata from a PDF file.
 
     :param file: The PDF file content as either a BytesIO object or raw bytes.
+    :type file: BytesIO or bytes
     
     :return: A dictionary containing the extracted metadata.
              Keys include 'Title', 'Authors', 'CreationDate', 'Abstract', and 'Keywords'.
     :rtype: dict
+    :raises ValueError: If the provided file format is not supported.
     """
 
     # If file is an InMemoryUploadedFile, read its content
@@ -123,7 +125,9 @@ def extract_text_from_pdf(file, num_pages=2):
     """
     Extract and organize text from a PDF file considering multi-column layout.
 
-    :param str file_path: The path to the PDF file.
+    :param file: The PDF file content as either a BytesIO object or raw bytes.
+    :type file: BytesIO or bytes
+    
     :param int num_pages: The number of pages to extract from the beginning and end. Default is 2.
 
     :return: Three strings representing the full text, text of the first `num_pages` pages, and text of the last `num_pages` pages.
@@ -204,6 +208,13 @@ def extract_text_from_pdf(file, num_pages=2):
 def download_pdf_from_url(url):
     """
     Download a PDF file from a given URL and return the file object.
+
+    :param str url: The URL of the PDF file.
+
+    :return: BytesIO object containing the PDF file if successful, None otherwise.
+    :rtype: BytesIO or None
+
+    :raises ValueError: If no PDF link is found on the page or if the content type is unsupported.
     """
     try:
         # Send a request to the URL
@@ -338,27 +349,39 @@ def extract_article_info(text, first_pages, last_pages):
         # Remove empty references (if any)
         references = [ref.strip() for ref in references if ref.strip()]
 
-        references_string = '\n'.join(references)
-
-        
-
+        references_string = '\n\n'.join(references)
+       
+        if not references : 
+            # if the refernces is none (not found in the last_pages text) we are obliged to check the holl text 
+            references_match = references_pattern.search(text) 
+            references_text = references_match.group().strip() if references_match else None
+            # Split references based on the pattern (digit followed by a dot)
+            references = re.split(r'\b\[\d\]+\.|\b\[\d\]|\d\.', references_text) if references_text else []
+            # Remove empty references (if any)
+            references = [ref.strip() for ref in references if ref.strip()]
+            references_string = '\n\n'.join(references)
+        #-----------------------------------------------------------------------------------------
+        # if ther is no keywords mentioned we can find the most ranked phrases instead
+        print(keywords)
         if not keywords:
+           r = Rake()
+           r.extract_keywords_from_text(first_pages)
+           keywords_list = r.get_ranked_phrases()
 
-            r = Rake()
-            r.extract_keywords_from_text(first_pages)
-            keywords_list = r.get_ranked_phrases()
+           # Limit the number of keywords
+           keywords = keywords_list[:5]
 
-            # Limit the number of keywords
-            keywords = keywords_list[:5]
+           cleaned_keywords = []
+           for keyword in keywords:
+               # Remove unwanted characters and digits
+               cleaned_keyword = ' '.join(filter(lambda x: x.isalpha(), keyword.split()))
+               cleaned_keywords.append(cleaned_keyword)
 
-            cleaned_keywords = []
-            for keyword in keywords:
-            # Remove unwanted characters and digits
-                cleaned_keyword = ' '.join(filter(lambda x: x.isalpha(), keyword.split()))
-                cleaned_keywords.append(cleaned_keyword)
+               # Convert the list of cleaned keywords to a string
+               keywords_string = ', '.join(cleaned_keywords)
 
-            keywords=cleaned_keywords
-        
+               keywords = keywords_string
+        #-----------------------------------------------------------------------------------------
         # If authors or institutions are not found using regex, use spaCy for entity recognition
         if not authors or not institutions:
             # Specify the number of lines to consider for entity recognition
@@ -463,7 +486,6 @@ def send_to_elasticsearch(index_name, data):
     Sends data to Elasticsearch.
 
     :param str index_name: The name of the index.
-    :param str document_type: The type of the document.
     :param dict data: The data to be sent.
     """
     es = Elasticsearch(['http://localhost:9200'],  verify_certs=False)
@@ -476,6 +498,15 @@ def send_to_elasticsearch(index_name, data):
 # parse_and_validate_date
 #//////////////////////////
 def parse_and_validate_date(date_string):
+    """
+    Parse and validate a date string.
+
+    :param str date_string: The date string to be parsed.
+    
+    :return: A formatted date string in YYYY-MM-DD format if parsing is successful,
+             or None if the parsing fails.
+    :rtype: str or None
+    """
     try:
         # Parse the date string using the expected format
         parsed_date = datetime.strptime(date_string, '%d %b %Y')
@@ -492,6 +523,15 @@ def parse_and_validate_date(date_string):
 # parse_metadata_date
 #//////////////////////////   
 def parse_metadata_date(date_string):
+    """
+    Parse a date string extracted from metadata and return it in YYYY-MM-DD format.
+
+    :param str date_string: The date string extracted from metadata.
+
+    :return: A formatted date string in YYYY-MM-DD format if parsing is successful,
+             or None if the parsing fails or the input is None.
+    :rtype: str or None
+    """
     if date_string is None:
         return None
 
@@ -507,6 +547,7 @@ def parse_metadata_date(date_string):
     except (ValueError, IndexError):
         # Handle invalid date string
         return None
+
 #------------------------------------------------------------------------------
 #//////////////////////////
 # upload_article_process
@@ -518,17 +559,17 @@ def upload_article_process(file):
 
     :param file: The uploaded PDF file.
 
-    :return: Article data dictionary.
+    :return: Article data dictionary containing information extracted from the PDF.
+    :rtype: list of dict
     """
-
     # Ensure the file cursor is at the beginning
     file.seek(0)
 
     # Extract metadata from the PDF file
     meta_data = extract_pdf_metadata(file)
     print(meta_data)
-    titre_meta_data = meta_data.get("Title","")
-    date_meta_data = meta_data.get("CreationDate","")
+    titre_meta_data = meta_data.get("Title", "")
+    date_meta_data = meta_data.get("CreationDate", "")
 
     # URL for the file
     file_url = f'http://127.0.0.1:8000/uploaded_media/article_pdfs/{file.name}'
@@ -541,7 +582,6 @@ def upload_article_process(file):
     analysis_result = extract_article_info(pdf_text, first_pages_text, last_pages_text)
 
     # Combine title from metadata and analysis result
-
     titre = analysis_result.get('title', '')
 
     # Define a translation table to remove specific characters
@@ -553,13 +593,12 @@ def upload_article_process(file):
 
     # Compare the modified strings
     if titre_without_spaces != titre_meta_data_without_spaces:
-       titre = titre_meta_data + ' ' + titre
-    
+        titre = titre_meta_data + ' ' + titre
+
     date = analysis_result.get('date', '')
 
-    if date_meta_data and not date :
+    if date_meta_data and not date:
         date = parse_metadata_date(date_meta_data)
-
 
     # Prepare the article data dictionary
     article_data = [{
@@ -575,4 +614,5 @@ def upload_article_process(file):
     }]
 
     return article_data
+
 #------------------------------------------------------------------------------

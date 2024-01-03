@@ -113,8 +113,8 @@ const UploadArticle = () => {
        
         <div className="h-full w-screen flex flex-col items-center justify-center font-Futura">
           {/* Header */}
-          <p className="text-3xl flex flex-col items-center justify-center font-Futura-bold pb-8 mt-20">
-            Upload article
+          <p className="text-3xl pl-2 flex flex-col items-center justify-center font-Futura-bold pb-8 mt-20">
+          Upload article
           </p>
         </div>
 
@@ -139,7 +139,7 @@ const UploadArticle = () => {
               src={link}
               alt="Link Icon"
               onClick={handleUrlSubmit}
-              className="cursor-pointer absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6"
+              className="cursor-pointer absolute right-4 top-1/2 transform -translate-y-1/2 h-7 w-8"
             />
           </div>
         </div>

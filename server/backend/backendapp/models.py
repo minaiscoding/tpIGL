@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from elasticsearch_dsl.connections import connections
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
-import uuid
+
 
 
 
@@ -35,7 +35,7 @@ class Utilisateurs(models.Model):
         return self.NomUtilisateur
 
 class Articles(models.Model): 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)# auto string generator for unique id of the articles better than char feild
+    id = models.CharField(max_length=255,primary_key=True)
     Titre = models.CharField(max_length=255,null=True,blank=True)
     Resume = models.TextField(null=True,blank=True)
     auteurs = models.CharField(max_length=255,null=True,blank=True)
@@ -50,7 +50,13 @@ class Articles(models.Model):
     def __str__(self):
         return self.Titre 
     
-    
+class ArticleFile(models.Model): 
+    id = models.AutoField(primary_key=True)
+    URL_Pdf = models.URLField(max_length=255,null=True,blank=True)
+    pdf_File = models.FileField(upload_to='article_pdfs/',null=True,blank=True,validators=[FileExtensionValidator( ['pdf'] )]) 
+
+    def __str__(self):
+        return self.pdf_File.name
 
 class Favoris(models.Model):
     UtilisateurID = models.ForeignKey(Utilisateurs, on_delete=models.CASCADE)

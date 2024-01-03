@@ -19,6 +19,16 @@ from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 #--------------------------------------------------------------------------------
 from elasticsearch_dsl import Search
 #------------------------------------------------------------------
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
+from knox.views import LoginView as KnoxLoginView
+from rest_framework import permissions
+from rest_framework.permissions import AllowAny
+from elasticsearch import Elasticsearch
+from django.core.exceptions import MultipleObjectsReturned
 from .utils import (  extract_text_from_pdf,
                       extract_pdf_metadata,
                       is_valid_scientific_pdf,
@@ -62,7 +72,21 @@ class ArticlesListView(APIView):
 
         # Return the serialized results as JSON
         return Response(serializer.data)
-#--------------------------------------------------------------------------------------------------------------
+
+
+class ArticleDetailView(APIView):
+    def get(self, request, article_id):
+        # Perform the Elasticsearch search to get the article by ID
+        search = Search(index='articles').query('term', id=article_id)  # Assuming 'id' is the name of the field in your model
+        response = search.execute()
+
+        # Extract relevant information from the search hit
+        hit = response.hits[0].to_dict() if response.hits else {}
+
+        return Response(hit)
+    
+
+    
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
     serializer_class = FavorisSerializer
@@ -346,22 +370,38 @@ class LogoutView(APIView):
 #  LoginView   
 #/////////////////////////
 class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+  @csrf_exempt
+  def post(self, request, *args, **kwargs):
+    nom_utilisateur = request.data.get('NomUtilisateur')
+    email = request.data.get('Email')
+    password = request.data.get('MotDePasse')
 
-        # Fetch user by username
-        try:
-            user = Utilisateurs.objects.get(NomUtilisateur=username)
-        except Utilisateurs.DoesNotExist:
-            user = None
+    # Debug: Print request data
+    print('Request data:', request.data)
 
-        if user is not None and check_password(password, user.MotDePasse):
-            # If user is authenticated, log them in
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # If authentication fails, return an error response
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-#--------------------------------------------------------------------------------
+    # Debug: Print user model fields
+    print('User model fields:', Utilisateurs._meta.get_fields())
+
+    try:
+        # Attempt to retrieve user based on both username and email
+        utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
         
+        # Check if the provided password matches the stored password
+        if check_password(password, utilisateur.MotDePasse):
+            # Serialize the user instance
+            serializer = UtilisateursSerializer(utilisateur)
+
+            # Add the role information to the response
+            response_data = {
+                'role': utilisateur.Role,
+                'message': 'Login successful',
+                'utilisateur': serializer.data,  # Include the serialized user data
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+    except Utilisateurs.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
+    except MultipleObjectsReturned:
+        return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

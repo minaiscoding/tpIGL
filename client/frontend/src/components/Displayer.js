@@ -1,6 +1,10 @@
 // Displayer.js
 import React from "react";
 import FavorisIcon from "./FavorisIcon";
+import { Link } from "react-router-dom";
+import { useEffect } from "react";
+
+
 import { Pointer } from "lucide-react";
 
 /**
@@ -10,6 +14,12 @@ import { Pointer } from "lucide-react";
  * @param {Array} props.results - Array of result objects to be displayed.
  * @returns {JSX.Element} - Rendered component.
  */
+
+
+
+
+
+
 const Displayer = ({ results }) => {
   // Sort the results by date in descending order
   const sortedResults = [...results].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -18,15 +28,19 @@ const Displayer = ({ results }) => {
     return <p style={{ color: "black" }}>Pas de résultat</p>;
   }
 
+
   return (
     <div>
+
       {sortedResults.map((result) => (
+
         <div
           key={result.Titre}
           className="bg-white border-2 rounded-rd border-black rounded-md p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out hover:border-4"
           style={{ display: "flex", flexDirection: "column" }}
-        >
+        
           <div style={{ alignSelf: "flex-end" }} className="w-10">
+
             <FavorisIcon></FavorisIcon>
           </div>
           <h1 className="pl-5 pr-5 text-3xl font-bold">{result.Titre}</h1>
@@ -46,8 +60,9 @@ const Displayer = ({ results }) => {
             For example, you can include more information from the 'result' object.
           */}
         </div>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   );
 };
 

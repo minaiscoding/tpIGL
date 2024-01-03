@@ -108,7 +108,7 @@ const UploadArticle = () => {
       {/* Main container with background image */}
       <div
         style={{ backgroundImage }}
-        className="h-full w-screen min-h-screen font-Futura bg-cover bg-center flex flex-col"
+        className="h-full w-screen min-h-screen bg-purple300  font-Futura bg-cover bg-center flex flex-col"
       >
        
         <div className="h-full w-screen flex flex-col items-center justify-center font-Futura">

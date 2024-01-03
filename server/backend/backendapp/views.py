@@ -36,7 +36,8 @@ from .utils import (  extract_text_from_pdf,
                       download_pdf_from_url,
                       send_to_elasticsearch, 
                        parse_metadata_date, 
-                      upload_article_process,          
+                      upload_article_process, 
+                      parse_and_validate_date,         
                    )
 import string
 #--------------------------------------------------------------------------------
@@ -183,6 +184,10 @@ class LocalUploadViewSet(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             uploaded_file = serializer.validated_data['pdf_File']
+            # Check if the URL is provided
+            if not uploaded_file:
+                return Response({'error': 'a File is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
             uploaded_file.seek(0)
             is_valid = is_valid_scientific_pdf(uploaded_file)
 
@@ -275,20 +280,23 @@ class ExternalUploadViewSet(APIView):
 
             # Extract metadata from the downloaded PDF
             meta_data = extract_pdf_metadata(article_file)
+
             titre_meta_data = meta_data.get("Title","")
             date_meta_data = meta_data.get("CreationDate","")
-
+            keywords_meta_data = meta_data.get("Keywords","")
+            #-----------------------------------------------------------
             # Extract text from the downloaded PDF
             pdf_text, f_txt, l_txt = extract_text_from_pdf(article_file)
 
             # Perform analysis on pdf_text
             analysis_result = extract_article_info(pdf_text, f_txt, l_txt)
 
-            # Combine title/date from metadata and analysis result
+            # Combine title/date/keywords from metadata and analysis result
 
             titre = analysis_result.get('title', '')
             date = analysis_result.get('date', '')
-
+            keywords = analysis_result.get('keywords', '')
+            #------------------------------------------------------
             # Define a translation table to remove specific characters
             translator = str.maketrans('', '', string.whitespace + "''’")
 
@@ -299,19 +307,23 @@ class ExternalUploadViewSet(APIView):
             # Compare the modified strings
             if titre_without_spaces != titre_meta_data_without_spaces:
                titre = titre_meta_data + ' ' + titre
-
-
-            if date_meta_data and not date :
-               date = parse_metadata_date(date_meta_data)
-
+            #------------------------------------------------------
+            if date_meta_data  and not date:
+               date = parse_metadata_date(date_meta_data)  
+            date = parse_and_validate_date(date)
+            #------------------------------------------------------
+            if keywords_meta_data:
+               if keywords_meta_data != keywords:
+                  keywords = keywords +' '+keywords_meta_data
+            #------------------------------------------------------
             # Prepare data for Article creation
             article_data = [{
                 'Titre': titre,
                 'Resume': analysis_result.get('abstract', ''),
                 'auteurs': analysis_result.get('authors', ''),
                 'Institution': analysis_result.get('institutions', ''),
-                'date': analysis_result.get('date', ''),
-                'MotsCles': analysis_result.get('keywords', ''),
+                'date': date,
+                'MotsCles': keywords,
                 'text': pdf_text,
                 'URL_Pdf': file_url,
                 'RefBib': analysis_result.get('references', ''),

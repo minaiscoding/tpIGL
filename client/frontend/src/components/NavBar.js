@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { LuFileText } from 'react-icons/lu';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../logo.svg';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa6';
 import { TfiWidgetized } from "react-icons/tfi";
@@ -17,6 +17,7 @@ const Navbar = ({ role, profile }) => {
     const location = useLocation();
     const [shownav, setShownav] = useState(false);
     const [activeClassName, setActiveClassName] = useState('');
+    const nav = useNavigate();
 
     useEffect(() => {
         // Update active class when the location changes
@@ -33,8 +34,7 @@ const Navbar = ({ role, profile }) => {
         localStorage.removeItem("userRole");
         localStorage.removeItem("NomUtilisateurs");
         localStorage.removeItem("id");
-        console.log("yes");
-        window.location.href = "/";
+        nav('/');
     };
 
     return (

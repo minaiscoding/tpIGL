@@ -52,10 +52,9 @@ const Displayer = ({ results }) => {
             Additional content can be added here.
             For example, you can include more information from the 'result' object.
           */}
-        </Link>
         </div>
-  ))
-}
+      ))
+      }
     </div >
   );
 };

@@ -4,7 +4,7 @@ import SearchPage from "./pages/SearchPage";
 import DataPage from "./pages/DataPage";
 import Navbar from "./components/NavBar";
 import LoginPage from "./pages/LoginPage";
-import AccueilPage from "./pages/AccueilPage";;
+import AccueilPage from "./pages/AccueilPage";
 import UploadArticle from "./pages/UploadArticle";
 import ListModerateurs from "./pages/ListModerateurs";
 import DetailsArticle from "./pages/DetailsArticle";
@@ -14,6 +14,25 @@ import SearchResultPage from './pages/SearchResultPage';
 import AllArticles from "./pages/AllArticles";
 
 
+const CheckAuth = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log()
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+      const checkAuthStatus = async () => {
+        const isAuthenticated = localStorage.getItem('token');
+        if (!isAuthenticated) {
+          navigate("/");
+        }
+      };
+
+      checkAuthStatus();
+    }
+  }, [navigate]);
+
+  return null;
+};
 
 const App = () => {
   // State variables and constants

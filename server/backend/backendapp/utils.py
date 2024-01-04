@@ -68,6 +68,7 @@ def extract_pdf_metadata(file):
 #///////////////////////
 # column_boxes  
 #///////////////////////
+
 def column_boxes(page: fitz.Page, footer_margin: int = 0, no_image_text: bool = True) -> list:
     """
     Return a list of column bounding boxes for the given page.

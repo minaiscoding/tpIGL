@@ -11,7 +11,7 @@ from drf_yasg import openapi
 schema_view = get_schema_view(
     openapi.Info(
         title="Articlo's backend",
-        default_version='v1',
+        default_version='1.0.0',
         description="The official API docummentation for articlo",
 
         contact=openapi.Contact(email="la_khadir@esi.dz"),

@@ -17,7 +17,7 @@ function Animation() {
         <img
           key={index}
           src={letter}
-          className={`letter letter-${index} ${index === 0 ? 'visible' : ''}`}
+          className={`letter letter-${index} ${index === 0 ? 'visible' : ''} w-[15%] md:w-full`}
           alt={`letter-${index}`}
         />
       ))}

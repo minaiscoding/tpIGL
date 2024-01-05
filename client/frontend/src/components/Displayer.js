@@ -20,12 +20,13 @@ import { Pointer } from "lucide-react";
 
 
 
-const Displayer = ({ results }) => {
+const Displayer = ({ results, pere }) => {
   // Sort the results by date in descending order
   const sortedResults = [...results].sort((a, b) => new Date(b.date) - new Date(a.date));
 
+  const userId = localStorage.getItem("id");
   if (sortedResults.length === 0) {
-    return <p style={{ color: "black" }}>Pas de résultat</p>;
+    return <p style={{ color: "black" }}>Pas de rÃ©sultat</p>;
   }
 
 
@@ -36,29 +37,21 @@ const Displayer = ({ results }) => {
 
         <div
           key={result.Titre}
-          className="bg-white border-2 rounded-rd border-black rounded-md p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out hover:border-4"
+          className="bg-white border-2 rounded-rd border-black p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out"
           style={{ display: "flex", flexDirection: "column" }}>
+          <Link to={pere === 'pere1' ? `/TextIntegral/${result.id}` : `/details/${result.id}`}>
 
-          <div style={{ alignSelf: "flex-end" }} className="w-10">
 
-            <FavorisIcon></FavorisIcon>
-          </div>
-          <h1 className="pl-5 pr-5 text-3xl font-bold">{result.Titre}</h1>
-          <p className="text-gray-800 text-opacity-75 italic mb-2 mt-2 pl-5 pr-5">{result.auteurs}</p>
-          <p className="text-gray-800 text-opacity-75 italic mb-1 mt-1 pl-5 pr-5">{result.date}</p>
-          <p className="pl-5 pr-5 mb-2 mt-2">{result.Resume}</p>
-          <a
-            href={result.URL_Pdf}
-            className="pl-5 pr-5 mb-2 mt-2 font-bold text-yellow hover:text-purple-800 no-underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Voir l'article complet en PDF
-          </a>
-          {/* 
-            Additional content can be added here.
-            For example, you can include more information from the 'result' object.
-          */}
+            <div style={{ alignSelf: "flex-end" }} className="w-10">
+
+              <FavorisIcon articleId={result.id} user_id={userId} />
+            </div>
+            <h1 className="pl-5 pr-5 text-3xl font-bold">{result.Titre}</h1>
+            <p className="text-gray-800 text-opacity-75 italic mb-2 mt-2 pl-5 pr-5">{result.auteurs}</p>
+            <p className="text-gray-800 text-opacity-75 italic mb-1 mt-1 pl-5 pr-5">{result.date}</p>
+            <p className="pl-5 pr-5 mb-2 mt-2">{result.Resume}</p>
+
+          </Link>
         </div>
       ))
       }

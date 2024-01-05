@@ -3,7 +3,7 @@ from django.urls import path,include
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet
+from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView
 #-----------------------------------------------------------------------------------------------
 
 urlpatterns = [
@@ -12,6 +12,8 @@ urlpatterns = [
    # path('articles/<str:article_id>/', ArticleDetailView.as_view(), name='article-detail'),  # Add this line
     path('favoris/', FavorisListView.as_view(), name='favoris-list'),
     path('search/', SearchView.as_view(), name='article_search'), 
+    path('saveFavorite/', SaveFavoriteView.as_view(), name='save_favorite'),
+
     #--------------------------------------------------------------------------------------------------#
     #----------------------# ArticlesControl Views #---------------------------------------------------#
     #--------------------------------------------------------------------------------------------------#

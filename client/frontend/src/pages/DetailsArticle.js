@@ -2,18 +2,24 @@ import React, { useState, useEffect } from "react";
 import vector_bg from "../assets/Vector.svg";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { IoArrowBack } from "react-icons/io5";
+
 
 const DetailsArticle = ({ role }) => {
   const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
-  const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2";
+  const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2  max-w-full text-wrap";
   const style3 =
-    "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full ";
+    "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full  max-w-full text-wrap ";
 
   const backgroundImage = `url(${vector_bg})`;
   const [edit, setEdit] = useState(false);
   const [articleData, setArticleData] = useState(null);
   const [formData, setFormData] = useState(null);
   const articleId = useParams();
+  const nav = useNavigate();
 
   useEffect(() => {
     // Fetch articles when the component mounts
@@ -26,7 +32,7 @@ const DetailsArticle = ({ role }) => {
   const fetchArticles = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:9200/articles/_doc/${articleId}`
+        `http://localhost:9200/articles/_doc/${articleId.articleId}`
       );
       console.log(response.data._source);
       setFormData(response.data._source);
@@ -55,19 +61,22 @@ const DetailsArticle = ({ role }) => {
   const handleDelete = async () => {
     try {
       // Retrieve the article ID from local storage
-      const articleId = localStorage.getItem("selectedArticleId");
+
 
       const response = await axios.delete(
-        `http://localhost:9200/articles/_doc/${articleId}`
+        `http://localhost:9200/articles/_doc/${articleId.articleId}`
       );
 
       // Check the response and handle accordingly
       if (response.status === 200) {
         console.log("Document deleted successfully from Elasticsearch");
-        window.location.reload();
+        nav('/articles');
+        toast.success(`l'article est supprimé avec succès`);
+
         // Optionally, update the state or perform other actions
       } else {
         console.error("Failed to delete document from Elasticsearch");
+        toast.error(`Error l'article n'est pas supprimé.`);
       }
     } catch (error) {
       console.error("Error deleting document:", error);
@@ -77,10 +86,8 @@ const DetailsArticle = ({ role }) => {
   const handleUpdate = async () => {
     try {
       // Retrieve the article ID from local storage
-      const articleId = localStorage.getItem("selectedArticleId");
-      console.log("*****", formData);
       const response = await axios.put(
-        `http://localhost:9200/articles/_doc/${articleId}`,
+        `http://localhost:9200/articles/_doc/${articleId.articleId}`,
         formData
       );
       setArticleData(formData);
@@ -102,10 +109,18 @@ const DetailsArticle = ({ role }) => {
   return (
     <div
       style={{ backgroundImage }}
-      className="w-screen h-full min-h-screen bg-purple300 bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8 overflow-y-scroll"
+      className="w-screen h-full min-h-screen bg-purple300 bg-center bg-no-repeat flex flex-col items-center justify-center px-2 bg-cover pb-8 overflow-y-scroll max-w-screen"
     >
+
       {articleData ? (
         <>
+          <div
+            className="flex flex-row gap-1 absolute left-2 top-8 sm:top-[70px] cursor-pointer"
+            onClick={() => nav("/articles")}
+          >
+            <IoArrowBack className=" text-white size-6 " />
+            <p className=" font-Futura text-white text-md font-bold" >Retour</p>
+          </div>
           <div
             className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg mt-20 sm:mt-8 mb-4 w-[90%]`}
           >
@@ -118,7 +133,7 @@ const DetailsArticle = ({ role }) => {
                   {" "}
                   Titre de l'article :
                 </label>
-                <input
+                <textarea
                   type="text"
                   id="titre"
                   name="Titre"
@@ -205,7 +220,7 @@ const DetailsArticle = ({ role }) => {
                 />
               </div>
             ) : (
-              <div className="flex flex-col items-start justify-center text-left">
+              <div className="flex flex-col items-start justify-center text-left max-w-screen ">
                 <h2 className="font-Futura text-left text-xl text-purple2 font-semibold">
                   {" "}
                   Titre de l'article :
@@ -235,8 +250,9 @@ const DetailsArticle = ({ role }) => {
             )}
           </div>
 
-          {role === "moderator" || role === "admin" && (
+          {role === "moderator" && (
             <div className="flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 xl:gap-24">
+              <ToastContainer />
               {!edit ? (
                 <>
                   <button

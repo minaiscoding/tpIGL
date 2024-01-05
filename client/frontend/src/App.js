@@ -12,6 +12,7 @@ import './App.css';
 import FavoriePage from './pages/FavoriePage';
 import SearchResultPage from './pages/SearchResultPage';
 import AllArticles from "./pages/AllArticles";
+import { TextArticlePage } from "./pages/TextArticlePage";
 
 
 const CheckAuth = () => {
@@ -93,8 +94,14 @@ const App = () => {
 
                       {/* Route for the Home page */}
                       <Route path="/Data" element={<DataPage />} />
-                      {/* Route for the articles page */}
-                      <Route path="/articles" element={<AllArticles />} />
+
+
+                      {role === 'moderator' && (
+                        <Route path="/articles" element={<AllArticles />} />
+                      )}
+
+                      {/* Route for the text of articles page */}
+                      <Route path="/TextIntegral/:articleId" element={<TextArticlePage />} />
 
 
                       {/* Route for the ModérateurPage */}
@@ -105,11 +112,10 @@ const App = () => {
 
 
                       {/* Route for the UplaodArticlePage */}
-                      {/*<Route path="/UploadArticle" element={<UploadArticle />} />*/}
-                      <Route
-                        path="/UploadArticle"
-                        element={<UploadArticle />}
-                      />
+
+                      {role === 'admin' && (
+                        <Route path="/UploadArticle" element={<UploadArticle />} />
+                      )}
 
                       {/* Route for the SearchResultPage */}
                       <Route path="/result" element={<SearchResultPage />} />

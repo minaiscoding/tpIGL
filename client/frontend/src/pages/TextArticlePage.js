@@ -21,10 +21,12 @@ export const TextArticlePage = () => {
 
     const fetchArticles = async () => {
         try {
-            const response = await axios.get(`http://localhost:9200/articles/_doc/${articleId}`);
+            const response = await axios.get(`http://localhost:9200/articles/_doc/${articleId.articleId}`
+            );
             const fetchedArticles = response.data._source;
 
             setArticleData({ ...fetchedArticles });
+            console.log('*****', articleData);
             setUrl(fetchedArticles.URL_Pdf);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -44,11 +46,11 @@ export const TextArticlePage = () => {
             {articleData ? (
 
                 <>
-                    <a href={url}>  <img src={pdf_img} className=" absolute top-16 sm:top-2 z-50 left-4 w-[5%] " /></a>
+                    <a href={url}>  <img src={pdf_img} className=" absolute top-12 sm:top-2 z-50 left-4 w-[40px] md:w-[50px] " /></a>
                     <div
-                        className={`  bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 h-[95vh] border-navBg mt-20 sm:mt-8 mb-4 w-[95%]   overflow-y-scroll`}
+                        className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 h-[95vh] border-navBg mt-20 sm:mt-8 mb-4 w-[95%] overflow-x-hidden overflow-y-scroll`}
                     >
-                        <p className='font-Futura text-navBg text-base text-wrap ml-2 mb-2'>{articleData.text}</p>
+                        <p className='font-Futura text-navBg text-xs sm:text-base  max-w-full text-wrap ml-2 mb-2'>{articleData.text}</p>
                     </div>
                     <div className="flex flex-row justify-center ">
                         <button

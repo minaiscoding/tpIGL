@@ -1,11 +1,10 @@
-// AccueilPage.js
 import Animation from '../components/Animation/Animation.js';
 import ConnexionButton from '../components/ConnexionButton';
+import logo from '../logo.svg'
 
 const AccueilPage = () => {
   const backgroundStyle = {
     backgroundImage: 'url(../../../images/bgimg1.svg)',
-    // Add other background styles as needed
   };
 
   return (
@@ -15,7 +14,8 @@ const AccueilPage = () => {
     >
       <div className="absolute inset-0 bg-gradient-to-br justify-between py-4 flex flex-col items-center from-f6b2372 via-6b30e42 to-3635ce2 h-screen w-screen z-10">
         <h1 className='text-[#fff] font-avantgarde text-center text-4xl sm:text-6xl font-extrabold mt-4'>BIENVENU SUR</h1>
-       <Animation backgroundStyle={backgroundStyle} />
+        <div className=' hidden sm2:flex '><Animation /></div>
+        <div className='sm2:hidden flex w-[95%]'> <img src={logo} className='w-full transition-transform duration-300' /></div>
         <ConnexionButton />
       </div>
     </div>

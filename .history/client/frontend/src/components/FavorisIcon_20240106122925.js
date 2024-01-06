@@ -13,14 +13,14 @@ const FavorisIcon = ({ articleId, user_id }) => {
   const addToFavorites = async () => {
     try {
       
-      const response = await axios.post(
+      const await axios.post(
         "http://localhost:8000/api/saveFavorite/",
         {
           articleId: articleId,
           userId: user_id,
         }
       );
-      console.log("API response:", response);
+     console.log("API response:", response);
       setFavoris(true);
     } catch (error) {
       console.error("Error saving favorite article:", error);

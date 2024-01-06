@@ -20,8 +20,8 @@ const FavorisIcon = ({ articleId, user_id }) => {
           userId: user_id,
         }
       );
-      console.log("API response:", response);
-      setFavoris(true);
+     
+        setFavoris(true);
     } catch (error) {
       console.error("Error saving favorite article:", error);
     }

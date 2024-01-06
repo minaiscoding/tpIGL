@@ -413,21 +413,6 @@ class LoginView(APIView):
 
 
 class SaveFavoriteView(APIView):
-
-    @swagger_auto_schema(
-        operation_id='save_favorite_view',
-        operation_description='Save a favorite article for a user.',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'articleId': openapi.Schema(type=openapi.TYPE_STRING),
-                'userId': openapi.Schema(type=openapi.TYPE_INTEGER),
-            },
-            required=['articleId', 'userId'],
-        ),
-        responses={200: 'Success', 404: 'Not Found', 400: 'Bad Request', 500: 'Internal Server Error'},
-        
-    )
     
     def get_article_data(self, article_id):
         try:
@@ -480,7 +465,7 @@ class SaveFavoriteView(APIView):
             existing_article = Articles.objects.filter(id=article_id).first()
             print(existing_article)
             if not existing_article:
-                # If the article doesn't exist, create a new instance
+                    # If the article doesn't exist, create a new instance
                 new_article = Articles(**article_data)
                 new_article.save()
             else:
@@ -519,15 +504,6 @@ class SaveFavoriteView(APIView):
         
 #-----------------------------------------------------------------------------------------------------
 def get_user_favorite_article_ids(user_id):
-        """
-    Get the list of article IDs favorited by a user.
-
-    Parameters:
-    - user_id (int): The ID of the user.
-
-    Returns:
-    - list of int: List of article IDs favorited by the user.
-    """
         user = get_object_or_404(Utilisateurs, id=user_id)
         
         favorite_articles = Favoris.objects.filter(UtilisateurID=user)
@@ -537,31 +513,7 @@ def get_user_favorite_article_ids(user_id):
         return article_ids
         
 class FavoriteArticleListView(APIView):
-     """
-    Retrieve a list of articles favorited by a user.
-
-    Query Parameters:
-    - user_id (int): The ID of the user.
-
-    Responses:
-    - 200 OK: Returns a list of serialized articles favorited by the user.
-    - 404 Not Found: If the user does not exist.
-    - 500 Internal Server Error: If there is an internal server error.
-
-    Example:
-    ```
-    GET /api/favorite-articles/?user_id=1
-    ```
-    """
      renderer_classes = [JSONRenderer]
-     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='User ID'),
-        ],
-        responses={200: 'Success', 404: 'Not Found', 500: 'Internal Server Error'},
-        operation_id='favorite_article_list_view',
-        operation_description='Retrieve a list of articles favorited by a user.',
-    )
 
      def get(self, request, user_id):
         # Get the article IDs favorited by the user

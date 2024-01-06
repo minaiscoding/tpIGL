@@ -554,14 +554,7 @@ class FavoriteArticleListView(APIView):
     ```
     """
      renderer_classes = [JSONRenderer]
-     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='User ID'),
-        ],
-        responses={200: 'Success', 404: 'Not Found', 500: 'Internal Server Error'},
-        operation_id='favorite_article_list_view',
-        operation_description='Retrieve a list of articles favorited by a user.',
-    )
+     
 
      def get(self, request, user_id):
         # Get the article IDs favorited by the user

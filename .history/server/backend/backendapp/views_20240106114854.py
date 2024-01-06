@@ -413,21 +413,6 @@ class LoginView(APIView):
 
 
 class SaveFavoriteView(APIView):
-
-    @swagger_auto_schema(
-        operation_id='save_favorite_view',
-        operation_description='Save a favorite article for a user.',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'articleId': openapi.Schema(type=openapi.TYPE_STRING),
-                'userId': openapi.Schema(type=openapi.TYPE_INTEGER),
-            },
-            required=['articleId', 'userId'],
-        ),
-        responses={200: 'Success', 404: 'Not Found', 400: 'Bad Request', 500: 'Internal Server Error'},
-        
-    )
     
     def get_article_data(self, article_id):
         try:
@@ -469,9 +454,9 @@ class SaveFavoriteView(APIView):
             
             if not article_data:
                     return Response({"detail": "Article not found"}, status=status.HTTP_404_NOT_FOUND)
-            print('The articale found using the id is', article_data)
+            print('The articale found ', article_data)
 
-            
+            print(article_id)
             all_articles = Articles.objects.exclude(Titre__isnull=True)
             for article in all_articles:
                 print('This is the articles dispo', article.id)
@@ -480,21 +465,22 @@ class SaveFavoriteView(APIView):
             existing_article = Articles.objects.filter(id=article_id).first()
             print(existing_article)
             if not existing_article:
-                # If the article doesn't exist, create a new instance
+                print('MAKANCH SHOUFI B3ID')
+                    # If the article doesn't exist, create a new instance
                 new_article = Articles(**article_data)
                 new_article.save()
             else:
                     # Use the existing article instance
                 new_article = existing_article
-        
+                print('new_article')
             
         
-            
+            print('before check')
             existing_favorite = Favoris.objects.filter(
                 UtilisateurID=utilisateur,
                 ArticleID=new_article  # Filter by the article ID
             ).exists()
-            
+            print('after check')
             if existing_favorite:
                 fav = Favoris.objects.all()
                 for favor in fav:
@@ -519,54 +505,21 @@ class SaveFavoriteView(APIView):
         
 #-----------------------------------------------------------------------------------------------------
 def get_user_favorite_article_ids(user_id):
-        """
-    Get the list of article IDs favorited by a user.
-
-    Parameters:
-    - user_id (int): The ID of the user.
-
-    Returns:
-    - list of int: List of article IDs favorited by the user.
-    """
         user = get_object_or_404(Utilisateurs, id=user_id)
-        
+        print('the iiiiiiiiid',user)
         favorite_articles = Favoris.objects.filter(UtilisateurID=user)
-       
+        print(favorite_articles)
         article_ids = [favorite.ArticleID.id for favorite in favorite_articles]
         
         return article_ids
         
 class FavoriteArticleListView(APIView):
-     """
-    Retrieve a list of articles favorited by a user.
-
-    Query Parameters:
-    - user_id (int): The ID of the user.
-
-    Responses:
-    - 200 OK: Returns a list of serialized articles favorited by the user.
-    - 404 Not Found: If the user does not exist.
-    - 500 Internal Server Error: If there is an internal server error.
-
-    Example:
-    ```
-    GET /api/favorite-articles/?user_id=1
-    ```
-    """
      renderer_classes = [JSONRenderer]
-     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='User ID'),
-        ],
-        responses={200: 'Success', 404: 'Not Found', 500: 'Internal Server Error'},
-        operation_id='favorite_article_list_view',
-        operation_description='Retrieve a list of articles favorited by a user.',
-    )
 
      def get(self, request, user_id):
         # Get the article IDs favorited by the user
         article_ids = get_user_favorite_article_ids(user_id)
-        
+        print('the idsssssssssss', article_ids)
 
         # Perform the Elasticsearch search to get articles with specific IDs
         search = Search(index='articles').query('match_all')
@@ -578,7 +531,7 @@ class FavoriteArticleListView(APIView):
 
         # Filter articles based on the provided article_ids list
         filtered_articles = [article for article in hits if article['id'] in article_ids]
-        
+        print('HELLOOOOOOOOO', filtered_articles )
 
         # Serialize the search results using your existing serializer
         serializer = ArticlesSerializer(data=filtered_articles, many=True)

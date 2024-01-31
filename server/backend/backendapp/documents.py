@@ -7,7 +7,7 @@ class ArticleDocument(Document):
     
     
     class Index:
-        name = 'articles'
+        name = 'search-article'
         settings = {'number_of_shards': 1,
                     'number_of_replicas': 0}
 

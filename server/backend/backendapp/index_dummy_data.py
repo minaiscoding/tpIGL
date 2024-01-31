@@ -1,8 +1,10 @@
 from elasticsearch import Elasticsearch
 
 # Define the Elasticsearch connection
-es = Elasticsearch(['http://localhost:9200'],  verify_certs=False)
-
+es = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
 # Dummy data
 dummy_data = [
     {'Titre': 'Dummy Article 1', 'Resume': 'Lorem ipsum...', 'auteurs': 'John Doe', 'Institution': 'ABC University', 'date': '2023-01-01', 'MotsCles': 'Lorem, Ipsum', 'text': 'Full article text...', 'URL_Pdf': 'http://example.com/pdf1', 'RefBib': 'Bib123'},
@@ -13,7 +15,7 @@ dummy_data = [
 # Index dummy data
 for data in dummy_data:
     # Specify the index and document type
-    index_name = 'articles'
+    index_name = 'search-article'
    
 
     # Index the document

@@ -4,11 +4,12 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch_dsl.connections import connections
 from django.core.validators import FileExtensionValidator
+from elasticsearch import Elasticsearch
 
-
-
-
-connections.create_connection(hosts=['https://localhost:9200'], timeout=20)
+client = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
 
 class Utilisateurs(models.Model):
     NomUtilisateur = models.CharField(max_length=255, unique=True)

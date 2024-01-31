@@ -51,9 +51,9 @@ class ArticlesListView(APIView):
     def get(self, request):
          # Perform the Elasticsearch search to get all articles
         client = Elasticsearch(
-  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
-  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
-)
+        os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+        api_key= os.getenv("API_KEY")
+        )
         search = Search(using=client,index='search-article').query('match_all')
         response = search.execute()
 

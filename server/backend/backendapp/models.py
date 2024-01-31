@@ -9,8 +9,6 @@ from django.core.validators import FileExtensionValidator
 
 
 
-connections.create_connection(hosts=['https://localhost:9200'], timeout=20)
-
 class Utilisateurs(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, default=None)
     NomUtilisateur = models.CharField(max_length=255, unique=True)

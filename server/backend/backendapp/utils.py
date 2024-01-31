@@ -1,6 +1,7 @@
 import requests
 import string
 import logging
+import os
 from datetime import datetime, timedelta
 #--------------------------------------------------------------------------------------------------------------
 # extract info using python bib
@@ -489,7 +490,10 @@ def send_to_elasticsearch(index_name, data):
     :param str index_name: The name of the index.
     :param dict data: The data to be sent.
     """
-    es = Elasticsearch(['http://localhost:9200'],  verify_certs=False)
+    es = Elasticsearch(
+    os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+    api_key= os.getenv("API_KEY")
+    )
     # Index the data in Elasticsearch
     for document in data:
         es.index(index=index_name, body=document)

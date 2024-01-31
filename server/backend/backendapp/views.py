@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
+from elasticsearch import Elasticsearch
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
@@ -63,6 +64,12 @@ class ArticlesListView(APIView):
         },
     )
     def get(self, request):
+         # Perform the Elasticsearch search to get all articles
+        client = Elasticsearch(
+        os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+        api_key= os.getenv("API_KEY")
+        )
+        search = Search(using=client,index='search-article').query('match_all')
         """
         Get details of all articles.
         ---
@@ -72,6 +79,7 @@ class ArticlesListView(APIView):
         """
         # Perform the Elasticsearch search to get all articles
         search = Search(index='articles').query('match_all')
+
         response = search.execute()
 
         # Extract relevant information from search hits
@@ -164,8 +172,11 @@ class SearchView(APIView):
         if start_date and end_date:
             date_range_filter = [{'range': {'date': {'gte': start_date, 'lte': end_date}}}]
 
-        # Perform the Elasticsearch search with dynamic query and date range filter
-        search = Search(index='articles').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
+        client = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
+        search = Search(using=client,index='search-article').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
 
         try:
             response = search.execute()
@@ -236,7 +247,7 @@ class LocalUploadViewSet(APIView):
                 return Response({'error': 'Invalid scientific PDF. The provided file does not lead to a valid scientific article.'}, status=status.HTTP_400_BAD_REQUEST)
 
             article_data = upload_article_process(uploaded_file)
-            send_to_elasticsearch('articles', article_data)
+            send_to_elasticsearch('search-article', article_data)
 
             
             # Save the PDF file to the media root   
@@ -373,7 +384,7 @@ class ExternalUploadViewSet(APIView):
 
             # Elasticsearch Indexing
             # Send article data to Elasticsearch
-            send_to_elasticsearch('articles', article_data)
+            send_to_elasticsearch('search-article', article_data)
 
             return Response( {
                              'article_data': article_data,

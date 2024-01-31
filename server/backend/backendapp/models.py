@@ -2,13 +2,10 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from elasticsearch_dsl.connections import connections
 from django.core.validators import FileExtensionValidator
 
 
 
-
-connections.create_connection(hosts=['https://localhost:9200'], timeout=20)
 
 class Utilisateurs(models.Model):
     NomUtilisateur = models.CharField(max_length=255, unique=True)

@@ -489,7 +489,10 @@ def send_to_elasticsearch(index_name, data):
     :param str index_name: The name of the index.
     :param dict data: The data to be sent.
     """
-    es = Elasticsearch(['http://localhost:9200'],  verify_certs=False)
+    es = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
     # Index the data in Elasticsearch
     for document in data:
         es.index(index=index_name, body=document)

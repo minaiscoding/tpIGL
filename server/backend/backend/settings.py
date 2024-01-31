@@ -52,15 +52,16 @@ INSTALLED_APPS = [
     'django_elasticsearch_dsl_drf',
     'PyPDF2',
       
+    'rest_framework.authtoken',
+    'knox',
 ]
 
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': 'http://localhost:9200',
+        'hosts': ['http://localhost:9200'],
     }
 }
-
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app's origin
@@ -169,5 +170,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
 }

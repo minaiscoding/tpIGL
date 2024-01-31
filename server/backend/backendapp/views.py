@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
+from elasticsearch import Elasticsearch
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
 from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
@@ -48,8 +49,12 @@ class ArticlesListView(APIView):
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        # Perform the Elasticsearch search to get all articles
-        search = Search(index='articles').query('match_all')
+         # Perform the Elasticsearch search to get all articles
+        client = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
+        search = Search(using=client,index='search-article').query('match_all')
         response = search.execute()
 
         # Extract relevant information from search hits
@@ -99,8 +104,11 @@ class SearchView(APIView):
         if start_date and end_date:
             date_range_filter = [{'range': {'date': {'gte': start_date, 'lte': end_date}}}]
 
-        # Perform the Elasticsearch search with dynamic query and date range filter
-        search = Search(index='articles').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
+        client = Elasticsearch(
+  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
+  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
+)
+        search = Search(using=client,index='search-article').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
 
         try:
             response = search.execute()

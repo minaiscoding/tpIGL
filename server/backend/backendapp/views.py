@@ -179,7 +179,7 @@ class LocalUploadViewSet(APIView):
                 return Response({'error': 'Invalid scientific PDF. The provided file does not lead to a valid scientific article.'}, status=status.HTTP_400_BAD_REQUEST)
 
             article_data = upload_article_process(uploaded_file)
-            send_to_elasticsearch('articles', article_data)
+            send_to_elasticsearch('search-article', article_data)
 
             
             # Save the PDF file to the media root   
@@ -316,7 +316,7 @@ class ExternalUploadViewSet(APIView):
 
             # Elasticsearch Indexing
             # Send article data to Elasticsearch
-            send_to_elasticsearch('articles', article_data)
+            send_to_elasticsearch('search-article', article_data)
 
             return Response( {
                              'article_data': article_data,

@@ -54,19 +54,21 @@ const SearchResultPage = () => {
   // Function to handle the search action
   const handleSearch = () => {
     // Get the selected start and end dates from the date inputs
-    const startDate = document.getElementById("start_date").value;
-    const endDate = document.getElementById("end_date").value;
+    const startDate = document.getElementById("start_date")?.value;
+    const endDate = document.getElementById("end_date")?.value;
 
     // Get the selected filter type
     const filterType = document.querySelector(
       'input[name="filterType"]:checked'
-    ).value;
+    )?.value;
 
     // Fetch search results with dynamic filter from your Django API
     fetch(
       `http://localhost:8000/api/search/?q=${encodeURIComponent(
         searchQuery
-      )}&start_date=${startDate}&end_date=${endDate}&filter_type=${filterType}`
+      )}&start_date=${startDate || ""}&end_date=${endDate || ""}&filter_type=${
+        filterType || ""
+      }`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -152,6 +154,7 @@ const SearchResultPage = () => {
                 type="radio"
                 name="filterType"
                 value="Titre"
+                defaultChecked
                 className="mr-2 h-5 w-5 border-gray-300 border rounded-full"
               />
               <span className="ml-1">Titre</span>
@@ -161,7 +164,7 @@ const SearchResultPage = () => {
 
         {/* Display Search Results Here */}
         <div className="mt-8">
-          <Displayer results={searchResults} />
+          <Displayer results={searchResults} pere="pere1" />
         </div>
       </div>
     </div>

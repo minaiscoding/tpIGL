@@ -4,7 +4,7 @@ import DataDisplay from "../components/DataDisplay";
 
 const DataPage = () => {
   return (
-    <div>
+    <div className="bg-purple300">
       <h1>Data Page</h1>
       {/* Use the DataDisplay component with a specific endpoint */}
       <DataDisplay endpoint="utilisateurs" />

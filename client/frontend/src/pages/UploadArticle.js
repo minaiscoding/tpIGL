@@ -7,7 +7,7 @@ import FileUpload from "../components/FileUpload";
 import link from "../../src/url_icon.svg";
 import vector_bg from "../../src/Vector.svg";
 
-const UploadArticle = ({ role }) => {
+const UploadArticle = () => {
   // Background image style
   const backgroundImage = `url(${vector_bg})`;
 
@@ -40,16 +40,16 @@ const UploadArticle = ({ role }) => {
       // Iterate through each file and upload individually
       for (const file of files) {
         const formData = new FormData();
-
+        
         formData.append('pdf_File', file);
 
         response = await axios.post(
           'http://127.0.0.1:8000/api/articles_ctrl/local-upload/',
           formData,
         );
-        // console.log('File uploaded successfully:', response.data);
-        // alert(`File ${file.name} uploaded successfully`);
-        toast.success(`Article ${file.name}: ${response.data.url_pdf} est joint avec succès`);
+       // console.log('File uploaded successfully:', response.data);
+       // alert(`File ${file.name} uploaded successfully`);
+       toast.success(`Article ${file.name}: ${response.data.url_pdf} est joint avec succès`);
         console.log("Article est joint avec succès:", response.data);
       }
 
@@ -62,7 +62,7 @@ const UploadArticle = ({ role }) => {
       //alert(`Erreur uploading: ${errorMessage}`);
       // Display specific error message from the backend, if available
       if (error.response?.data?.error) {
-        toast.error(`Erreur uploading fichiers: ${error.response.data.error}`);
+         toast.error(`Erreur uploading fichiers: ${error.response.data.error}`);
       } else {
         toast.error(`Error uploading fichiers: ${errorMessage}`);
       }
@@ -104,17 +104,17 @@ const UploadArticle = ({ role }) => {
   };
 
   return (
-    <div>
+    <div className="bg-purple300">
       {/* Main container with background image */}
       <div
         style={{ backgroundImage }}
-        className="h-full w-screen min-h-screen bg-purple300  font-Futura bg-cover bg-center flex flex-col"
+        className="h-full w-screen min-h-screen font-Futura bg-cover bg-center flex flex-col"
       >
-
+       
         <div className="h-full w-screen flex flex-col items-center justify-center font-Futura">
           {/* Header */}
           <p className="text-3xl pl-2 flex flex-col items-center justify-center font-Futura-bold pb-8 mt-20">
-            Upload article
+          Upload article
           </p>
         </div>
 
@@ -125,7 +125,7 @@ const UploadArticle = ({ role }) => {
             files={files}
             setFiles={setFiles}
           />
-          <ToastContainer />
+           <ToastContainer />
           {/* URL input */}
           <div className="w-[80%] text-black px-4 py-2 mt-10 flex flex-col border-2 border-black rounded-rd relative bg-gradient-to-b from-purple-600 to-purple-600 mb-32 sm:mb-40 md:mb-48 lg:mb-56 xl:mb-64 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-purple-300">
             <input

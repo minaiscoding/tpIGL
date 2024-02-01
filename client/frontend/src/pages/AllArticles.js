@@ -7,7 +7,7 @@ import Displayer from "../components/Displayer";
  *
  * @returns {JSX.Element} - Rendered component.
  */
-const AllArticles = ({ role }) => {
+const AllArticles = () => {
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
@@ -26,14 +26,12 @@ const AllArticles = ({ role }) => {
   }, []); // Empty dependency array means this effect runs once on mount
 
   return (
-
     <div
-      className="h-full w-screen min-h-screen font-Futura bg-cover bg-center p-10"
+      className="h-full bg-purple300 w-screen min-h-screen font-Futura bg-cover bg-center p-10"
       style={{ backgroundImage: "url(../../../images/bgimg2.svg)" }}
     >
-
       <div className="mt-8">
-        <Displayer results={searchResults} pere='pere2' />
+        <Displayer results={searchResults} />
       </div>
     </div>
   );

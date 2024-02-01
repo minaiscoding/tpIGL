@@ -15,10 +15,13 @@ module.exports = {
       }),
       screens: {
         s: "500px",
+        sm2: "620px",
       },
     },
     borderRadius: {
+      'sm': '5px',
       'rd': '6px',
+      'md': '5px',
     },
     fontFamily: {
       Futura: "Futura Book BT",
@@ -39,10 +42,10 @@ module.exports = {
       purple2: "rgba(107, 48, 228, 0.86)",
       blue2: "rgba(246, 178, 55, 0.9)",
       'purple-600': '#8A88E2',
-      'purple-300':'#bdbdec',
+      purple300: '#bdbdec',
       white: "#FFFFFF",
       "gray-800": "#1E1E1E",
-      "gray-100":"#F7FAFC",
+      "gray-100": "#F7FAFC",
 
     },
   },

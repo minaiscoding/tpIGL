@@ -7,7 +7,7 @@ class UtilisateursSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateurs
         fields = '__all__'
-
+        
 class ArticlesSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -24,3 +24,8 @@ class FavorisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favoris
         fields = '__all__'
+        
+
+class AuthTokenSerializer(serializers.Serializer):
+    NomUtilisateur = serializers.CharField()
+    MotDePasse = serializers.CharField()

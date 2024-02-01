@@ -1,41 +1,47 @@
 /* Animation.css */
 
 .animation-container {
-    display: flex;
+  display: flex;
+}
+
+.letter {
+  margin-right: 20px; /* Adjust as needed */
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.visible {
+  opacity: 1;
+}
+
+/* Add a delay to each letter based on its index */
+.letter-0 {
+  animation: type 0.5s forwards 0.5s;
+}
+.letter-1 {
+  animation: type 0.5s forwards 1s;
+}
+.letter-2 {
+  animation: type 0.5s forwards 1.5s;
+}
+.letter-3 {
+  animation: type 0.5s forwards 2s;
+}
+.letter-4 {
+  animation: type 0.5s forwards 2.5s;
+}
+.letter-5 {
+  animation: type 0.5s forwards 3s;
+}
+.letter-6 {
+  animation: type 0.5s forwards 3.5s;
+}
+
+@keyframes type {
+  from {
+    opacity: 0;
   }
-  
-  .letter {
- 
-        margin-right: 20px; /* Adjust as needed */
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-       
-  }
-  
-  .visible {
+  to {
     opacity: 1;
   }
-  
-  /* Add a delay to each letter based on its index */
-  .letter-0 { animation: type 0.5s forwards 0.5s; }
-  .letter-1 { animation: type 0.5s forwards 1s; }
-  .letter-2 { animation: type 0.5s forwards 1.5s; }
-  .letter-3 { animation: type 0.5s forwards 2s; }
-  .letter-4 { animation: type 0.5s forwards 2.5s; }
-  .letter-5 { animation: type 0.5s forwards 3s; }
-  .letter-6 { animation: type 0.5s forwards 3.5s; }
-  
-  .cursor {
-    background-color: #000; /* Adjust color as needed */
-    width: 2px; /* Adjust width as needed */
-    height: 20px; /* Adjust height as needed */
-    display: inline-block;
-    opacity: 1;
-    animation: blink 1s infinite;
-  }
-  
-  @keyframes type {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
+}

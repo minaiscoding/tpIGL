@@ -20,6 +20,16 @@ from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 #--------------------------------------------------------------------------------
 from elasticsearch_dsl import Search
 #------------------------------------------------------------------
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
+from knox.views import LoginView as KnoxLoginView
+from rest_framework import permissions
+from rest_framework.permissions import AllowAny
+from elasticsearch import Elasticsearch
+from django.core.exceptions import MultipleObjectsReturned
 from .utils import (  extract_text_from_pdf,
                       extract_pdf_metadata,
                       is_valid_scientific_pdf,
@@ -46,8 +56,13 @@ class UtilisateursListView(generics.ListAPIView):
     serializer_class = UtilisateursSerializer
 #--------------------------------------------------------------------------------------------------------------
 class ArticlesListView(APIView):
-    renderer_classes = [JSONRenderer]
-
+    @swagger_auto_schema(
+        operation_summary="Get All Articles",
+        operation_description="Endpoint to retrieve details of all articles.",
+        responses={
+            200: "Articles retrieved successfully",
+        },
+    )
     def get(self, request):
          # Perform the Elasticsearch search to get all articles
         client = Elasticsearch(
@@ -55,11 +70,20 @@ class ArticlesListView(APIView):
         api_key= os.getenv("API_KEY")
         )
         search = Search(using=client,index='search-article').query('match_all')
+        """
+        Get details of all articles.
+        ---
+        responses:
+          200:
+            description: Articles retrieved successfully
+        """
+        # Perform the Elasticsearch search to get all articles
+        search = Search(index='articles').query('match_all')
+
         response = search.execute()
 
         # Extract relevant information from search hits
         hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
-        
 
         # Serialize the search results using your existing serializer
         serializer = ArticlesSerializer(data=hits, many=True)
@@ -67,7 +91,51 @@ class ArticlesListView(APIView):
 
         # Return the serialized results as JSON
         return Response(serializer.data)
-#--------------------------------------------------------------------------------------------------------------
+
+
+class ArticleDetailView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('article_id', openapi.IN_PATH, description="ID of the article", type=openapi.TYPE_INTEGER),
+        ],
+        operation_summary="Get Article by ID",
+        operation_description="Retrieve detailed information about an article by its ID.",
+        responses={
+            200: "OK - Article details retrieved successfully",
+            404: "Not Found - Article with the provided ID does not exist",
+        },
+    )
+    def get(self, request, article_id):
+        """
+        Get Article by ID
+        ---
+        parameters:
+          - name: article_id
+            description: ID of the article
+            required: true
+            type: string
+            format: int32
+            example: 1
+        responses:
+          200:
+            description: OK - Article details retrieved successfully
+          404:
+            description: Not Found - Article with the provided ID does not exist
+        """
+        # Perform the Elasticsearch search to get the article by ID
+        search = Search(index='articles').query('term', id=article_id)
+        response = search.execute()
+
+        # Extract relevant information from the search hit
+        hit = response.hits[0].to_dict() if response.hits else {}
+
+        if not hit:
+            return Response({'error': 'Article with the provided ID does not exist'}, status=404)
+
+        return Response(hit)
+    
+
+    
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
     serializer_class = FavorisSerializer
@@ -327,49 +395,127 @@ class ExternalUploadViewSet(APIView):
             return Response({'error': 'Échec du téléchargement du PDF depuis l\'URL.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-#--------------------------------------------------------------------------------
-#/////////////////////////
-#  LogoutView   
-#/////////////////////////
-class LogoutView(APIView):
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-    
-'''class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('NomUtilisateur')
-        password = request.data.get('MotDePasse')
 
-        user = authenticate(request, NomUtilisateur=username, MotDePasse=password)
-
-        if user is not None:
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)'''
             
 #--------------------------------------------------------------------------------
 #/////////////////////////
 #  LoginView   
 #/////////////////////////
 class LoginView(APIView):
+    @csrf_exempt
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['NomUtilisateur', 'Email', 'MotDePasse'],
+            properties={
+                'NomUtilisateur': openapi.Schema(type=openapi.TYPE_STRING),
+                'Email': openapi.Schema(type=openapi.TYPE_STRING),
+                'MotDePasse': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+        operation_summary="User Login",
+        operation_description="Endpoint to authenticate and log in a user.",
+        responses={
+            200: "Login successful",
+            401: "Unauthorized - Invalid password",
+            401: "Unauthorized - User not found",
+            500: "Internal Server Error - Multiple users found for the provided username and email",
+        },
+    )
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        """
+        User Login
+        ---
+        parameters:
+          - name: NomUtilisateur
+            description: User's username
+            required: true
+            type: string
+          - name: Email
+            description: User's email
+            required: true
+            type: string
+          - name: MotDePasse
+            description: User's password
+            required: true
+            type: string
+        responses:
+          200:
+            description: Login successful
+          401:
+            description: Unauthorized - Invalid password or User not found
+          500:
+            description: Internal Server Error - Multiple users found for the provided username and email
+        """
+        nom_utilisateur = request.data.get('NomUtilisateur')
+        email = request.data.get('Email')
+        password = request.data.get('MotDePasse')
 
-        # Fetch user by username
+        # Debug: Print request data
+        print('Request data:', request.data)
+
+        # Debug: Print user model fields
+        print('User model fields:', Utilisateurs._meta.get_fields())
+
         try:
-            user = Utilisateurs.objects.get(NomUtilisateur=username)
-        except Utilisateurs.DoesNotExist:
-            user = None
+            # Attempt to retrieve user based on both username and email
+            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
+            
+            # Check if the provided password matches the stored password
+            if check_password(password, utilisateur.MotDePasse):
+                # Serialize the user instance
+                serializer = UtilisateursSerializer(utilisateur)
 
-        if user is not None and check_password(password, user.MotDePasse):
-            # If user is authenticated, log them in
-            login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # If authentication fails, return an error response
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+                # Add the role information to the response
+                response_data = {
+                    'role': utilisateur.Role,
+                    'message': 'Login successful',
+                    'utilisateur': serializer.data,  # Include the serialized user data
+                }
+
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+        except Utilisateurs.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
+        except MultipleObjectsReturned:
+            return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 #--------------------------------------------------------------------------------
-        
+#/////////////////////////
+#  LoginView   
+#/////////////////////////
+class SaveFavoriteView(APIView):
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        try:
+            # Get the articleId and userId from the request data
+            article_id = request.data.get("articleId")
+            user_id = request.data.get("userId")
+            print('Request data:', request.data)
+            # Debug: Print user model fields
+            print('Favoris model fields:', Favoris._meta.get_fields())
+
+            # Check if the article is already marked as a favorite for this user
+            existing_favorite = Favoris.objects.filter(
+                UtilisateurID=user_id, ArticleID=article_id
+            ).exists()
+
+            if not existing_favorite:
+                # If not, create a new favorite entry in the database
+                favorite = Favoris.objects.create(
+                    UtilisateursID=user_id, ArticleID=article_id
+                )
+                serializer = FavoriteArticleSerializer(favorite)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                # If already favorited, return a 400 Bad Request response
+                return Response(
+                    {"detail": "Article is already marked as a favorite."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Exception as e:
+            return Response(
+                {"detail": f"Error saving favorite article: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

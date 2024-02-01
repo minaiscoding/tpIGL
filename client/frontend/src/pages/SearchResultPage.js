@@ -163,7 +163,7 @@ const SearchResultPage = () => {
         </div>
         {/* Display Search Results Here */}
         <div className="mt-8">
-          <Displayer results={searchResults} pere="pere1" />
+          <Displayer results={searchResults} pere='pere1' />
         </div>
       </div>
     </div>

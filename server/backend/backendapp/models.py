@@ -7,8 +7,6 @@ from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 
 
-
-
 class Utilisateurs(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, default=None)
     NomUtilisateur = models.CharField(max_length=255, unique=True)

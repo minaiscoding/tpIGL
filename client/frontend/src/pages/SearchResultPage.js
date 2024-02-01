@@ -161,7 +161,6 @@ const SearchResultPage = () => {
             </label>
           </div>
         </div>
-
         {/* Display Search Results Here */}
         <div className="mt-8">
           <Displayer results={searchResults} pere="pere1" />

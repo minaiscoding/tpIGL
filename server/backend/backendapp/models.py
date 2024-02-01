@@ -2,9 +2,9 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from elasticsearch_dsl.connections import connections
+from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
-
-
 
 
 class Utilisateurs(models.Model):

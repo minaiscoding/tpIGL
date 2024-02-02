@@ -3,13 +3,13 @@ from django.urls import path,include
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView
+from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView,ArticleDetailView,Moderateurs,ModerateursUpdate,ModerateurDelete,ModerateursAdd
 #-----------------------------------------------------------------------------------------------
 
 urlpatterns = [
     path('utilisateurs/', UtilisateursListView.as_view(), name='utilisateurs-list'),
     path('articles/', ArticlesListView.as_view(), name='articles-list'),
-   # path('articles/<str:article_id>/', ArticleDetailView.as_view(), name='article-detail'),  # Add this line
+    path('articles/<str:article_id>/', ArticleDetailView.as_view(), name='article-detail'),
     path('favoris/', FavorisListView.as_view(), name='favoris-list'),
     path('search/', SearchView.as_view(), name='article_search'), 
     path('saveFavorite/', SaveFavoriteView.as_view(), name='save_favorite'),
@@ -21,8 +21,25 @@ urlpatterns = [
     path('articles_ctrl/external-upload/', ExternalUploadViewSet.as_view(), name='external-upload'),
     #--------------------------------------------------------------------------------------------------#
     path('login/', LoginView.as_view(), name='login'),
+    #--------------------------------------------------------------------------------------------------#
+    #----------------------# ModerateursControler  #---------------------------------------------------#
+    #--------------------------------------------------------------------------------------------------#
+    #Define URL paths for Moderateurs related views
+    #Path to retrieve a list of moderators
+    path('moderateurs/', Moderateurs.as_view(), name='moderateurs-list'),
 
-]
+    #Path to add a new moderator
+    path('moderateurs/add', ModerateursAdd.as_view(), name='moderateurs-add'),
+
+    #Path to update an existing moderator, requires an integer parameter 'id'
+    path('moderateurs/update/<int:id>', ModerateursUpdate.as_view(), name='moderateurs-update'),
+
+    #Path to delete an existing moderator, requires an integer parameter 'id'
+    path('moderateurs/delete/<int:id>', ModerateurDelete.as_view(), name='moderateurs-delete'),
+
+   ]
+
+
 
 # Serve static files during development
 if settings.DEBUG:

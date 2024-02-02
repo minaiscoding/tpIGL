@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { IoArrowBack } from "react-icons/io5";
 
 
+
 const DetailsArticle = ({ role }) => {
   const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
   const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2  max-w-full text-wrap";
@@ -20,6 +21,7 @@ const DetailsArticle = ({ role }) => {
   const [formData, setFormData] = useState(null);
   const articleId = useParams();
   const nav = useNavigate();
+  
 
   useEffect(() => {
     // Fetch articles when the component mounts
@@ -31,12 +33,19 @@ const DetailsArticle = ({ role }) => {
 
   const fetchArticles = async () => {
     try {
+      console.log ('hello');
+      console.log ('*****',articleId.articleId);
       const response = await axios.get(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`
+        `http://localhost:8000/api/articles/${articleId.articleId}`
+
       );
-      console.log(response.data._source);
-      setFormData(response.data._source);
-      setArticleData(response.data._source);
+      console.log (response);
+      console.log ('hello');
+      console.log (response.data);
+
+      
+      setFormData(response.data);
+      setArticleData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -64,7 +73,7 @@ const DetailsArticle = ({ role }) => {
 
 
       const response = await axios.delete(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`
+        `http://localhost:8000/api/articles/${articleId.articleId}`        
       );
 
       // Check the response and handle accordingly
@@ -85,26 +94,25 @@ const DetailsArticle = ({ role }) => {
 
   const handleUpdate = async () => {
     try {
-      // Retrieve the article ID from local storage
-      const response = await axios.put(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`,
-        formData
-      );
-      setArticleData(formData);
-      console.log("Update Response:", response);
-
-      if (response.status === 200) {
-        console.log("Document updated successfully in Elasticsearch");
-
-        setEdit(false);
-      } else {
-        console.error("Failed to update document in Elasticsearch", response);
-
-      }
+        const response = await axios.put(
+            `http://localhost:8000/api/articles/${articleId.articleId}/`,
+            formData
+        );
+        
+        if (response.status === 200) {
+            console.log("Document updated successfully in Elasticsearch");
+            setEdit(false);
+            toast.success(`Article updated successfully`);
+        } else {
+            console.error("Failed to update document in Elasticsearch", response);
+            toast.error(`Failed to update article`);
+        }
     } catch (error) {
-      console.error("Error updating document:", error);
+        console.error("Error updating document:", error);
+        toast.error(`Error updating article: ${error.message}`);
     }
-  };
+};
+
 
   return (
     <div
@@ -116,10 +124,10 @@ const DetailsArticle = ({ role }) => {
         <>
           <div
             className="flex flex-row gap-1 absolute left-2 top-8 sm:top-[70px] cursor-pointer"
-            onClick={() => nav("/articles")}
+            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
           >
-            <IoArrowBack className=" text-white size-6 " />
-            <p className=" font-Futura text-white text-md font-bold" >Retour</p>
+            <IoArrowBack className=" text-white size-6  " />
+            <p className=" font-Futura text-white text-md font-bold " >Retour</p>
           </div>
           <div
             className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg mt-20 sm:mt-8 mb-4 w-[90%]`}

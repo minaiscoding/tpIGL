@@ -29,3 +29,8 @@ class FavorisSerializer(serializers.ModelSerializer):
 class AuthTokenSerializer(serializers.Serializer):
     NomUtilisateur = serializers.CharField()
     MotDePasse = serializers.CharField()
+
+class FavoriteArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favoris
+        fields = 'all'

@@ -7,7 +7,8 @@ from django.shortcuts import render
 from elasticsearch import Elasticsearch
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
-from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
+from .serializers import UtilisateursSerializer, ArticlesSerializer, FavoriteArticleSerializer,UploadArticlesSerializer,FavorisSerializer
+from django.shortcuts import get_object_or_404
 #--------------------------------------------------------------------------------
 from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
@@ -18,7 +19,8 @@ from rest_framework import status
 from rest_framework.decorators import action,api_view
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 #--------------------------------------------------------------------------------
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
+
 #------------------------------------------------------------------
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -66,8 +68,9 @@ class ArticlesListView(APIView):
     def get(self, request):
          # Perform the Elasticsearch search to get all articles
         client = Elasticsearch(
-        os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
-        api_key= os.getenv("API_KEY")
+          os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+          
+        api_key=  os.getenv("API_KEY")
         )
         search = Search(using=client,index='search-article').query('match_all')
         """
@@ -78,7 +81,7 @@ class ArticlesListView(APIView):
             description: Articles retrieved successfully
         """
         # Perform the Elasticsearch search to get all articles
-        search = Search(index='articles').query('match_all')
+        # search = Search(index='search-article').query('match_all')
 
         response = search.execute()
 
@@ -106,35 +109,51 @@ class ArticleDetailView(APIView):
         },
     )
     def get(self, request, article_id):
-        """
-        Get Article by ID
-        ---
-        parameters:
-          - name: article_id
-            description: ID of the article
-            required: true
-            type: string
-            format: int32
-            example: 1
-        responses:
-          200:
-            description: OK - Article details retrieved successfully
-          404:
-            description: Not Found - Article with the provided ID does not exist
-        """
-        # Perform the Elasticsearch search to get the article by ID
-        search = Search(index='articles').query('term', id=article_id)
-        response = search.execute()
+        try:
+            # Perform the Elasticsearch search to get the specific article by ID
+            client = Elasticsearch(
+                os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+                api_key=os.getenv("API_KEY")
+            )
+            search = Search(using=client, index='search-article').query('match', _id=article_id)
+            response = search.execute()
 
-        # Extract relevant information from the search hit
-        hit = response.hits[0].to_dict() if response.hits else {}
+            # Check if any hits were found
+            if not response.hits:
+                print(f'Article with ID {article_id} not found in Elasticsearch')
+                return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        if not hit:
-            return Response({'error': 'Article with the provided ID does not exist'}, status=404)
+            # Assuming there's only one matching article (ID is unique)
+            article_data = response.hits[0].to_dict()
 
-        return Response(hit)
-    
+            return Response(article_data)
 
+        except Exception as e:
+            print('Error in get_article_data:', str(e))
+            return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def delete(self, request, article_id):
+        try:
+        # Perform the Elasticsearch search to get the specific article by ID
+            client = Elasticsearch(
+            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+            api_key=os.getenv("API_KEY")
+           )
+            search = Search(using=client, index='search-article').query('match', _id=article_id)
+            response = search.execute()
+
+            # Check if any hits were found
+            if not response.hits:
+               print(f'Article with ID {article_id} not found in Elasticsearch')
+               return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Delete the article
+            response.hits[0].delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            print('Error in delete_article:', str(e))
+            return Response({"detail": "Error deleting article"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
@@ -483,39 +502,184 @@ class LoginView(APIView):
     
 #--------------------------------------------------------------------------------
 #/////////////////////////
-#  LoginView   
+#  FavorisView   
 #/////////////////////////
+
+          
+            
 class SaveFavoriteView(APIView):
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
+
+    @swagger_auto_schema(
+        operation_id='save_favorite_view',
+        operation_description='Save a favorite article for a user.',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'articleId': openapi.Schema(type=openapi.TYPE_STRING),
+                'userId': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+            required=['articleId', 'userId'],
+        ),
+        responses={200: 'Success', 404: 'Not Found', 400: 'Bad Request', 500: 'Internal Server Error'},
+        
+    )
+    
+    def get_article_data(self, request, article_id):
         try:
-            # Get the articleId and userId from the request data
+            # Perform the Elasticsearch search to get the specific article by ID
+            client = Elasticsearch(
+                os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+                api_key=os.getenv("API_KEY")
+            )
+            search = Search(using=client, index='search-article').query('match', _id=article_id)
+            response = search.execute()
+
+            # Check if any hits were found
+            if not response.hits:
+                print(f'Article with ID {article_id} not found in Elasticsearch')
+                return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Assuming there's only one matching article (ID is unique)
+            article_data = response.hits[0].to_dict()
+
+            return Response(article_data)
+
+        except Exception as e:
+            print('Error in get_article_data:', str(e))
+            return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
             article_id = request.data.get("articleId")
             user_id = request.data.get("userId")
-            print('Request data:', request.data)
-            # Debug: Print user model fields
-            print('Favoris model fields:', Favoris._meta.get_fields())
+            print('The id of the authetified user is : ', user_id)
+            
 
-            # Check if the article is already marked as a favorite for this user
-            existing_favorite = Favoris.objects.filter(
-                UtilisateurID=user_id, ArticleID=article_id
-            ).exists()
+            utilisateur = get_object_or_404(Utilisateurs, id=user_id)
+            print('The authetified user is : ', utilisateur)
+            article_data = self.get_article_data(request, article_id)
+            
+            if not article_data:
+                    return Response({"detail": "Article not found"}, status=status.HTTP_404_NOT_FOUND)
+           
 
-            if not existing_favorite:
-                # If not, create a new favorite entry in the database
-                favorite = Favoris.objects.create(
-                    UtilisateursID=user_id, ArticleID=article_id
-                )
-                serializer = FavoriteArticleSerializer(favorite)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            all_articles = Articles.objects.exclude(Titre__isnull=True)
+            for article in all_articles:
+                print('This is the articles dispo', article.id)
+
+
+            existing_article = Articles.objects.filter(id=article_id).first()
+            print(existing_article)
+            if not existing_article:
+                # If the article doesn't exist, create a new instance
+                new_article = Articles(**article_data)
+                new_article.save()
             else:
-                # If already favorited, return a 400 Bad Request response
+                    # Use the existing article instance
+                new_article = existing_article
+        
+            
+        
+            
+            existing_favorite = Favoris.objects.filter(
+                UtilisateurID=utilisateur,
+                ArticleID=new_article  # Filter by the article ID
+            ).exists()
+            
+            if existing_favorite:
+                fav = Favoris.objects.all()
+                for favor in fav:
+                    print(favor.UtilisateurID.NomUtilisateur)
+                    print(favor.ArticleID.id)
+
                 return Response(
                     {"detail": "Article is already marked as a favorite."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            else :
+            # Create a new Favoris instance and associate it with Utilisateurs and Articles
+                favoris = Favoris(UtilisateurID=utilisateur, ArticleID=new_article)
+                favoris.save()
+                
         except Exception as e:
+            print('Error in SaveFavoriteView:', str(e))
             return Response(
                 {"detail": f"Error saving favorite article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+#-----------------------------------------------------------------------------------------------------
+def get_user_favorite_article_ids(user_id):
+        """
+    Get the list of article IDs favorited by a user.
+
+    Parameters:
+    - user_id (int): The ID of the user.
+
+    Returns:
+    - list of int: List of article IDs favorited by the user.
+    """
+        user = get_object_or_404(Utilisateurs, id=user_id)
+        
+        favorite_articles = Favoris.objects.filter(UtilisateurID=user)
+       
+        article_ids = [favorite.ArticleID.id for favorite in favorite_articles]
+        
+        return article_ids
+        
+class FavoriteArticleListView(APIView):
+     """
+    Retrieve a list of articles favorited by a user.
+
+    Query Parameters:
+    - user_id (int): The ID of the user.
+
+    Responses:
+    - 200 OK: Returns a list of serialized articles favorited by the user.
+    - 404 Not Found: If the user does not exist.
+    - 500 Internal Server Error: If there is an internal server error.
+
+    Example:
+    ```
+    GET /api/favorite-articles/?user_id=1
+    ```
+    """
+     renderer_classes = [JSONRenderer]
+     @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='User ID'),
+        ],
+        responses={200: 'Success', 404: 'Not Found', 500: 'Internal Server Error'},
+        operation_id='favorite_article_list_view',
+        operation_description='Retrieve a list of articles favorited by a user.',
+    )
+
+     def get(self, request, user_id):
+      try:
+        # Perform the Elasticsearch search to get the specific articles by IDs
+        article_ids = get_user_favorite_article_ids(user_id)
+        client = Elasticsearch(
+            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+            api_key=os.getenv("API_KEY")
+        )
+        search = Search(using=client, index='search-article').query(Q('terms', _id=article_ids))
+        response = search.execute()
+
+        # Check if any hits were found
+        if not response.hits:
+            not_found_ids = set(article_ids)
+            found_ids = set(hit['_id'] for hit in response['hits']['hits'])
+            not_found_ids -= found_ids
+            print(f'Articles with IDs {not_found_ids} not found in Elasticsearch')
+            return Response({'detail': f'Articles with IDs {not_found_ids} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Collect article data for each hit
+        article_data = [hit.to_dict() for hit in response['hits']['hits']]
+
+        return Response(article_data)
+
+      except Exception as e:
+        print('Error in get_article_data:', str(e))
+        return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

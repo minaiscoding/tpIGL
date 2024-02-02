@@ -35,7 +35,6 @@ const ListModerateurs = () => {
       Role: "moderator",
     };
 
-
     fetch("http://localhost:8000/api/moderateurs/add", {
       method: "POST",
       headers: {
@@ -46,7 +45,7 @@ const ListModerateurs = () => {
       .then(() => {
         setUsername("");
         setEmail("");
-        setPassword("")
+        setPassword("");
         setAjouté(false);
         rafraichirModerateur();
       })
@@ -57,7 +56,7 @@ const ListModerateurs = () => {
   return (
     //////background
     <div
-      className={`relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
+      className={` w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
       
       `}
       style={{
@@ -68,7 +67,7 @@ const ListModerateurs = () => {
         //titre
       }
       <div
-        className={`text-black text-[3vw] z-20 font-Futura-bold mb-[5vh] absolute top-[80px] ${
+        className={`text-black text-[3vw] z-20 font-Futura-bold mb-[10vh] absolute top-[80px] ${
           ajouté && "blur-sm brightness-75	"
         }`}
       >
@@ -79,7 +78,7 @@ const ListModerateurs = () => {
       }
       <div className={`sm:w-[80vw] ${ajouté && "blur-sm brightness-75	"}`}>
         <button
-          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:block w-[25vw] ml-[3vw] md:hidden "
+          className="place-self-center  bg-gray-800 rounded-rd font-Futura mt-[0] text-white w-[10vw] h-[5vh] text-xl text-center sm:block w-[25vw] ml-[3vw] md:hidden "
           onClick={() => setAjouté(true)}
         >
           + Ajouter
@@ -96,7 +95,7 @@ const ListModerateurs = () => {
       }
       <div>
         <button
-          className={`place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:hidden md:block ${
+          className={`place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[13vw] h-[7vh] text-xl text-center s:hidden md:block ${
             ajouté && "blur-sm brightness-75	"
           }`}
           onClick={() => setAjouté(true)}
@@ -108,11 +107,11 @@ const ListModerateurs = () => {
         //formulaire d'ajout
       }
       <div
-        className={` blur-none bg-white absolute border-2 border-dashed border-gray-800 rounded-rd w-[30vw] h-[30vh] p-[1vw] items-center justify-center ${
+        className={` blur-none bg-white absolute border-2 border-dashed border-gray-800 rounded-rd w-[35vw] h-[37vh] p-[1vw] items-center justify-center s:w-[43vw] ${
           !ajouté && "hidden"
         } ${ajouté && "blur-none brightness-100	"}`}
       >
-        <p className="font-Futura font-light text-5xl m-[0vw] flex flex-col items-center justify-center ">
+        <p className="font-Futura font-light text-3xl m-[0vw] flex flex-col items-center justify-center s:text-2xl ">
           Ajouter un modérateur
         </p>
         <div className="flex flex-row px-[1vw] w-full h-[25vh]">
@@ -121,10 +120,14 @@ const ListModerateurs = () => {
           }
           <div className=" p-[0.8vw] my-[1vw] w-2/4  items-center">
             <div className="flex flex-row mb-[2vh]">
-              <img className=" " src={iconUser} alt="iconUser"></img>
+              <img
+                className="mr-[1vw] w-[5vw] h-[5.5vh] mp-[1vh] "
+                src={iconUser}
+                alt="iconUser"
+              ></img>
               <input
                 type="text"
-                className=" w-[13vw] h-[4vh] p-[0.5vw] text-xl ml-[0.6vw]"
+                className=" w-[13vw] h-[4vh] p-[0.5vw] text- ml-[0.3vw] mt-[0.5vh] s:text-sm s:w-[20vw]"
                 placeholder="Nom du modérateur"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -132,13 +135,13 @@ const ListModerateurs = () => {
             </div>
             <div className="flex flex-row mb-[2vh]">
               <img
-                className="  h-[3vh] mr-[0.5vw]    "
+                className="mr-[1vw] w-[4vw] h-[4vh] mt-[1vh] "
                 src={iconEmail}
                 alt="iconEmail"
               ></img>
               <input
                 type="email"
-                className="w-[13vw] h-[4vh] p-[0.5vw] text-lg"
+                className="w-[13vw] h-[4vh] p-[0.5vw] text mt-[1vh] s:text-sm s:w-[23vw]"
                 placeholder="Email du modérateur"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -146,13 +149,13 @@ const ListModerateurs = () => {
             </div>
             <div className="flex flex-row mb-[0.8vh]">
               <img
-                className="mr-[0.5vw] pb-[6vh]"
+                className="mr-[1vw] w-[5.5vw] h-[6vh] mt-[0.5vh] "
                 src={iconMdp}
                 alt="iconMdp"
               ></img>
               <input
                 type="text"
-                className=" w-[13vw] h-[4vh] p-[0.5vw] text-lg"
+                className=" w-[13vw] h-[4vh] p-[0.5vw] text mt-[2vh] s:text-sm s:w-[20vw]"
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -164,7 +167,7 @@ const ListModerateurs = () => {
           }
           <div className="flex flex-row justify-center items-center h-full w-2/4">
             <button
-              className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl  "
+              className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[7vh] text-xl s:text-xs s:mr-[vw] "
               onClick={() => {
                 ajouter();
               }}

@@ -10,10 +10,10 @@ import { IoArrowBack } from "react-icons/io5";
 
 
 const DetailsArticle = ({ role }) => {
-  const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
+  const style1 = "font-Futura text-left text-2xl text-purple2 font-semibold";
   const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2  max-w-full text-wrap";
   const style3 =
-    "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full  max-w-full text-wrap ";
+    "font-Futura text-navBg  text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md  w-[90%] w-full  max-w-full text-wrap ";
 
   const backgroundImage = `url(${vector_bg})`;
   const [edit, setEdit] = useState(false);
@@ -136,7 +136,7 @@ const DetailsArticle = ({ role }) => {
               <div className="flex flex-col items-start text-left gap-2">
                 <label
                   htmlFor="titre"
-                  className="font-Futura text-left text-xl text-purple2 font-semibold"
+                  className="font-Futura text-left text-2xl text-purple2 font-semibold"
                 >
                   {" "}
                   Titre de l'article :
@@ -185,7 +185,7 @@ const DetailsArticle = ({ role }) => {
                   name="Resume"
                   value={formData.Resume}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[300px] `}
                 />
 
                 <label htmlFor="motsCles" className={style1}>
@@ -198,7 +198,7 @@ const DetailsArticle = ({ role }) => {
                   name="MotsCles"
                   value={formData.MotsCles}
                   onChange={handleChange}
-                  className={style3}
+                  className={style3 }
                 />
 
                 <label htmlFor="texte" className={style1}>
@@ -211,7 +211,7 @@ const DetailsArticle = ({ role }) => {
                   name="text"
                   value={formData.text}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[500px] `}
                 />
 
                 <label htmlFor="biblio" className={style1}>
@@ -224,12 +224,12 @@ const DetailsArticle = ({ role }) => {
                   name="RefBib"
                   value={formData.RefBib}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[300px] `}
                 />
               </div>
             ) : (
               <div className="flex flex-col items-start justify-center text-left max-w-screen ">
-                <h2 className="font-Futura text-left text-xl text-purple2 font-semibold">
+                <h2 className="font-Futura text-left text-2xl text-purple2 font-semibold">
                   {" "}
                   Titre de l'article :
                 </h2>
@@ -250,10 +250,10 @@ const DetailsArticle = ({ role }) => {
                 <p className={style2}>{formData.MotsCles}</p>
 
                 <h2 className={style1}> Texte :</h2>
-                <p className={`${style2} ml-2`}>{formData.text}</p>
+                <pre className={`${style2} ml-2 `}>{formData.text}</pre>
 
                 <h2 className={style1}> Bibiliographie : </h2>
-                <p className={`${style2} ml-2`}>{formData.RefBib}</p>
+                <pre className={`${style2} ml-2 `}>{formData.RefBib}</pre>
               </div>
             )}
           </div>

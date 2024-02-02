@@ -569,11 +569,17 @@ class SaveFavoriteView(APIView):
                 print('This is the articles dispo', article.id)
 
 
-            existing_article = Articles.objects.filter(id=article_id).first()
+            existing_article = Articles.objects.filter(id=article_id).values_list('id', flat=True).first()
             print(existing_article)
             if not existing_article:
                 # If the article doesn't exist, create a new instance
-                new_article = Articles(**article_data)
+                new_article = Articles(
+                  id=article_data.get('id'),
+                  Titre = (''),
+                  Resume = (''),
+                  auteurs = (''),
+                  Institution = (''),                  
+                )
                 new_article.save()
             else:
                     # Use the existing article instance

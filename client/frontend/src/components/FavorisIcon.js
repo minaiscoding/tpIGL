@@ -10,8 +10,7 @@ const FavorisIcon = ({ articleId, user_id }) => {
 
   const addToFavorites = async () => {
     try {
-      console.log (articleId);
-      console.log (user_id);
+     
       const response = await axios.post(
         "http://localhost:8000/api/saveFavorite/",
         {

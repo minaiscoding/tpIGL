@@ -660,3 +660,89 @@ def upload_article_process(file):
     return article_data
 
 #------------------------------------------------------------------------------
+#//////////////////////////////
+# delete_article_from_elastic
+#//////////////////////////////
+def delete_article_from_elastic(article_id):
+    """
+    Delete an article from Elasticsearch by its ID.
+
+    :param article_id: The ID of the article to delete.
+    :type article_id: str
+    :return: True if the article is successfully deleted, False otherwise.
+    :rtype: bool
+    """
+    try:
+        # Initialize Elasticsearch client
+        client = Elasticsearch(
+            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+            api_key=os.getenv("API_KEY")
+        )
+
+        # Construct the delete by query request body
+        delete_by_query_body = {
+            "query": {
+                "match": {
+                    "_id": article_id
+                }
+            }
+        }
+
+        # Delete documents matching the query
+        response = client.delete_by_query(
+            index="search-article",
+            body=delete_by_query_body
+        )
+
+        # Check the response and return True if successful
+        if response["result"] == "deleted":
+            return True
+        else:
+            print("Failed to delete article.")
+            return False
+
+    except Exception as e:
+        print('Error in delete_article_by_id:', str(e))
+        return False
+     
+#------------------------------------------------------------------------------
+#//////////////////////////////
+# update_article_in_elastic
+#//////////////////////////////
+def update_article_in_elastic(article_id, updated_fields):
+    """
+    Update an article in Elasticsearch.
+
+    :param article_id: The ID of the article to update.
+    :type article_id: str
+    :param updated_fields: Dictionary containing the updated fields and their values.
+    :type updated_fields: dict
+    :return: True if the article is successfully updated, False otherwise.
+    :rtype: bool
+    """
+    try:
+        # Initialize Elasticsearch client
+        client = Elasticsearch(
+            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+            api_key=os.getenv("API_KEY")
+        )
+
+        # Construct the update request body
+        update_body = {"doc": updated_fields}
+
+        # Update the document
+        response = client.update(
+            index="search-article",
+            id=article_id,
+            body=update_body
+        )
+
+        # Check the response and return True if successful
+        if response.get("result") == "updated":
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        return False
+#------------------------------------------------------------------------------

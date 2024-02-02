@@ -10,11 +10,12 @@ import { IoArrowBack } from "react-icons/io5";
 
 
 
+
 const DetailsArticle = ({ role }) => {
-  const style1 = "font-Futura text-left text-xl text-purple2 font-semibold";
+  const style1 = "font-Futura text-left text-2xl text-purple2 font-semibold";
   const style2 = "font-Futura text-navBg text-base text-wrap ml-2 mb-2  max-w-full text-wrap";
   const style3 =
-    "font-Futura text-navBg text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md w-[90%] w-full  max-w-full text-wrap ";
+    "font-Futura text-navBg  text-base text-wrap ml-2 mb-2 border-solid border-[1px] border-navBg px-2  rounded-md  w-[90%] w-full  max-w-full text-wrap ";
 
   const backgroundImage = `url(${vector_bg})`;
   const [edit, setEdit] = useState(false);
@@ -22,8 +23,7 @@ const DetailsArticle = ({ role }) => {
   const [formData, setFormData] = useState(null);
   const articleId = useParams();
   const nav = useNavigate();
-  const cloud = process.env.ELASTIC_SEARCH_CLOUD_LINK ;
-  const key = process.env.API_KEY ;
+  
 
   useEffect(() => {
     // Fetch articles when the component mounts
@@ -39,16 +39,15 @@ const DetailsArticle = ({ role }) => {
       console.log ('*****',articleId.articleId);
       const response = await axios.get(
         `http://localhost:8000/api/articles/${articleId.articleId}`
-     
-      
-       /* `https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443/search-article/_doc/ZkhkYY0BSnFURs8FewfA`,
-        {
-          headers: {
-            'Authorization':  'ApiKey WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ',
-          },
-        }*/
 
       );
+      console.log (response);
+      console.log ('hello');
+      console.log (response.data);
+
+      
+      setFormData(response.data);
+      setArticleData(response.data);
       console.log (response);
       console.log ('hello');
       console.log (response.data);
@@ -84,6 +83,7 @@ const DetailsArticle = ({ role }) => {
 
       const response = await axios.delete(
         `http://localhost:8000/api/articles/${articleId.articleId}`        
+        `http://localhost:8000/api/articles/${articleId.articleId}`        
       );
 
       // Check the response and handle accordingly
@@ -104,26 +104,25 @@ const DetailsArticle = ({ role }) => {
 
   const handleUpdate = async () => {
     try {
-      // Retrieve the article ID from local storage
-      const response = await axios.put(
-        `http://localhost:8000/api/articles/${articleId.articleId}`,
-        formData
-      );
-      setArticleData(formData);
-      console.log("Update Response:", response);
-
-      if (response.status === 200) {
-        console.log("Document updated successfully in Elasticsearch");
-
-        setEdit(false);
-      } else {
-        console.error("Failed to update document in Elasticsearch", response);
-
-      }
+        const response = await axios.put(
+            `http://localhost:8000/api/articles/${articleId.articleId}/`,
+            formData
+        );
+        
+        if (response.status === 200) {
+            console.log("Document updated successfully in Elasticsearch");
+            setEdit(false);
+            toast.success(`Article updated successfully`);
+        } else {
+            console.error("Failed to update document in Elasticsearch", response);
+            toast.error(`Failed to update article`);
+        }
     } catch (error) {
-      console.error("Error updating document:", error);
+        console.error("Error updating document:", error);
+        toast.error(`Error updating article: ${error.message}`);
     }
-  };
+};
+
 
   return (
     <div
@@ -135,10 +134,10 @@ const DetailsArticle = ({ role }) => {
         <>
           <div
             className="flex flex-row gap-1 absolute left-2 top-8 sm:top-[70px] cursor-pointer"
-            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
+            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) :edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
           >
-            <IoArrowBack className=" text-white size-6  " />
-            <p className=" font-Futura text-white text-md font-bold " >Retour</p>
+            <IoArrowBack className=" text-white size-6   " />
+            <p className=" font-Futura text-white text-md font-bold  " >Retour</p>
           </div>
           <div
             className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg mt-20 sm:mt-8 mb-4 w-[90%]`}
@@ -147,7 +146,7 @@ const DetailsArticle = ({ role }) => {
               <div className="flex flex-col items-start text-left gap-2">
                 <label
                   htmlFor="titre"
-                  className="font-Futura text-left text-xl text-purple2 font-semibold"
+                  className="font-Futura text-left text-2xl text-purple2 font-semibold"
                 >
                   {" "}
                   Titre de l'article :
@@ -196,7 +195,7 @@ const DetailsArticle = ({ role }) => {
                   name="Resume"
                   value={formData.Resume}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[300px] `}
                 />
 
                 <label htmlFor="motsCles" className={style1}>
@@ -209,7 +208,7 @@ const DetailsArticle = ({ role }) => {
                   name="MotsCles"
                   value={formData.MotsCles}
                   onChange={handleChange}
-                  className={style3}
+                  className={style3 }
                 />
 
                 <label htmlFor="texte" className={style1}>
@@ -222,7 +221,7 @@ const DetailsArticle = ({ role }) => {
                   name="text"
                   value={formData.text}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[500px] `}
                 />
 
                 <label htmlFor="biblio" className={style1}>
@@ -235,12 +234,12 @@ const DetailsArticle = ({ role }) => {
                   name="RefBib"
                   value={formData.RefBib}
                   onChange={handleChange}
-                  className={style3}
+                  className={`${style3} h-[300px] `}
                 />
               </div>
             ) : (
               <div className="flex flex-col items-start justify-center text-left max-w-screen ">
-                <h2 className="font-Futura text-left text-xl text-purple2 font-semibold">
+                <h2 className="font-Futura text-left text-2xl text-purple2 font-semibold">
                   {" "}
                   Titre de l'article :
                 </h2>
@@ -261,10 +260,10 @@ const DetailsArticle = ({ role }) => {
                 <p className={style2}>{formData.MotsCles}</p>
 
                 <h2 className={style1}> Texte :</h2>
-                <p className={`${style2} ml-2`}>{formData.text}</p>
+                <pre className={`${style2} ml-2 `}>{formData.text}</pre>
 
                 <h2 className={style1}> Bibiliographie : </h2>
-                <p className={`${style2} ml-2`}>{formData.RefBib}</p>
+                <pre className={`${style2} ml-2 `}>{formData.RefBib}</pre>
               </div>
             )}
           </div>

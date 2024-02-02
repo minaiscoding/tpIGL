@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+  environment:
+    - DJANGO_DB_ENGINE=django.db.backends.sqlite3
+    - DJANGO_DB_NAME=/app/db.sqlite3 # Use the path within the container
+    - EELASTICSEARCH_HOST=elasticsearch:9200
+
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.15.2" # Use a specific version of Elasticsearch
+    ports:
+      - "9200:9200"
+
+frontend:
+  build: ./client/frontend
+  container_name: frontend_c
+  depends_on:
+    - django
+  ports:
+    - "3000:3000"
+  stdin_open: true
+  tty: true

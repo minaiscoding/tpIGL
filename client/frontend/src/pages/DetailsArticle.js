@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import vector_bg from "../assets/Vector.svg";
 import axios from "axios";
@@ -6,6 +7,7 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IoArrowBack } from "react-icons/io5";
+
 
 
 const DetailsArticle = ({ role }) => {
@@ -20,6 +22,8 @@ const DetailsArticle = ({ role }) => {
   const [formData, setFormData] = useState(null);
   const articleId = useParams();
   const nav = useNavigate();
+  const cloud = process.env.ELASTIC_SEARCH_CLOUD_LINK ;
+  const key = process.env.API_KEY ;
 
   useEffect(() => {
     // Fetch articles when the component mounts
@@ -31,12 +35,27 @@ const DetailsArticle = ({ role }) => {
 
   const fetchArticles = async () => {
     try {
+      console.log ('hello');
+      console.log ('*****',articleId.articleId);
       const response = await axios.get(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`
+        `http://localhost:8000/api/articles/${articleId.articleId}`
+     
+      
+       /* `https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443/search-article/_doc/ZkhkYY0BSnFURs8FewfA`,
+        {
+          headers: {
+            'Authorization':  'ApiKey WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ',
+          },
+        }*/
+
       );
-      console.log(response.data._source);
-      setFormData(response.data._source);
-      setArticleData(response.data._source);
+      console.log (response);
+      console.log ('hello');
+      console.log (response.data);
+
+      
+      setFormData(response.data);
+      setArticleData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -64,7 +83,7 @@ const DetailsArticle = ({ role }) => {
 
 
       const response = await axios.delete(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`
+        `http://localhost:8000/api/articles/${articleId.articleId}`        
       );
 
       // Check the response and handle accordingly
@@ -87,7 +106,7 @@ const DetailsArticle = ({ role }) => {
     try {
       // Retrieve the article ID from local storage
       const response = await axios.put(
-        `http://localhost:9200/articles/_doc/${articleId.articleId}`,
+        `http://localhost:8000/api/articles/${articleId.articleId}`,
         formData
       );
       setArticleData(formData);
@@ -116,10 +135,10 @@ const DetailsArticle = ({ role }) => {
         <>
           <div
             className="flex flex-row gap-1 absolute left-2 top-8 sm:top-[70px] cursor-pointer"
-            onClick={() => nav("/articles")}
+            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
           >
-            <IoArrowBack className=" text-white size-6 " />
-            <p className=" font-Futura text-white text-md font-bold" >Retour</p>
+            <IoArrowBack className=" text-white size-6  " />
+            <p className=" font-Futura text-white text-md font-bold " >Retour</p>
           </div>
           <div
             className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg mt-20 sm:mt-8 mb-4 w-[90%]`}

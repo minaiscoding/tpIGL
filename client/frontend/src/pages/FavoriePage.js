@@ -1,27 +1,42 @@
-import React from "react";
-//import DataDisplay from '../components/DataDisplay';
-
-const FavoriePage = () => {
-    return(
-        <div>
-           
-        {/* Background Image */}
-        <div
-          className="relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(../../../images/background.svg)',
-          }}
-        >
-             <div className="text-black text-[3vw] z-20 font-Futura-bold mb-[60vh]">
-             <p>Mes articles favoris</p>
-             </div>
-  </div>
-  
-  </div>
-  
-    );
-    
-  };
+import React, { useState, useEffect } from "react";
+import Displayer from "../components/Displayer";
 
 
-export default FavoriePage;
+
+const FavoriteArticles = () => {
+  const [searchResults, setSearchResults] = useState([]);
+
+  const userId = localStorage.getItem("id");
+
+  useEffect(() => {
+    console.log("useEffect triggered");
+
+    // Fetch data from the Django API with the user ID included
+    fetch(`http://localhost:8000/api/favoris/${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("API Response:", data);
+        setSearchResults(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching articles:", error);
+      });
+  }, [userId]); // Include userId in the dependency array to re-run the effect when userId changes
+
+  return (
+    <div
+      className="h-full w-screen min-h-screen font-Futura bg-cover bg-center p-10 "
+      style={{ backgroundImage: "url(../../../images/bgimg2.svg)" }}
+    >
+      <div className="text-black text-[3vw] z-50 font-Futura-bold ml-[60vh] mb-[10vh]">
+        <p>Mes articles favoris</p>
+      </div>
+
+      <div className="mt-8">
+        <Displayer results={searchResults} />
+      </div>
+    </div>
+  );
+};
+
+export default FavoriteArticles;

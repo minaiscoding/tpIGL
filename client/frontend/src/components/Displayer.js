@@ -39,13 +39,12 @@ const Displayer = ({ results, pere }) => {
           key={result.Titre}
           className="bg-white border-2 rounded-rd border-black p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out"
           style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ alignSelf: "flex-end" }} className="w-10">
+
+            <FavorisIcon articleId={result.id} user_id={userId} />
+          </div>
           <Link to={pere === 'pere1' ? `/TextIntegral/${result.id}` : `/details/${result.id}`}>
 
-
-            <div style={{ alignSelf: "flex-end" }} className="w-10">
-
-              <FavorisIcon articleId={result.id} user_id={userId} />
-            </div>
             <h1 className="pl-5 pr-5 text-3xl font-bold">{result.Titre}</h1>
             <p className="text-gray-800 text-opacity-75 italic mb-2 mt-2 pl-5 pr-5">{result.auteurs}</p>
             <p className="text-gray-800 text-opacity-75 italic mb-1 mt-1 pl-5 pr-5">{result.date}</p>

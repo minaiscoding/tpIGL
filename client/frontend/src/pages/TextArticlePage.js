@@ -21,9 +21,10 @@ export const TextArticlePage = () => {
 
     const fetchArticles = async () => {
         try {
-            const response = await axios.get(`http://localhost:9200/articles/_doc/${articleId.articleId}`
+            const response = await axios.get(`http://localhost:8000/api/articles/${articleId.articleId}`
+            
             );
-            const fetchedArticles = response.data._source;
+            const fetchedArticles = response.data;
 
             setArticleData({ ...fetchedArticles });
             console.log('*****', articleData);

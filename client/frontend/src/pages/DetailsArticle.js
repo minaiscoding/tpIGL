@@ -211,7 +211,7 @@ const DetailsArticle = ({ role }) => {
                   name="text"
                   value={formData.text}
                   onChange={handleChange}
-                  className={`${style3} h-[500px] `}
+                  className={`${style3} h-screen `}
                 />
 
                 <label htmlFor="biblio" className={style1}>
@@ -250,10 +250,10 @@ const DetailsArticle = ({ role }) => {
                 <p className={style2}>{formData.MotsCles}</p>
 
                 <h2 className={style1}> Texte :</h2>
-                <pre className={`${style2} ml-2 `}>{formData.text}</pre>
+                <p className={`${style2} ml-2 `}>{formData.text}</p>
 
                 <h2 className={style1}> Bibiliographie : </h2>
-                <pre className={`${style2} ml-2 `}>{formData.RefBib}</pre>
+                <p className={`${style2} ml-2 `}>{formData.RefBib}</p>
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 import requests
 
-# Define the API endpoint
+#### Define the API endpoint
 ENDPOINT = "http://localhost:8000/api/moderateurs/"
 
 # Test to check if the moderators endpoint returns a 200 status code

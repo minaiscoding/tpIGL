@@ -26,14 +26,14 @@ function Moderateur({ moderateur, setModerateurs }) {
       });
   };
   const supprimer = (id) => {
-    // Assurez-vous de remplacer "http://localhost:8000" par la base de votre API
+    
     
     fetch(`http://localhost:8000/api/moderateurs/delete/${id}`, {
       method: "POST",
     })
       .then((response) => response.json())
       .then(() => {
-        // Mettez à jour votre état ou effectuez d'autres actions nécessaires après la suppression
+        
         setClicked(false);
         rafraichirModerateur();
       })

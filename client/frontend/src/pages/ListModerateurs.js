@@ -55,7 +55,7 @@ const ListModerateurs = () => {
       });
   };
   return (
-    //background
+    //////background
     <div
       className={`relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
       

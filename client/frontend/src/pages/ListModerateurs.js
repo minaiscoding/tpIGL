@@ -11,7 +11,6 @@ const ListModerateurs = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-
   const rafraichirModerateur = () => {
     console.log("fetching les modérateurs");
     fetch(`http://localhost:8000/api/moderateurs`)
@@ -28,35 +27,38 @@ const ListModerateurs = () => {
   useEffect(() => {
     rafraichirModerateur();
   }, []);
-    const ajouter = () => {
-      let moderateur = {
-        NomUtilisateur: username,
-        Email: email,
-        MotDePasse: password,
-        Role: "moderator",
-      };
-
-      fetch("http://localhost:8000/api/moderateurs/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(moderateur),
-      })
-        .then((response) => response.json())
-        .then(() => {
-          setAjouté(false);
-          rafraichirModerateur();
-        })
-        .catch((error) => {
-          console.error("Error adding moderator:", error);
-        });
+  const ajouter = () => {
+    let moderateur = {
+      NomUtilisateur: username,
+      Email: email,
+      MotDePasse: password,
+      Role: "moderator",
     };
+
+
+    fetch("http://localhost:8000/api/moderateurs/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(moderateur),
+    })
+      .then(() => {
+        setUsername("");
+        setEmail("");
+        setPassword("")
+        setAjouté(false);
+        rafraichirModerateur();
+      })
+      .catch((error) => {
+        console.error("Error adding moderator:", error);
+      });
+  };
   return (
     //background
     <div
       className={`relative w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
-      ${ajouté && "blur-sm brightness-75	"}
+      
       `}
       style={{
         backgroundImage: "url(../../../images/background.svg)",
@@ -65,13 +67,17 @@ const ListModerateurs = () => {
       {
         //titre
       }
-      <div className="text-black text-[3vw] z-20 font-Futura-bold mb-[5vh] absolute top-[80px]">
+      <div
+        className={`text-black text-[3vw] z-20 font-Futura-bold mb-[5vh] absolute top-[80px] ${
+          ajouté && "blur-sm brightness-75	"
+        }`}
+      >
         La liste des modérateurs
       </div>
       {
         //liste des modérateurs
       }
-      <div className="sm:w-[80vw] ">
+      <div className={`sm:w-[80vw] ${ajouté && "blur-sm brightness-75	"}`}>
         <button
           className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:block w-[25vw] ml-[3vw] md:hidden "
           onClick={() => setAjouté(true)}
@@ -79,7 +85,7 @@ const ListModerateurs = () => {
           + Ajouter
         </button>
       </div>
-      <div>
+      <div className={`${ajouté && "blur-sm brightness-75	"}`}>
         <Moderateurs
           moderateurs={moderateurs}
           setModerateurs={setModerateurs}
@@ -90,7 +96,9 @@ const ListModerateurs = () => {
       }
       <div>
         <button
-          className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:hidden md:block"
+          className={`place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl text-center sm:hidden md:block ${
+            ajouté && "blur-sm brightness-75	"
+          }`}
           onClick={() => setAjouté(true)}
         >
           + Ajouter
@@ -118,6 +126,7 @@ const ListModerateurs = () => {
                 type="text"
                 className=" w-[13vw] h-[4vh] p-[0.5vw] text-xl ml-[0.6vw]"
                 placeholder="Nom du modérateur"
+                value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -131,6 +140,7 @@ const ListModerateurs = () => {
                 type="email"
                 className="w-[13vw] h-[4vh] p-[0.5vw] text-lg"
                 placeholder="Email du modérateur"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -144,6 +154,7 @@ const ListModerateurs = () => {
                 type="text"
                 className=" w-[13vw] h-[4vh] p-[0.5vw] text-lg"
                 placeholder="Mot de passe"
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
@@ -154,7 +165,9 @@ const ListModerateurs = () => {
           <div className="flex flex-row justify-center items-center h-full w-2/4">
             <button
               className="place-self-center  bg-gray-800 rounded-rd font-Futura text-white w-[10vw] h-[5vh] text-xl  "
-              onClick={() => ajouter()}
+              onClick={() => {
+                ajouter();
+              }}
             >
               Ajouter
             </button>

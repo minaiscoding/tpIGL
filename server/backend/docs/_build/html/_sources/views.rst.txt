@@ -1,0 +1,7 @@
+Views
+=====
+
+.. automodule:: backendapp.views
+   :members:
+   :undoc-members:
+   :show-inheritance:

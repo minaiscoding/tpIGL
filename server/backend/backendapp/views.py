@@ -350,41 +350,136 @@ class LoginView(APIView):
 #/////////////////////////
 #  ModerateurControlers   
 #/////////////////////////
+# APIView to get a list of moderators
 class Moderateurs(APIView):
-     def get(self, request):
-        # Assuming 'roles' is a field in your User model
+    def get(self, request):
+        """
+        Retrieve a list of moderators from the database.
+        ---
+        parameters:
+          - none
+        responses:
+          200:
+            description: OK - Moderators retrieved successfully
+          404:
+            description: Not Found - No moderators found in the database
+
+        """
+        
+        # Query the database for all Utilisateurs with Role='moderator'
         moderators = Utilisateurs.objects.filter(Role='moderator')
 
-        # Serialize the queryset
+        # Serialize the queryset using UtilisateursSerializer
         serializer = UtilisateursSerializer(moderators, many=True)
 
+        # Return the serialized data as a JSON response
         return Response(serializer.data)
+
+# APIView to add a new moderator
 class ModerateursAdd(APIView):
+    
     def post(self, request):
+        """
+        Add a new moderator
+        ---
+        parameters:
+        -none
+        responses:
+        200:
+          description: OK - Moderator added successfully
+        400:
+          description: Bad Request - Invalid data provided
+        500:
+          description: Internal Server Error - Unable to save the moderator
+        """
+        # Serialize the incoming data using UtilisateursSerializer
         serializeobj = UtilisateursSerializer(data=request.data)
+
+        # Check if the serialized data is valid
         if serializeobj.is_valid():
+            # Save the serialized data to the database
             serializeobj.save()
+            # Return a success response
             return Response(status=200)
+        # Return an error response with validation errors
         return Response(serializeobj.errors)
+
+# APIView to update an existing moderator
 class ModerateursUpdate(APIView):
-    def post(self,request,id):
+    def post(self, request, id):
+        """
+        Update an existing moderator in the database.
+        ---
+        parameters:
+        - name: id
+          description: ID of the moderator to be updated
+          required: true
+          type: integer
+
+        responses:
+        200:
+          description: OK - Moderator updated successfully
+        404:
+          description: Not Found - Moderator with the provided ID does not exist
+        500:
+          description: Internal Server Error - Unable to update the moderator
+
+        """
+        
+        id = hex(id)[2:]  # [2:] pour enlever le préfixe "0x"
+        
         try:
-            UtilisateurObj=Utilisateurs.objects.get(id=id)
-        except:
+            # Attempt to retrieve the Utilisateur object with the given id
+            UtilisateurObj = Utilisateurs.objects.get(id=id)
+        except Utilisateurs.DoesNotExist:
+            # Return an error response if the object is not found
             return Response("Not Found in Database")
 
-        serializeobj=UtilisateursSerializer(UtilisateurObj,data=request.data)
+        # Serialize the incoming data using UtilisateursSerializer with the retrieved object
+        serializeobj = UtilisateursSerializer(UtilisateurObj, data=request.data)
+
+        # Check if the serialized data is valid
         if serializeobj.is_valid():
+            # Save the updated serialized data to the database
             serializeobj.save()
+            # Return a success response
             return Response(200)
+        # Return an error response with validation errors
         return Response(serializeobj.errors)
+
+# APIView to delete an existing moderator
 class ModerateurDelete(APIView):
-    def post(self,request,id):
+    def post(self, request, id):
+        """
+         Delete an existing moderator from the database.
+        ---
+        parameters:
+         -  name: id
+          description: ID of the moderator to be deleted
+          required: true
+          type: integer
+
+        responses:
+       200:
+          description: OK - Moderator deleted successfully
+        404:
+          description: Not Found - Moderator with the provided ID does not exist
+        500:
+          description: Internal Server Error - Unable to delete the moderator
+    """
+        id = hex(id)[2:]  # [2:] pour enlever le préfixe "0x"
         try:
-            UtilisateurObj=Utilisateurs.objects.get(id=id)
-        except:
+            # Attempt to retrieve the Utilisateur object with the given id
+            UtilisateurObj = Utilisateurs.objects.get(id=id)
+        except Utilisateurs.DoesNotExist:
+            # Return an error response if the object is not found
             return Response("Not Found in Database")
+
+        # Delete the retrieved Utilisateur object from the database
         UtilisateurObj.delete()
+
+        # Return a success response
         return Response(200)
+
 
     

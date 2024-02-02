@@ -40,10 +40,20 @@ urlpatterns = [
     #--------------------------------------------------------------------------------------------------#
     #----------------------# ModerateursControler  #---------------------------------------------------#
     #--------------------------------------------------------------------------------------------------#
-    path('moderateurs/', Moderateurs.as_view(), name='moderateurs-add'),
-    path('moderateurs/add', ModerateursAdd.as_view(), name='moderateurs-add'),
-    path('moderateurs/update/<int:id>', ModerateursUpdate.as_view(), name='moderateurs-update'),
-    path('moderateurs/delete/<int:id>',ModerateurDelete.as_view(), name='moderateurs-delete'),
+# Define URL paths for Moderateurs related views
+
+# Path to retrieve a list of moderators
+path('moderateurs/', Moderateurs.as_view(), name='moderateurs-list'),
+
+# Path to add a new moderator
+path('moderateurs/add', ModerateursAdd.as_view(), name='moderateurs-add'),
+
+# Path to update an existing moderator, requires an integer parameter 'id'
+path('moderateurs/update/<int:id>', ModerateursUpdate.as_view(), name='moderateurs-update'),
+
+# Path to delete an existing moderator, requires an integer parameter 'id'
+path('moderateurs/delete/<int:id>', ModerateurDelete.as_view(), name='moderateurs-delete'),
+
 ]
 
 # Serve static files during development

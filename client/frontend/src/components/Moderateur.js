@@ -27,6 +27,7 @@ function Moderateur({ moderateur, setModerateurs }) {
   };
   const supprimer = (id) => {
     // Assurez-vous de remplacer "http://localhost:8000" par la base de votre API
+    
     fetch(`http://localhost:8000/api/moderateurs/delete/${id}`, {
       method: "POST",
     })

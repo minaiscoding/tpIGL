@@ -233,6 +233,23 @@ Default is True.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="backendapp.utils.delete_article_from_elastic">
+<span class="sig-prename descclassname"><span class="pre">backendapp.utils.</span></span><span class="sig-name descname"><span class="pre">delete_article_from_elastic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.utils.delete_article_from_elastic" title="Link to this definition">#</a></dt>
+<dd><p>Delete an article from Elasticsearch by its ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>article_id</strong> (<em>str</em>) – The ID of the article to delete.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the article is successfully deleted, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="backendapp.utils.download_pdf_from_url">
 <span class="sig-prename descclassname"><span class="pre">backendapp.utils.</span></span><span class="sig-name descname"><span class="pre">download_pdf_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.utils.download_pdf_from_url" title="Link to this definition">#</a></dt>
 <dd><p>Download a PDF file from a given URL and return the file object.</p>
@@ -399,6 +416,26 @@ or None if the parsing fails or the input is None.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="backendapp.utils.update_article_in_elastic">
+<span class="sig-prename descclassname"><span class="pre">backendapp.utils.</span></span><span class="sig-name descname"><span class="pre">update_article_in_elastic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated_fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.utils.update_article_in_elastic" title="Link to this definition">#</a></dt>
+<dd><p>Update an article in Elasticsearch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>article_id</strong> (<em>str</em>) – The ID of the article to update.</p></li>
+<li><p><strong>updated_fields</strong> (<em>dict</em>) – Dictionary containing the updated fields and their values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the article is successfully updated, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="backendapp.utils.upload_article_process">
 <span class="sig-prename descclassname"><span class="pre">backendapp.utils.</span></span><span class="sig-name descname"><span class="pre">upload_article_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.utils.upload_article_process" title="Link to this definition">#</a></dt>
 <dd><p>Process the uploaded PDF file, extract metadata, validate,
@@ -413,6 +450,73 @@ extract text, perform analysis, and return the article data.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of dict</p>
 </dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-backendapp.test_moderator">
+<span id="test-moderator-methods"></span><h1>Test_moderator Methods<a class="headerlink" href="#module-backendapp.test_moderator" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="backendapp.test_moderator.test_moderateur_delete">
+<span class="sig-prename descclassname"><span class="pre">backendapp.test_moderator.</span></span><span class="sig-name descname"><span class="pre">test_moderateur_delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.test_moderator.test_moderateur_delete" title="Link to this definition">#</a></dt>
+<dd><p>Test adding a moderator, retrieving its ID, deleting it, and checking if it no longer exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Noindex<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="backendapp.test_moderator.test_moderateur_update">
+<span class="sig-prename descclassname"><span class="pre">backendapp.test_moderator.</span></span><span class="sig-name descname"><span class="pre">test_moderateur_update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.test_moderator.test_moderateur_update" title="Link to this definition">#</a></dt>
+<dd><p>Test adding a moderator, retrieving its ID, updating it, and checking if the updated data exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Noindex<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="backendapp.test_moderator.test_moderateurs_add">
+<span class="sig-prename descclassname"><span class="pre">backendapp.test_moderator.</span></span><span class="sig-name descname"><span class="pre">test_moderateurs_add</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.test_moderator.test_moderateurs_add" title="Link to this definition">#</a></dt>
+<dd><p>Test adding a moderator to the API and checking if it exists in the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Noindex<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="backendapp.test_moderator.test_moderators_endpoint">
+<span class="sig-prename descclassname"><span class="pre">backendapp.test_moderator.</span></span><span class="sig-name descname"><span class="pre">test_moderators_endpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#backendapp.test_moderator.test_moderators_endpoint" title="Link to this definition">#</a></dt>
+<dd><p>Test the moderators API endpoint for a successful response (status code 200).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Noindex<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
 </dl>
 </dd></dl>
 

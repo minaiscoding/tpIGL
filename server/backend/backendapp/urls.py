@@ -3,7 +3,7 @@ from django.urls import path,include
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import LoginView, UtilisateursListView, ArticlesListView, FavoriteArticleListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView
+from .views import LoginView, UtilisateursListView, ArticlesListView, Moderateurs, ArticleDetailView,ModerateurDelete, ModerateursUpdate, ModerateursAdd, FavoriteArticleListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView
 #-----------------------------------------------------------------------------------------------
 
 urlpatterns = [

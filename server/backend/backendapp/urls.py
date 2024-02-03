@@ -3,14 +3,15 @@ from django.urls import path,include
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import LoginView, UtilisateursListView, ArticlesListView, FavorisListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView,ArticleDetailView,Moderateurs,ModerateursUpdate,ModerateurDelete,ModerateursAdd
+from .views import LoginView, UtilisateursListView, ArticlesListView, Moderateurs, ArticleDetailView,ModerateurDelete, ModerateursUpdate, ModerateursAdd, FavoriteArticleListView, SearchView,LocalUploadViewSet,ExternalUploadViewSet,SaveFavoriteView
 #-----------------------------------------------------------------------------------------------
 
 urlpatterns = [
     path('utilisateurs/', UtilisateursListView.as_view(), name='utilisateurs-list'),
     path('articles/', ArticlesListView.as_view(), name='articles-list'),
     path('articles/<str:article_id>/', ArticleDetailView.as_view(), name='article-detail'),
-    path('favoris/', FavorisListView.as_view(), name='favoris-list'),
+    #path('favoris/', FavorisListView.as_view(), name='favoris-list'),
+    path('favoris/<int:user_id>/', FavoriteArticleListView.as_view(), name='user-favorite-articles'),
     path('search/', SearchView.as_view(), name='article_search'), 
     path('saveFavorite/', SaveFavoriteView.as_view(), name='save_favorite'),
 

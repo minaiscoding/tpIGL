@@ -1,0 +1,6 @@
+node_modules
+
+# Exclude version control system files
+
+.git
+.gitignore

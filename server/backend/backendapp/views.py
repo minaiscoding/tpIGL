@@ -40,7 +40,10 @@ from .utils import (  extract_text_from_pdf,
                       send_to_elasticsearch, 
                        parse_metadata_date, 
                       upload_article_process, 
-                      parse_and_validate_date,         
+                      parse_and_validate_date, 
+                      delete_article_from_elastic,
+                      update_article_in_elastic
+
                    )
 import string
 #--------------------------------------------------------------------------------
@@ -80,20 +83,18 @@ class ArticlesListView(APIView):
           200:
             description: Articles retrieved successfully
         """
-        # Perform the Elasticsearch search to get all articles
-        # search = Search(index='search-article').query('match_all')
-
         response = search.execute()
 
         # Extract relevant information from search hits
         hits = [{'id': hit.meta.id, **hit.to_dict()} for hit in response.hits]
 
-        # Serialize the search results using your existing serializer
+        # Serialize the search results using existing serializer
         serializer = ArticlesSerializer(data=hits, many=True)
         serializer.is_valid()
 
         # Return the serialized results as JSON
         return Response(serializer.data)
+
 
 
 class ArticleDetailView(APIView):
@@ -131,29 +132,25 @@ class ArticleDetailView(APIView):
         except Exception as e:
             print('Error in get_article_data:', str(e))
             return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #######################################################################################################################
     def delete(self, request, article_id):
         try:
-        # Perform the Elasticsearch search to get the specific article by ID
-            client = Elasticsearch(
-            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
-            api_key=os.getenv("API_KEY")
-           )
-            search = Search(using=client, index='search-article').query('match', _id=article_id)
-            response = search.execute()
-
-            # Check if any hits were found
-            if not response.hits:
-               print(f'Article with ID {article_id} not found in Elasticsearch')
-               return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
-
-            # Delete the article
-            response.hits[0].delete()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
+            delete_article_from_elastic(article_id)
+            return Response({"message": f"Successfully deleted article with id {article_id}"})
         except Exception as e:
-            print('Error in delete_article:', str(e))
-            return Response({"detail": "Error deleting article"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Failed to delete article with id {article_id}: {str(e)}"}, status=500)
+    #######################################################################################################################
+    def put(self, request, article_id):
+        try:
+           # Update the article in Elasticsearch
+           updated_fields = request.data  # Assuming request.data contains the updated fields
+           update_article_in_elastic(article_id, updated_fields)
+        
+           return Response({"message": f"Successfully updated article with id {article_id}"})
+        except Exception as e:
+           return Response({"error": f"Failed to update article with id {article_id}: {str(e)}"}, status=500)
+    #######################################################################################################################
+    
     
 class FavorisListView(generics.ListAPIView):
     queryset = Favoris.objects.all()
@@ -192,9 +189,9 @@ class SearchView(APIView):
             date_range_filter = [{'range': {'date': {'gte': start_date, 'lte': end_date}}}]
 
         client = Elasticsearch(
-  "https://2b2811472db94c158c3aefb9da83eed0.us-central1.gcp.cloud.es.io:443",
-  api_key="WVFFWFg0MEJ0SWNEVmxWd0Rab2E6NEZkbGpTb0lUdTJNY0w5aTdWOXpXUQ=="
-)
+        os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+        api_key= os.getenv("API_KEY")
+        )
         search = Search(using=client,index='search-article').query('bool', filter=date_range_filter).query('match', **{filter_type: query})
 
         try:
@@ -221,7 +218,6 @@ class SearchView(APIView):
     #------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------------------#
-
 #//////////////////////////////////////////////////////////////
 #     LocalUploadViewSet
 #//////////////////////////////////////////////////////////////   
@@ -436,8 +432,7 @@ class LoginView(APIView):
         operation_description="Endpoint to authenticate and log in a user.",
         responses={
             200: "Login successful",
-            401: "Unauthorized - Invalid password",
-            401: "Unauthorized - User not found",
+            401: "Unauthorized - Invalid password or User not found",
             500: "Internal Server Error - Multiple users found for the provided username and email",
         },
     )
@@ -477,32 +472,34 @@ class LoginView(APIView):
         print('User model fields:', Utilisateurs._meta.get_fields())
 
         try:
-            # Attempt to retrieve user based on both username and email
-            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
-            
-            # Check if the provided password matches the stored password
-            if check_password(password, utilisateur.MotDePasse):
-                # Serialize the user instance
-                serializer = UtilisateursSerializer(utilisateur)
+            # Attempt to retrieve user based on NomUtilisateur
+            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur)
+            # Check if the provided email matches the stored email
+            if utilisateur.Email == email:
+                # Check if the provided password matches the stored password
+                if check_password(password, utilisateur.MotDePasse):
+                    # Serialize the user instance
+                    serializer = UtilisateursSerializer(utilisateur)
 
-                # Add the role information to the response
-                response_data = {
-                    'role': utilisateur.Role,
-                    'message': 'Login successful',
-                    'utilisateur': serializer.data,  # Include the serialized user data
-                }
+                    # Add the role information to the response
+                    response_data = {
+                        'role': utilisateur.Role,
+                        'message': 'Login successful',
+                        'utilisateur': serializer.data,  # Include the serialized user data
+                    }
 
-                return Response(response_data, status=status.HTTP_200_OK)
+                    return Response(response_data, status=status.HTTP_200_OK)
+                else:
+                    return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'message': 'Incorrect Email'}, status=status.HTTP_401_UNAUTHORIZED)
         except Utilisateurs.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
         except MultipleObjectsReturned:
-            return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({'message': 'Multiple users found for the provided NomUtilisateur'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 #--------------------------------------------------------------------------------
 #/////////////////////////
-#  FavorisView   
+#  FavoriteView   
 #/////////////////////////
 
           
@@ -624,3 +621,174 @@ class FavoriteArticleListView(APIView):
             print('Error in FavoriteArticleListView:', str(e))
             return Response({"detail": "Error retrieving favorite articles"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+#--------------------------------------------------------------------------------
+#/////////////////////////
+#  ModerateurControlers   
+#/////////////////////////
+#--------------------------------------------------------------------------------------------------------
+# APIView to get a list of moderators
+class Moderateurs(APIView):
+    @swagger_auto_schema(
+        operation_summary="Get List of Moderators",
+        operation_description="Retrieve a list of moderators from the database.",
+        responses={
+            200: "OK - Moderators retrieved successfully",
+            404: "Not Found - No moderators found in the database"
+        }
+    )
+    def get(self, request):
+        """
+        Retrieve a list of moderators from the database.
+        ---
+        parameters:
+          - none
+        responses:
+          200:
+            description: OK - Moderators retrieved successfully
+          404:
+            description: Not Found - No moderators found in the database
+
+        """
+        
+        # Query the database for all Utilisateurs with Role='moderator'
+        moderators = Utilisateurs.objects.filter(Role='moderator')
+
+        # Serialize the queryset using UtilisateursSerializer
+        serializer = UtilisateursSerializer(moderators, many=True)
+
+        # Return the serialized data as a JSON response
+        return Response(serializer.data)
+#--------------------------------------------------------------------------------------------------------    
+# APIView to add a new moderator
+class ModerateursAdd(APIView):
+    @swagger_auto_schema(
+        operation_summary="Add a New Moderator",
+        operation_description="Add a new moderator to the database.",
+        responses={
+            200: "OK - Moderator added successfully",
+            400: "Bad Request - Invalid data provided",
+            500: "Internal Server Error - Unable to save the moderator"
+        }
+    )
+    
+    def post(self, request):
+        """
+        Add a new moderator
+        ---
+        parameters:
+        -none
+        responses:
+        200:
+          description: OK - Moderator added successfully
+        400:
+          description: Bad Request - Invalid data provided
+        500:
+          description: Internal Server Error - Unable to save the moderator
+        """
+        # Serialize the incoming data using UtilisateursSerializer
+        serializeobj = UtilisateursSerializer(data=request.data)
+
+        # Check if the serialized data is valid
+        if serializeobj.is_valid():
+            # Save the serialized data to the database
+            serializeobj.save()
+            # Return a success response
+            return Response(status=200)
+        # Return an error response with validation errors
+        return Response(serializeobj.errors)
+#--------------------------------------------------------------------------------------------------------
+# APIView to update an existing moderator
+class ModerateursUpdate(APIView):
+    @swagger_auto_schema(
+        operation_summary="Update Moderator",
+        operation_description="Update an existing moderator in the database.",
+        responses={
+            200: "OK - Moderator updated successfully",
+            404: "Not Found - Moderator with the provided ID does not exist",
+            500: "Internal Server Error - Unable to update the moderator"
+        }
+    )
+     
+    def post(self, request, id):
+        """
+        Update an existing moderator in the database.
+        ---
+        parameters:
+        - name: id
+          description: ID of the moderator to be updated
+          required: true
+          type: integer
+
+        responses:
+        200:
+          description: OK - Moderator updated successfully
+        404:
+          description: Not Found - Moderator with the provided ID does not exist
+        500:
+          description: Internal Server Error - Unable to update the moderator
+
+        """
+              
+        try:
+            # Attempt to retrieve the Utilisateur object with the given id
+            UtilisateurObj = Utilisateurs.objects.get(id=id)
+        except Utilisateurs.DoesNotExist:
+            # Return an error response if the object is not found
+            return Response("Not Found in Database")
+
+        # Serialize the incoming data using UtilisateursSerializer with the retrieved object
+        serializeobj = UtilisateursSerializer(UtilisateurObj, data=request.data)
+
+        # Check if the serialized data is valid
+        if serializeobj.is_valid():
+            # Save the updated serialized data to the database
+            serializeobj.save()
+            # Return a success response
+            return Response(200)
+        # Return an error response with validation errors
+        return Response(serializeobj.errors)
+#--------------------------------------------------------------------------------------------------------
+# APIView to delete an existing moderator
+class ModerateurDelete(APIView):
+    @swagger_auto_schema(
+        operation_summary="Delete Moderator",
+        operation_description="Delete an existing moderator from the database.",
+        responses={
+            200: "OK - Moderator deleted successfully",
+            404: "Not Found - Moderator with the provided ID does not exist",
+            500: "Internal Server Error - Unable to delete the moderator"
+        }
+    )
+    def post(self, request, id):
+        """
+         Delete an existing moderator from the database.
+        ---
+        parameters:
+         -  name: id
+          description: ID of the moderator to be deleted
+          required: true
+          type: integer
+
+        responses:
+       200:
+          description: OK - Moderator deleted successfully
+        404:
+          description: Not Found - Moderator with the provided ID does not exist
+        500:
+          description: Internal Server Error - Unable to delete the moderator
+    """
+       
+        try:
+            # Attempt to retrieve the Utilisateur object with the given id
+            UtilisateurObj = Utilisateurs.objects.get(id=id)
+        except Utilisateurs.DoesNotExist:
+            # Return an error response if the object is not found
+            return Response("Not Found in Database")
+
+        # Delete the retrieved Utilisateur object from the database
+        UtilisateurObj.delete()
+
+        # Return a success response
+        return Response(200)
+    
+#--------------------------------------------------------------------------------------------------------

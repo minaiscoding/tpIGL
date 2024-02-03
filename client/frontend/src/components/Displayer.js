@@ -26,7 +26,7 @@ const Displayer = ({ results, pere }) => {
 
   const userId = localStorage.getItem("id");
   if (sortedResults.length === 0) {
-    return <p style={{ color: "black" }}>Pas de rÃ©sultat</p>;
+    return <p style={{ color: "black" }}>Pas de résultat</p>;
   }
 
 
@@ -37,7 +37,7 @@ const Displayer = ({ results, pere }) => {
 
         <div
           key={result.Titre}
-          className="bg-white border-2 rounded-rd border-black p-5 mb-5 result-container ml-10 mr-10 transition duration-300 ease-in-out"
+          className=" w-[90%]  center bg-white border-2 rounded-rd border-black p-5 mb-5 result-container ml-5 mr-5 transition duration-300 ease-in-out"
           style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ alignSelf: "flex-end" }} className="w-10">
 

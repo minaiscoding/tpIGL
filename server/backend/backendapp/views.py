@@ -7,7 +7,8 @@ from django.shortcuts import render
 from elasticsearch import Elasticsearch
 #--------------------------------------------------------------------------------
 from .models import Utilisateurs, Articles, Favoris
-from .serializers import UtilisateursSerializer, ArticlesSerializer, FavorisSerializer,UploadArticlesSerializer
+from .serializers import UtilisateursSerializer, ArticlesSerializer, FavoriteArticleSerializer,UploadArticlesSerializer,FavorisSerializer
+from django.shortcuts import get_object_or_404
 #--------------------------------------------------------------------------------
 from rest_framework import generics,status,viewsets
 from rest_framework.views import APIView
@@ -18,7 +19,8 @@ from rest_framework import status
 from rest_framework.decorators import action,api_view
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 #--------------------------------------------------------------------------------
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
+
 #------------------------------------------------------------------
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -69,8 +71,9 @@ class ArticlesListView(APIView):
     def get(self, request):
          # Perform the Elasticsearch search to get all articles
         client = Elasticsearch(
-        os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
-        api_key= os.getenv("API_KEY")
+          os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+          
+        api_key=  os.getenv("API_KEY")
         )
         search = Search(using=client,index='search-article').query('match_all')
         """
@@ -429,8 +432,7 @@ class LoginView(APIView):
         operation_description="Endpoint to authenticate and log in a user.",
         responses={
             200: "Login successful",
-            401: "Unauthorized - Invalid password",
-            401: "Unauthorized - User not found",
+            401: "Unauthorized - Invalid password or User not found",
             500: "Internal Server Error - Multiple users found for the provided username and email",
         },
     )
@@ -470,63 +472,141 @@ class LoginView(APIView):
         print('User model fields:', Utilisateurs._meta.get_fields())
 
         try:
-            # Attempt to retrieve user based on both username and email
-            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
-            
-            # Check if the provided password matches the stored password
-            if check_password(password, utilisateur.MotDePasse):
-                # Serialize the user instance
-                serializer = UtilisateursSerializer(utilisateur)
+            # Attempt to retrieve user based on NomUtilisateur
+            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur)
+            # Check if the provided email matches the stored email
+            if utilisateur.Email == email:
+                # Check if the provided password matches the stored password
+                if check_password(password, utilisateur.MotDePasse):
+                    # Serialize the user instance
+                    serializer = UtilisateursSerializer(utilisateur)
 
-                # Add the role information to the response
-                response_data = {
-                    'role': utilisateur.Role,
-                    'message': 'Login successful',
-                    'utilisateur': serializer.data,  # Include the serialized user data
-                }
+                    # Add the role information to the response
+                    response_data = {
+                        'role': utilisateur.Role,
+                        'message': 'Login successful',
+                        'utilisateur': serializer.data,  # Include the serialized user data
+                    }
 
-                return Response(response_data, status=status.HTTP_200_OK)
+                    return Response(response_data, status=status.HTTP_200_OK)
+                else:
+                    return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'message': 'Incorrect Email'}, status=status.HTTP_401_UNAUTHORIZED)
         except Utilisateurs.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
         except MultipleObjectsReturned:
-            return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({'message': 'Multiple users found for the provided NomUtilisateur'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 #--------------------------------------------------------------------------------
 #/////////////////////////
 #  FavoriteView   
 #/////////////////////////
+
+          
+            
 class SaveFavoriteView(APIView):
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
+
+    @swagger_auto_schema(
+        operation_id='save_favorite_view',
+        operation_description='Save a favorite article for a user.',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'articleId': openapi.Schema(type=openapi.TYPE_STRING),
+                'userId': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+            required=['articleId', 'userId'],
+        ),
+        responses={200: 'Success', 404: 'Not Found', 400: 'Bad Request', 500: 'Internal Server Error'},
+        
+    )
+    
+    def get_article_data(self, request, article_id):
         try:
-            # Get the articleId and userId from the request data
+            # Perform the Elasticsearch search to get the specific article by ID
+            client = Elasticsearch(
+                os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+                api_key=os.getenv("API_KEY")
+            )
+            search = Search(using=client, index='search-article').query('match', _id=article_id)
+            response = search.execute()
+
+            # Check if any hits were found
+            if not response.hits:
+                print(f'Article with ID {article_id} not found in Elasticsearch')
+                return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Assuming there's only one matching article (ID is unique)
+            article_data = response.hits[0].to_dict()
+
+            return Response(article_data)
+
+        except Exception as e:
+            print('Error in get_article_data:', str(e))
+            return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
             article_id = request.data.get("articleId")
             user_id = request.data.get("userId")
-            print('Request data:', request.data)
-            # Debug: Print user model fields
-            print('Favoris model fields:', Favoris._meta.get_fields())
+            print('The id of the authetified user is : ', user_id)
+            
 
-            # Check if the article is already marked as a favorite for this user
-            existing_favorite = Favoris.objects.filter(
-                UtilisateurID=user_id, ArticleID=article_id
-            ).exists()
+            utilisateur = get_object_or_404(Utilisateurs, id=user_id)
+            print('The authetified user is : ', utilisateur)
+            article_data = self.get_article_data(request, article_id)
+            
+            if not article_data:
+                    return Response({"detail": "Article not found"}, status=status.HTTP_404_NOT_FOUND)
+           
 
-            if not existing_favorite:
-                # If not, create a new favorite entry in the database
-                favorite = Favoris.objects.create(
-                    UtilisateursID=user_id, ArticleID=article_id
+            
+            all_articles = Articles.objects.exclude(Titre__isnull=True)
+            for article in all_articles:
+                print('This is the articles dispo', article.id)
+
+
+            existing_article = Articles.objects.filter(id=article_id).values_list('id', flat=True).first()
+            print(existing_article)
+            if not existing_article:
+                # If the article doesn't exist, create a new instance
+                new_article = Articles(
+                  id=article_data.get('id'),
+                  Titre = (''),
+                  Resume = (''),
+                  auteurs = (''),
+                  Institution = (''),                  
                 )
-                serializer = FavorisSerializer(favorite)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                new_article.save()
             else:
-                # If already favorited, return a 400 Bad Request response
+                    # Use the existing article instance
+                new_article = existing_article
+        
+            
+        
+            
+            existing_favorite = Favoris.objects.filter(
+                UtilisateurID=utilisateur,
+                ArticleID=new_article  # Filter by the article ID
+            ).exists()
+            
+            if existing_favorite:
+                fav = Favoris.objects.all()
+                for favor in fav:
+                    print(favor.UtilisateurID.NomUtilisateur)
+                    print(favor.ArticleID.id)
+
                 return Response(
                     {"detail": "Article is already marked as a favorite."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            else :
+            # Create a new Favoris instance and associate it with Utilisateurs and Articles
+                favoris = Favoris(UtilisateurID=utilisateur, ArticleID=new_article)
+                favoris.save()
+                
         except Exception as e:
+            print('Error in SaveFavoriteView:', str(e))
             return Response(
                 {"detail": f"Error saving favorite article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

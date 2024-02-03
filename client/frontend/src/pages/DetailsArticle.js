@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import vector_bg from "../assets/Vector.svg";
 import axios from "axios";
@@ -6,6 +7,7 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IoArrowBack } from "react-icons/io5";
+
 
 
 
@@ -46,6 +48,13 @@ const DetailsArticle = ({ role }) => {
       
       setFormData(response.data);
       setArticleData(response.data);
+      console.log (response);
+      console.log ('hello');
+      console.log (response.data);
+
+      
+      setFormData(response.data);
+      setArticleData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -73,6 +82,7 @@ const DetailsArticle = ({ role }) => {
 
 
       const response = await axios.delete(
+        `http://localhost:8000/api/articles/${articleId.articleId}`        
         `http://localhost:8000/api/articles/${articleId.articleId}`        
       );
 
@@ -124,10 +134,10 @@ const DetailsArticle = ({ role }) => {
         <>
           <div
             className="flex flex-row gap-1 absolute left-2 top-8 sm:top-[70px] cursor-pointer"
-            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
+            onClick={() =>edit ? nav(`/details/${articleId.articleId}`) :edit ? nav(`/details/${articleId.articleId}`) : nav("/articles")}
           >
-            <IoArrowBack className=" text-white size-6  " />
-            <p className=" font-Futura text-white text-md font-bold " >Retour</p>
+            <IoArrowBack className=" text-white size-6   " />
+            <p className=" font-Futura text-white text-md font-bold  " >Retour</p>
           </div>
           <div
             className={`bg-[#ffff] mx-4 border-solid rounded-sm px-8 py-2 max-h-[75%] border-navBg mt-20 sm:mt-8 mb-4 w-[90%]`}

@@ -68,9 +68,9 @@ const LoginPage = ({ onRoleChange }) => {
 
           if (error.response.data.message === 'User not found') {
             setError1('vérifier votre nom d`utilisateur');
-          }/* else if (error.response.data.field === "Email") {
-          setError2(error.response.data.message || "Error in email");
-        } */else if (error.response.data.message === 'Invalid password') {
+          }else if (error.response.data.message === 'Incorrect Email') {
+          setError2(error.response.data.message || "Email incorrecte");
+        } else if (error.response.data.message === 'Invalid password') {
             setError3('mot de passe incorrecte');
           } else {
             setErrorMsg(error.response.data.message || "Sign-in failed");

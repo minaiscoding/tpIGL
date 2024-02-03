@@ -432,8 +432,7 @@ class LoginView(APIView):
         operation_description="Endpoint to authenticate and log in a user.",
         responses={
             200: "Login successful",
-            401: "Unauthorized - Invalid password",
-            401: "Unauthorized - User not found",
+            401: "Unauthorized - Invalid password or User not found",
             500: "Internal Server Error - Multiple users found for the provided username and email",
         },
     )
@@ -473,29 +472,31 @@ class LoginView(APIView):
         print('User model fields:', Utilisateurs._meta.get_fields())
 
         try:
-            # Attempt to retrieve user based on both username and email
-            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur, Email=email)
-            
-            # Check if the provided password matches the stored password
-            if check_password(password, utilisateur.MotDePasse):
-                # Serialize the user instance
-                serializer = UtilisateursSerializer(utilisateur)
+            # Attempt to retrieve user based on NomUtilisateur
+            utilisateur = Utilisateurs.objects.get(NomUtilisateur=nom_utilisateur)
+            # Check if the provided email matches the stored email
+            if utilisateur.Email == email:
+                # Check if the provided password matches the stored password
+                if check_password(password, utilisateur.MotDePasse):
+                    # Serialize the user instance
+                    serializer = UtilisateursSerializer(utilisateur)
 
-                # Add the role information to the response
-                response_data = {
-                    'role': utilisateur.Role,
-                    'message': 'Login successful',
-                    'utilisateur': serializer.data,  # Include the serialized user data
-                }
+                    # Add the role information to the response
+                    response_data = {
+                        'role': utilisateur.Role,
+                        'message': 'Login successful',
+                        'utilisateur': serializer.data,  # Include the serialized user data
+                    }
 
-                return Response(response_data, status=status.HTTP_200_OK)
+                    return Response(response_data, status=status.HTTP_200_OK)
+                else:
+                    return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({'message': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'message': 'Incorrect Email'}, status=status.HTTP_401_UNAUTHORIZED)
         except Utilisateurs.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
         except MultipleObjectsReturned:
-            return Response({'message': 'Multiple users found for the provided username and email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({'message': 'Multiple users found for the provided NomUtilisateur'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 #--------------------------------------------------------------------------------
 #/////////////////////////
 #  FavoriteView   

@@ -56,7 +56,7 @@ const ListModerateurs = () => {
   return (
     //////background
     <div
-      className={` w-full justify-center flex flex-col items-center h-[100vh] bg-cover bg-center relative 
+      className={` w-full justify-center flex flex-col items-center h-screen bg-cover bg-center overflow-y-scroll py-8
       
       `}
       style={{
@@ -67,7 +67,7 @@ const ListModerateurs = () => {
         //titre
       }
       <div
-        className={`text-black text-[3vw] z-20 font-Futura-bold mb-[10vh] absolute top-[80px] ${
+        className={`text-black text-[5vh] z-20 font-Futura-bold mb-8  ${
           ajouté && "blur-sm brightness-75	"
         }`}
       >

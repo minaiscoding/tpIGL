@@ -509,104 +509,45 @@ class LoginView(APIView):
             
 class SaveFavoriteView(APIView):
 
-    @swagger_auto_schema(
-        operation_id='save_favorite_view',
-        operation_description='Save a favorite article for a user.',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'articleId': openapi.Schema(type=openapi.TYPE_STRING),
-                'userId': openapi.Schema(type=openapi.TYPE_INTEGER),
-            },
-            required=['articleId', 'userId'],
-        ),
-        responses={200: 'Success', 404: 'Not Found', 400: 'Bad Request', 500: 'Internal Server Error'},
-        
-    )
-    
-    def get_article_data(self, request, article_id):
+    def get_article_data(self, article_id):
         try:
-            # Perform the Elasticsearch search to get the specific article by ID
             client = Elasticsearch(
-                os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
-                api_key=os.getenv("API_KEY")
-            )
+            os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
+            api_key=os.getenv("API_KEY")
+            )  
             search = Search(using=client, index='search-article').query('match', _id=article_id)
             response = search.execute()
 
-            # Check if any hits were found
             if not response.hits:
-                print(f'Article with ID {article_id} not found in Elasticsearch')
-                return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
-
-            # Assuming there's only one matching article (ID is unique)
+                return None
             article_data = response.hits[0].to_dict()
-
-            return Response(article_data)
-
+            return article_data
         except Exception as e:
-            print('Error in get_article_data:', str(e))
-            return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print("Error:", e)
+            return None
 
     def post(self, request):
         try:
             article_id = request.data.get("articleId")
             user_id = request.data.get("userId")
-            print('The id of the authetified user is : ', user_id)
-            
 
+            # Check if user and article exist
             utilisateur = get_object_or_404(Utilisateurs, id=user_id)
-            print('The authetified user is : ', utilisateur)
-            article_data = self.get_article_data(request, article_id)
-            
+            article_data = self.get_article_data(article_id)
             if not article_data:
-                    return Response({"detail": "Article not found"}, status=status.HTTP_404_NOT_FOUND)
-           
+                return Response({'detail': f'Article with ID {article_id} not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            
-            all_articles = Articles.objects.exclude(Titre__isnull=True)
-            for article in all_articles:
-                print('This is the articles dispo', article.id)
+            # Check if the article is already favorited by the user
+            existing_favoris = Favoris.objects.filter(UtilisateurID=utilisateur, ArticleID__id=article_id).exists()
+            if existing_favoris:
+                return Response({'detail': 'Article already favorited by the user'}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Create or get the article
+            article, created = Articles.objects.get_or_create(id=article_id, defaults=article_data)
 
-            existing_article = Articles.objects.filter(id=article_id).values_list('id', flat=True).first()
-            print(existing_article)
-            if not existing_article:
-                # If the article doesn't exist, create a new instance
-                new_article = Articles(
-                  id=article_data.get('id'),
-                  Titre = (''),
-                  Resume = (''),
-                  auteurs = (''),
-                  Institution = (''),                  
-                )
-                new_article.save()
-            else:
-                    # Use the existing article instance
-                new_article = existing_article
-        
-            
-        
-            
-            existing_favorite = Favoris.objects.filter(
-                UtilisateurID=utilisateur,
-                ArticleID=new_article  # Filter by the article ID
-            ).exists()
-            
-            if existing_favorite:
-                fav = Favoris.objects.all()
-                for favor in fav:
-                    print(favor.UtilisateurID.NomUtilisateur)
-                    print(favor.ArticleID.id)
-
-                return Response(
-                    {"detail": "Article is already marked as a favorite."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            else :
             # Create a new Favoris instance and associate it with Utilisateurs and Articles
-                favoris = Favoris(UtilisateurID=utilisateur, ArticleID=new_article)
-                favoris.save()
+            favoris = Favoris.objects.create(UtilisateurID=utilisateur, ArticleID=article)
+            return Response({'detail': 'Article saved as favorite'}, status=status.HTTP_201_CREATED)
                 
         except Exception as e:
             print('Error in SaveFavoriteView:', str(e))
@@ -614,10 +555,9 @@ class SaveFavoriteView(APIView):
                 {"detail": f"Error saving favorite article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        
 #-----------------------------------------------------------------------------------------------------
 def get_user_favorite_article_ids(user_id):
-        """
+    """
     Get the list of article IDs favorited by a user.
 
     Parameters:
@@ -626,16 +566,13 @@ def get_user_favorite_article_ids(user_id):
     Returns:
     - list of int: List of article IDs favorited by the user.
     """
-        user = get_object_or_404(Utilisateurs, id=user_id)
-        
-        favorite_articles = Favoris.objects.filter(UtilisateurID=user)
-       
-        article_ids = [favorite.ArticleID.id for favorite in favorite_articles]
-        
-        return article_ids
-        
+    user = get_object_or_404(Utilisateurs, id=user_id)
+    favorite_articles = Favoris.objects.filter(UtilisateurID=user)
+    article_ids = [favorite.ArticleID.id for favorite in favorite_articles]
+    return article_ids
+
 class FavoriteArticleListView(APIView):
-     """
+    """
     Retrieve a list of articles favorited by a user.
 
     Query Parameters:
@@ -651,8 +588,9 @@ class FavoriteArticleListView(APIView):
     GET /api/favorite-articles/?user_id=1
     ```
     """
-     renderer_classes = [JSONRenderer]
-     @swagger_auto_schema(
+    renderer_classes = [JSONRenderer]
+
+    @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='User ID'),
         ],
@@ -660,32 +598,29 @@ class FavoriteArticleListView(APIView):
         operation_id='favorite_article_list_view',
         operation_description='Retrieve a list of articles favorited by a user.',
     )
+    def get(self, request, user_id):
+        try:
+            # Get the list of article IDs favorited by the user
+            article_ids = get_user_favorite_article_ids(user_id)
 
-     def get(self, request, user_id):
-      try:
-        # Perform the Elasticsearch search to get the specific articles by IDs
-        article_ids = get_user_favorite_article_ids(user_id)
-        client = Elasticsearch(
+            # Perform the Elasticsearch search to get the specific articles by IDs
+            client = Elasticsearch(
             os.getenv("ELASTIC_SEARCH_CLOUD_LINK"),
             api_key=os.getenv("API_KEY")
-        )
-        search = Search(using=client, index='search-article').query(Q('terms', _id=article_ids))
-        response = search.execute()
+            )  
+            search = Search(using=client, index='search-article').query('terms', _id=article_ids)
+            response = search.execute()
 
-        # Check if any hits were found
-        if not response.hits:
-            not_found_ids = set(article_ids)
-            found_ids = set(hit['_id'] for hit in response['hits']['hits'])
-            not_found_ids -= found_ids
-            print(f'Articles with IDs {not_found_ids} not found in Elasticsearch')
-            return Response({'detail': f'Articles with IDs {not_found_ids} not found'}, status=status.HTTP_404_NOT_FOUND)
+            # Check if any hits were found
+            if not response.hits:
+                return Response({'detail': 'No articles found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Collect article data for each hit
-        article_data = [hit.to_dict() for hit in response['hits']['hits']]
+            # Collect article data for each hit
+            article_data = [hit.to_dict() for hit in response.hits]
 
-        return Response(article_data)
+            return Response(article_data)
 
-      except Exception as e:
-        print('Error in get_article_data:', str(e))
-        return Response({"detail": "Error retrieving article data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print('Error in FavoriteArticleListView:', str(e))
+            return Response({"detail": "Error retrieving favorite articles"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

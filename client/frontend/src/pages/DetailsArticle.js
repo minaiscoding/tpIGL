@@ -83,7 +83,7 @@ const DetailsArticle = ({ role }) => {
 
       const response = await axios.delete(
         `http://localhost:8000/api/articles/${articleId.articleId}`        
-        `http://localhost:8000/api/articles/${articleId.articleId}`        
+       
       );
 
       // Check the response and handle accordingly

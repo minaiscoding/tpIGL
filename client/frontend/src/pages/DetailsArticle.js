@@ -104,7 +104,7 @@ const DetailsArticle = ({ role }) => {
   const handleUpdate = async () => {
     try {
         const response = await axios.put(
-            `http://localhost:8000/api/articles/${articleId.articleId}`,
+            `http://localhost:8000/api/articles/${articleId.articleId}/`,
             formData
         );
         

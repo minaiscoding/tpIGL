@@ -82,8 +82,7 @@ const DetailsArticle = ({ role }) => {
 
 
       const response = await axios.delete(
-        `http://localhost:8000/api/articles/${articleId.articleId}`        
-        `http://localhost:8000/api/articles/${articleId.articleId}`        
+        `http://localhost:8000/api/articles/${articleId.articleId}`               
       );
 
       // Check the response and handle accordingly
@@ -105,7 +104,7 @@ const DetailsArticle = ({ role }) => {
   const handleUpdate = async () => {
     try {
         const response = await axios.put(
-            `http://localhost:8000/api/articles/${articleId.articleId}/`,
+            `http://localhost:8000/api/articles/${articleId.articleId}`,
             formData
         );
         
